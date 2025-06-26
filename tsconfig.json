@@ -18,12 +18,16 @@
     "noEmit": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "types": ["vite/client"],
+    "types": [
+      "vite/client",
+      "@cloudflare/workers-types",
+      "@types/node"
+    ],
     "paths": {
       "~/*": ["./src/*"]
     }
   },
-  "files": ["./.eslintrc.cjs"],
+  "files": ["./.eslintrc.cjs", "./src/global.d.ts"],
   "include": ["src", "tests"],
   "exclude": ["node_modules", "dist", "server", "tmp"]
 }

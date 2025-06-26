@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite --mode ssr --host 0.0.0.0",
-    "dev:all": "concurrently -n \"VITE,STORY,DB\" -c \"blue,magenta,yellow\" \"pnpm dev\" \"pnpm storybook\" \"pnpm services:start\"",
+    "dev:all": "concurrently -n \"VITE,STORY\" -c \"blue,magenta\" \"pnpm dev\" \"pnpm storybook\"",
     "dev:debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr",
     "dev:ssl": "vite --mode ssr --host 0.0.0.0 --https --cert .certs/localhost.crt --key .certs/localhost.key",
     "build": "qwik build",
@@ -35,16 +35,12 @@
     "storybook": "storybook dev -p 6006 --no-open",
     "storybook:build": "storybook build",
     "storybook:test": "test-storybook",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:prod": "prisma migrate deploy",
-    "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma migrate reset",
-    "db:studio": "prisma studio",
     "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/lib/database.types.ts",
     "supabase:link": "supabase link --project-ref $SUPABASE_PROJECT_ID",
     "supabase:migrate": "supabase db push",
+    "supabase:seed": "supabase db seed",
+    "cache:clear": "wrangler kv:key delete --binding=KV --all",
+    "storage:list": "wrangler r2 object list --bucket=your-app-storage",
     "services:start": "docker-compose up -d",
     "services:stop": "docker-compose down",
     "services:logs": "docker-compose logs -f",
@@ -79,7 +75,8 @@
     "@lit/task": "^1.0.0",
     "@sentry/browser": "^7.100.0",
     "@datadog/browser-logs": "^4.50.0",
-    "web-vitals": "^3.5.0"
+    "web-vitals": "^3.5.0",
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "vite": "^5.1.0",
@@ -113,8 +110,6 @@
     "tailwindcss": "^3.4.0",
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
-    "prisma": "^5.8.0",
-    "@prisma/client": "^5.8.0",
     "concurrently": "^8.2.0",
     "rimraf": "^5.0.0",
     "dotenv": "^16.3.0",
@@ -126,7 +121,8 @@
     "vite-tsconfig-paths": "^4.3.0",
     "wrangler": "^3.22.0",
     "vercel": "^33.0.0",
-    "@cloudflare/workers-types": "^4.20240117.0"
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "miniflare": "^3.20231030.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
