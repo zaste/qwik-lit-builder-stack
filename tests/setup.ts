@@ -33,56 +33,44 @@ beforeAll(() => {
   
   // Mock Cloudflare KV
   global.KV = {
-    get: vi.fn().mockResolvedValue(null),
-    put: vi.fn().mockResolvedValue(undefined),
-    delete: vi.fn().mockResolvedValue(undefined),
-    list: vi.fn().mockResolvedValue({ keys: [] }),
-    getWithMetadata: vi.fn().mockResolvedValue({ value: null, metadata: null }),
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    list: vi.fn(),
   } as any;
-  
+
   // Mock Cloudflare R2
   global.R2 = {
-    get: vi.fn().mockResolvedValue(null),
-    put: vi.fn().mockResolvedValue({}),
-    delete: vi.fn().mockResolvedValue(undefined),
-    list: vi.fn().mockResolvedValue({ objects: [] }),
-    head: vi.fn().mockResolvedValue(null),
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    list: vi.fn(),
+    head: vi.fn(),
   } as any;
   
-  // Mock Supabase
-  vi.mock('@supabase/supabase-js', () => ({
-    createClient: vi.fn(() => ({
+  // Mock Supabase client
+  vi.mock('~/lib/supabase', () => ({
+    getSupabaseClient: vi.fn(() => ({
       auth: {
-        signInWithPassword: vi.fn(),
-        signInWithOAuth: vi.fn(),
+        signIn: vi.fn(),
         signOut: vi.fn(),
         getSession: vi.fn(),
         getUser: vi.fn(),
-        onAuthStateChange: vi.fn(),
       },
       from: vi.fn(() => ({
-        select: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockReturnThis(),
-        update: vi.fn().mockReturnThis(),
-        delete: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({ data: null, error: null }),
-        limit: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-      })),
-      storage: {
-        from: vi.fn(() => ({
-          upload: vi.fn(),
-          download: vi.fn(),
-          remove: vi.fn(),
-          getPublicUrl: vi.fn(),
+        select: vi.fn(() => ({
+          eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
         })),
-      },
-      channel: vi.fn(() => ({
-        on: vi.fn().mockReturnThis(),
-        subscribe: vi.fn().mockReturnThis(),
-        unsubscribe: vi.fn(),
+        insert: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
       })),
     })),
+    supabaseAuth: {
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      signInWithOAuth: vi.fn(),
+    },
   }));
 });

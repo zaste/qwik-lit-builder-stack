@@ -3,23 +3,50 @@
 ## Quick Start
 
 1. **Create a Codespace**: Click "Code" → "Codespaces" → "Create codespace on main"
-2. **Wait for setup**: The environment will automatically configure (5-7 minutes first time)
-3. **Start developing**: Run `pnpm dev` in the terminal
+2. **Wait for setup**: The environment will automatically configure (3-5 minutes)
+3. **Configure credentials**: Copy `.env.example` to `.env.local` and add your keys
+4. **Start developing**: Run `pnpm dev` in the terminal
 
 Your app will be available at: `https://<codespace-name>-5173.app.github.dev`
 
-## 🛠️ Available Services
+## 🛠️ Stack Overview
 
-| Service | Port | URL in Codespace | Description |
-|---------|------|------------------|-------------|
-| Vite Dev | 5173 | Auto-forwarded | Main development server |
-| Storybook | 6006 | Auto-forwarded | Component documentation |
-| PostgreSQL | 5432 | localhost:5432 | Database |
-| Redis | 6379 | localhost:6379 | Cache |
-| MinIO | 9000/9001 | localhost:9000/9001 | S3-compatible storage |
-| Adminer | 8080 | Auto-forwarded | Database UI |
-| Mailhog | 8025 | Auto-forwarded | Email testing UI |
-| Prisma Studio | 5555 | Auto-forwarded | Database ORM UI |
+| Service | Type | Location | Purpose |
+|---------|------|----------|----------|
+| **Supabase** | Cloud | `*.supabase.co` | Auth, Database, Storage, Realtime |
+| **Cloudflare KV** | Edge | Via Wrangler | Cache & Sessions |
+| **Cloudflare R2** | Edge | Via Wrangler | Object Storage |
+| **Mailhog** | Local | `localhost:8025` | Email Testing |
+| **Wrangler** | Local | `localhost:8787` | Cloudflare Dev Server |
+
+## 📋 Initial Setup
+
+### 1. Environment Variables
+
+```bash
+# Copy the template
+cp .env.example .env.local
+
+# Edit with your credentials
+code .env.local
+```
+
+**Required variables:**
+- `VITE_SUPABASE_URL` - Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` - Your Supabase anon key
+
+**Optional but recommended:**
+- `CLOUDFLARE_API_TOKEN` - For Cloudflare deployments
+- `BUILDER_PUBLIC_KEY` - For Builder.io CMS
+
+### 2. Verify Setup
+
+```bash
+# Run the utility script
+./scripts/codespaces-utils.sh
+
+# Select option 2 (Check environment)
+```
 
 ## 📝 Common Commands
 
@@ -31,7 +58,7 @@ pnpm dev:all
 # Start individual services
 pnpm dev          # Qwik dev server
 pnpm storybook    # Component library
-pnpm db:studio    # Prisma Studio
+wrangler dev      # Cloudflare Workers
 
 # Testing
 pnpm test         # Unit tests
@@ -39,43 +66,37 @@ pnpm test:e2e     # E2E tests
 pnpm test:ui      # Vitest UI
 ```
 
-### Database
+### Supabase Commands
 ```bash
-# Run migrations
-pnpm db:migrate
+# Generate TypeScript types
+pnpm supabase:types
 
-# Reset database
-pnpm db:reset
+# Check connection
+./scripts/codespaces-utils.sh supabase
+```
 
-# Seed data
-pnpm db:seed
+### Cloudflare Commands
+```bash
+# Setup local development
+./scripts/codespaces-utils.sh cloudflare
 
-# Open Prisma Studio
-pnpm db:studio
+# Manage KV cache
+wrangler kv:key list --binding=KV
+wrangler kv:key put --binding=KV "key" "value"
+
+# Manage R2 storage
+wrangler r2 object list --bucket=your-bucket
 ```
 
 ### Building & Deployment
 ```bash
 # Build for different platforms
-pnpm build:cloudflare
-pnpm build:vercel
-pnpm build:static
+pnpm build:cloudflare   # Cloudflare Pages
+pnpm build:vercel       # Vercel
+pnpm build:static       # Static hosting
 
 # Deploy
 pnpm deploy:cloudflare
-pnpm deploy:vercel
-```
-
-### Code Generation
-```bash
-# Generate new component
-pnpm generate:component
-
-# Generate new route
-pnpm generate:route
-
-# Generate LIT component
-pnpm generate:lit
 ```
 
 ## 🔧 VS Code Tasks
@@ -83,13 +104,15 @@ pnpm generate:lit
 Press `Cmd+Shift+B` (Mac) or `Ctrl+Shift+B` (Windows/Linux) to see all available tasks:
 
 - **Dev: Start All** - Launches all development services
-- **Test: Unit** - Runs unit tests
-- **Build: Production** - Creates production build
-- **DB: Migrate** - Runs database migrations
+- **Dev: Wrangler** - Start Cloudflare Workers locally
+- **Supabase: Generate Types** - Update TypeScript types
+- **Cloudflare: KV List** - View KV store contents
+- **Test: Unit** - Run unit tests
+- **Build: Production** - Create production build
 
 ## 🐛 Debugging
 
-### Debug Configurations Available:
+### Debug Configurations
 
 1. **Debug: Qwik Dev Server** - Debug server-side code
 2. **Debug: Chrome** - Debug client-side code
@@ -99,105 +122,100 @@ Press `Cmd+Shift+B` (Mac) or `Ctrl+Shift+B` (Windows/Linux) to see all available
 
 Press `F5` to start debugging with the selected configuration.
 
-## 🔐 Environment Variables
+### Common Issues
 
-1. Copy `.env.example` to `.env.local`
-2. Update values as needed
-3. Codespace-specific URLs are automatically configured
-
-### Required for Production Features:
-- `BUILDER_PUBLIC_KEY` - Get from Builder.io dashboard
-- `DATABASE_URL` - Automatically configured in Codespaces
-- `AUTH_SECRET` - Generate with `openssl rand -hex 32`
-
-## 📦 Pre-installed Tools
-
-- **Node.js 20** with pnpm
-- **Docker** & Docker Compose
-- **PostgreSQL** client tools
-- **Git** & GitHub CLI
-- **Playwright** browsers
-- **AWS CLI** & Cloudflare Wrangler
-- **Vercel CLI**
-
-## 🚀 Performance Tips
-
-1. **Use Prebuilds**: Codespaces are prebuild weekly for faster startup
-2. **Machine Size**: Use at least 4-core for best performance
-3. **Browser**: Use Chrome/Edge for best debugging experience
-4. **Extensions**: All required extensions are pre-installed
-
-## 🔄 Syncing with Local Development
-
-### Export from Codespace:
+#### Supabase Connection Failed
 ```bash
-# Export database
-pg_dump -U devuser app_dev > backup.sql
+# Check credentials
+echo $VITE_SUPABASE_URL
+echo $VITE_SUPABASE_ANON_KEY
 
-# Download files
-gh codespace cp -r dist/ ./local-dist/
+# Test connection
+curl -H "apikey: $VITE_SUPABASE_ANON_KEY" $VITE_SUPABASE_URL/rest/v1/
 ```
 
-### Import to Codespace:
+#### Cloudflare KV Not Working
 ```bash
-# Upload files
-gh codespace cp ./local-files/ remote:/workspace/
-
-# Import database
-psql -U devuser app_dev < backup.sql
+# Setup local KV
+mkdir -p .wrangler/state/kv
+wrangler kv:namespace create "KV" --preview
 ```
 
-## 🆘 Troubleshooting
-
-### Port Already in Use
+#### Port Already in Use
 ```bash
-# Find process using port
+# Find process
 lsof -i :5173
 
 # Kill process
 kill -9 <PID>
 ```
 
-### Database Connection Issues
-```bash
-# Restart PostgreSQL
-sudo service postgresql restart
+## 🚀 Performance Tips
 
-# Check status
-sudo service postgresql status
+1. **Use Prebuilds**: Codespaces are prebuild weekly for faster startup
+2. **Machine Size**: Use at least 4-core for best performance
+3. **Browser**: Chrome/Edge recommended for debugging
+4. **Extensions**: All required extensions are pre-installed
+
+## 📦 Pre-installed Tools
+
+- **Node.js 20** with pnpm
+- **Supabase CLI** - Database management
+- **Wrangler** - Cloudflare development
+- **Docker** - For Mailhog only
+- **Git** & GitHub CLI
+- **Playwright** browsers
+- **Builder.io CLI**
+
+## 🔄 Syncing with Local Development
+
+### Export from Codespace
+```bash
+# Download built files
+gh codespace cp -r dist/ ./local-dist/
+
+# Export KV data
+wrangler kv:key list --binding=KV > kv-backup.json
 ```
 
-### Clean Rebuild
+### Import to Codespace
 ```bash
-# Clean everything
-pnpm clean:all
+# Upload files
+gh codespace cp ./local-files/ remote:/workspace/
 
-# Reinstall
-pnpm install
-
-# Rebuild
-pnpm build
+# Import KV data
+wrangler kv:bulk put --binding=KV kv-backup.json
 ```
 
-### Codespace Running Slow
-1. Upgrade to a larger machine type (8-core recommended)
-2. Close unused services: `pnpm services:stop`
-3. Clear caches: `pnpm clean`
+## 🎯 Utilities Script
 
-## 📚 Additional Resources
+The `scripts/codespaces-utils.sh` provides helpful utilities:
 
-- [Qwik Documentation](https://qwik.builder.io/)
-- [LIT Documentation](https://lit.dev/)
-- [Builder.io Docs](https://www.builder.io/c/docs)
-- [GitHub Codespaces Docs](https://docs.github.com/en/codespaces)
+```bash
+# Interactive mode
+./scripts/codespaces-utils.sh
+
+# Command mode
+./scripts/codespaces-utils.sh ports      # Make ports public
+./scripts/codespaces-utils.sh env        # Check environment
+./scripts/codespaces-utils.sh cloudflare # Setup Cloudflare
+./scripts/codespaces-utils.sh supabase   # Test connection
+```
 
 ## 💡 Pro Tips
 
 1. **Hot Reload**: Both Qwik and LIT components hot reload automatically
-2. **Port Forwarding**: Use `gh codespace ports` to manage port visibility
-3. **Secrets**: Use Codespace secrets for sensitive data instead of committing them
-4. **GPU**: Enable GPU acceleration for better Playwright test performance
-5. **Dotfiles**: Configure your personal dotfiles repo for consistent environment
+2. **Port Forwarding**: Ports are auto-forwarded, use utility script to make public
+3. **Secrets**: Use Codespace secrets for sensitive data
+4. **Multiple Tabs**: Use VS Code's terminal tabs for different services
+5. **Save Battery**: Stop Codespace when not in use
+
+## 📚 Additional Resources
+
+- [Qwik Documentation](https://qwik.builder.io/)
+- [Supabase Documentation](https://supabase.com/docs)
+- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
+- [GitHub Codespaces Docs](https://docs.github.com/en/codespaces)
 
 ---
 
