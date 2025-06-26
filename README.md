@@ -1,6 +1,6 @@
 # 🚀 Qwik + LIT + Builder.io + Supabase + Cloudflare Stack
 
-> Ultra-modern web application stack with Qwik City, LIT Web Components, Builder.io CMS, Supabase Backend, Cloudflare Edge Services, and GitHub Codespaces - Production-ready for 2025
+> Ultra-modern web application stack with Qwik City, LIT Web Components, Builder.io CMS, Supabase Backend, and Cloudflare Edge Services - Production-ready for 2025
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/zaste/qwik-lit-builder-stack)
 
@@ -10,24 +10,18 @@
 - **Components**: [LIT](https://lit.dev/) - Native Web Components
 - **CMS**: [Builder.io](https://www.builder.io/) - Visual development platform
 - **Backend**: [Supabase](https://supabase.com/) - Auth, Database, Storage, Realtime
-- **Edge**: [Cloudflare](https://cloudflare.com/) - KV Cache, R2 Storage, Pages Hosting
+- **Edge**: [Cloudflare](https://cloudflare.com/) - KV Cache, R2 Storage, Pages hosting
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
-- **Testing**: Vitest + Playwright
-- **Development**: GitHub Codespaces
+- **Testing**: Vitest + Playwright + Web Test Runner
+- **Deployment**: Cloudflare Pages (primary), Vercel, Static
 
 ## 🚀 Quick Start
-
-### Prerequisites
-
-1. **Supabase Account** - [Create project](https://supabase.com)
-2. **Cloudflare Account** (optional) - [Sign up](https://cloudflare.com)
-3. **Builder.io Account** (optional) - [Get started](https://builder.io)
 
 ### Option 1: GitHub Codespaces (Recommended)
 
 1. Click the "Open in GitHub Codespaces" button above
 2. Wait for environment setup (3-5 minutes)
-3. Configure `.env.local` with your credentials
+3. Configure your `.env.local` with Supabase credentials
 4. Run `pnpm dev` to start development
 
 ### Option 2: Local Development
@@ -48,42 +42,48 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-## 🔧 Configuration
+## 🔧 Initial Setup
 
-### Environment Variables
+### 1. Supabase Setup
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Get your project URL and anon key from Settings → API
+3. Update `.env.local`:
 
 ```bash
-# Supabase (Required)
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_KEY=your-service-key # Server-side only
-
-# Cloudflare (Optional but recommended)
-CLOUDFLARE_API_TOKEN=your-api-token
-CLOUDFLARE_ACCOUNT_ID=your-account-id
-
-# Builder.io (Optional)
-BUILDER_PUBLIC_KEY=your-public-key
+SUPABASE_SERVICE_KEY=your-service-key # For server-side operations
 ```
 
-### Supabase Setup
+4. Run database migrations:
+```bash
+pnpm supabase:link --project-ref your-project-ref
+pnpm supabase:migrate
+```
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Run migrations:
-   ```bash
-   pnpm supabase:link --project-ref your-project-ref
-   pnpm supabase:migrate
-   ```
-3. Generate TypeScript types:
-   ```bash
-   pnpm supabase:types
-   ```
+### 2. Cloudflare Setup (Optional but Recommended)
 
-### Cloudflare Setup
+1. Create a [Cloudflare account](https://dash.cloudflare.com/sign-up)
+2. Get your API token from My Profile → API Tokens
+3. Update `.env.local`:
 
-1. Install Wrangler: `npm install -g wrangler`
-2. Login: `wrangler login`
-3. Update `wrangler.toml` with your KV namespace and R2 bucket IDs
+```bash
+CLOUDFLARE_API_TOKEN=your-api-token
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+```
+
+4. Configure `wrangler.toml` with your KV namespace and R2 bucket IDs
+
+### 3. Builder.io Setup (Optional)
+
+1. Create account at [builder.io](https://www.builder.io/)
+2. Get your public API key
+3. Update `.env.local`:
+
+```bash
+BUILDER_PUBLIC_KEY=your-public-key
+```
 
 ## 📁 Project Structure
 
@@ -91,126 +91,174 @@ BUILDER_PUBLIC_KEY=your-public-key
 src/
 ├── components/          # Qwik components
 │   ├── ui/             # Basic UI components
-│   └── features/       # Feature-specific components
+│   ├── features/       # Feature components (e.g., RealtimeCollaboration)
+│   └── router-head/    # Meta/SEO components
 ├── design-system/       # LIT web components
 │   ├── components/     # Web component definitions
-│   └── tokens/         # Design tokens
-├── routes/             # Qwik City routes
-│   ├── (app)/         # Protected routes
-│   ├── api/           # API endpoints
-│   ├── auth/          # Auth routes
-│   └── index.tsx      # Home page
-├── lib/               # Utilities
-│   ├── supabase.ts    # Supabase client
-│   ├── cloudflare.ts  # Cloudflare services
-│   └── monitoring.ts  # Performance tracking
-└── middleware/        # Route middleware
+│   ├── tokens/         # Design tokens
+│   └── builder-registration.ts
+├── routes/              # Qwik City routes
+│   ├── (app)/          # Protected routes (with auth)
+│   ├── api/            # API endpoints
+│   │   ├── cache/      # KV cache management
+│   │   ├── storage/    # R2 storage endpoints
+│   │   └── health/     # Health checks
+│   ├── auth/           # Auth routes
+│   └── login/          # Public auth pages
+├── lib/                 # Shared utilities
+│   ├── supabase.ts     # Supabase client & helpers
+│   ├── cloudflare.ts   # Cloudflare KV & R2 helpers
+│   └── database.types.ts # Generated Supabase types
+└── middleware/          # Route middleware
+    └── auth.ts         # Auth protection
 ```
 
 ## 🛠️ Available Scripts
 
 ### Development
 ```bash
-pnpm dev              # Start dev server
-pnpm dev:all          # Start all services
-pnpm storybook        # Component documentation
+pnpm dev              # Start dev server (port 5173)
+pnpm dev:all          # Start dev + storybook + services
+pnpm storybook        # Component documentation (port 6006)
+pnpm preview          # Preview production build
 ```
 
 ### Testing
 ```bash
-pnpm test             # Unit tests
-pnpm test:e2e         # E2E tests
-pnpm test:coverage    # Coverage report
+pnpm test             # Run unit tests
+pnpm test:ui          # Run tests with UI
+pnpm test:coverage    # Generate coverage report
+pnpm test:e2e         # Run E2E tests
+pnpm test:components  # Test LIT components
 ```
 
 ### Building & Deployment
 ```bash
-pnpm build            # Production build
-pnpm build:analyze    # Bundle analysis
-pnpm preview          # Preview production build
+pnpm build            # Build for production
+pnpm build:cloudflare # Build for Cloudflare Pages
+pnpm build:vercel     # Build for Vercel
+pnpm build:static     # Build static site
 
-# Deploy to Cloudflare Pages
-pnpm deploy:cloudflare
-
-# Deploy to Vercel
-pnpm deploy:vercel
+pnpm deploy:cloudflare # Deploy to Cloudflare Pages
+pnpm deploy:vercel     # Deploy to Vercel
 ```
 
-### Utilities
+### Database & Backend
 ```bash
-# Supabase
 pnpm supabase:types   # Generate TypeScript types
-
-# Cloudflare
-wrangler dev          # Test Workers locally
-wrangler kv:key list --binding=KV
-wrangler r2 object list --bucket=your-bucket
-
-# Code generation
-pnpm generate:component
-pnpm generate:route
-pnpm generate:lit
+pnpm supabase:link    # Link to Supabase project
+pnpm supabase:migrate # Run migrations
 ```
 
-## 🏗️ Architecture
+### Cloudflare Tools
+```bash
+pnpm wrangler dev     # Test Workers locally
+pnpm cache:clear      # Clear KV cache
+pnpm storage:list     # List R2 objects
+```
 
-### Frontend
-- **Qwik City**: Resumable framework with O(1) hydration
-- **LIT Components**: Framework-agnostic web components
-- **Tailwind CSS**: Utility-first styling
+### Code Generation
+```bash
+pnpm generate:component # Generate Qwik component
+pnpm generate:route     # Generate new route
+pnpm generate:lit       # Generate LIT component
+```
 
-### Backend Services
-- **Supabase Auth**: OAuth, Magic Links, Row Level Security
-- **Supabase Database**: PostgreSQL with realtime subscriptions
-- **Supabase Storage**: File uploads with CDN
-- **Cloudflare KV**: Edge caching
-- **Cloudflare R2**: Object storage (S3 compatible)
+## 🌟 Key Features
 
-### Edge Computing
-- **Cloudflare Pages**: Global edge hosting
-- **Pages Functions**: Serverless API routes
-- **KV Store**: Distributed key-value storage
+### 🔐 Authentication & Security
+- **Social Login**: Google, GitHub, Discord via Supabase Auth
+- **Magic Links**: Passwordless authentication
+- **Row Level Security**: Database-level access control
+- **Session Management**: JWT tokens with refresh
+- **Protected Routes**: Automatic auth middleware
+
+### 💾 Data & Storage
+- **PostgreSQL Database**: Via Supabase with RLS
+- **Object Storage**: Cloudflare R2 for large files
+- **Image Storage**: Supabase Storage with transformations
+- **Edge Caching**: Cloudflare KV for global cache
+
+### 🔄 Real-time Features
+- **Live Collaboration**: Cursor tracking, presence
+- **Real-time Updates**: Supabase Channels
+- **Broadcasting**: Custom events
+- **Optimistic Updates**: Instant UI feedback
+
+### ⚡ Performance
+- **Edge Rendering**: Cloudflare Pages Functions
+- **Smart Caching**: KV Store at edge locations
+- **Image Optimization**: On-the-fly transformations
+- **Code Splitting**: Automatic with Qwik
+- **Zero Hydration**: Resumability instead of hydration
+
+### 🎨 Developer Experience
+- **Type Safety**: Full TypeScript with generated types
+- **Component Library**: Storybook for documentation
+- **Hot Module Reload**: Instant feedback
+- **Git Hooks**: Automated quality checks
+- **VS Code Integration**: Tasks and debugging
+
+## 📊 Performance Metrics
+
+- **Lighthouse Score**: 100/100/100/100
+- **First Contentful Paint**: < 0.5s
+- **Time to Interactive**: < 1s
+- **Core Web Vitals**: All green
+- **Bundle Size**: < 150KB initial load
 
 ## 🚀 Deployment
 
 ### Cloudflare Pages (Recommended)
 
-1. Connect your GitHub repository to Cloudflare Pages
+1. Connect your GitHub repo to Cloudflare Pages
 2. Set build command: `pnpm build:cloudflare`
 3. Set output directory: `dist`
 4. Add environment variables in Cloudflare dashboard
+5. Deploy!
 
-### Manual Deployment
+### Vercel
 
 ```bash
-# Build for Cloudflare
-pnpm build:cloudflare
+# Install Vercel CLI
+npm i -g vercel
 
 # Deploy
-wrangler pages deploy dist
+pnpm deploy:vercel
 ```
 
-## 📊 Performance
+### Static Hosting
 
-- **Lighthouse Score**: 100/100/100/100
-- **First Contentful Paint**: < 0.5s
-- **Time to Interactive**: < 1s
-- **Bundle Size**: < 150KB (initial)
-- **Edge Latency**: < 50ms globally
+```bash
+# Build static site
+pnpm build:static
 
-## 🔐 Security Features
+# Deploy to any static host
+pnpm deploy:static
+```
 
-- **Row Level Security**: Database-level access control
-- **JWT Authentication**: Secure token-based auth
-- **CSRF Protection**: Built into Qwik City
-- **CSP Headers**: Configured for Cloudflare Pages
+## 🏗️ Architecture Decisions
 
-## 🧪 Testing Strategy
+### Why This Stack?
 
-- **Unit Tests**: Vitest for components and utilities
-- **E2E Tests**: Playwright for user flows
-- **Component Tests**: Web Test Runner for LIT components
-- **Visual Tests**: Storybook for documentation
+1. **Qwik**: O(1) loading time regardless of app size
+2. **LIT**: Framework-agnostic components that work everywhere
+3. **Supabase**: Complete backend with minimal setup
+4. **Cloudflare**: Global edge network for maximum performance
+5. **Builder.io**: Visual CMS for marketing teams
+
+### Trade-offs
+
+- **Complexity**: Multiple services to manage
+- **Learning Curve**: New concepts (resumability, web components)
+- **Vendor Lock-in**: Tied to Supabase + Cloudflare features
+
+### Best For
+
+- **SaaS Applications**: Auth, real-time, and storage built-in
+- **Content Sites**: Builder.io for visual editing
+- **Global Apps**: Edge deployment for low latency
+- **Team Projects**: Great DX with Codespaces
 
 ## 🤝 Contributing
 
@@ -223,19 +271,37 @@ wrangler pages deploy dist
 ### Commit Convention
 
 We use [Conventional Commits](https://www.conventionalcommits.org/):
+
 - `feat:` New features
 - `fix:` Bug fixes
 - `docs:` Documentation changes
+- `style:` Code style changes
 - `refactor:` Code refactoring
 - `test:` Test updates
-- `chore:` Maintenance tasks
+- `chore:` Build process updates
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Supabase Connection Failed**
+- Check your `.env.local` has correct URLs and keys
+- Ensure your IP is whitelisted in Supabase settings
+
+**Cloudflare KV Not Working Locally**
+- Run `wrangler login` to authenticate
+- Use `wrangler dev` for local testing
+
+**Type Errors After Schema Changes**
+- Run `pnpm supabase:types` to regenerate types
+- Restart TypeScript server in VS Code
 
 ## 📚 Resources
 
 - [Qwik Documentation](https://qwik.builder.io/)
 - [LIT Documentation](https://lit.dev/)
-- [Supabase Docs](https://supabase.com/docs)
-- [Cloudflare Docs](https://developers.cloudflare.com/)
+- [Supabase Documentation](https://supabase.com/docs)
+- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
 - [Builder.io Docs](https://www.builder.io/c/docs)
 
 ## 📄 License
@@ -244,16 +310,12 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 🙏 Acknowledgments
 
-Built with ❤️ using:
-- [Qwik](https://qwik.builder.io/) by BuilderIO
-- [LIT](https://lit.dev/) by Google
-- [Supabase](https://supabase.com/) by Supabase Inc
-- [Cloudflare](https://cloudflare.com/) by Cloudflare Inc
+- [Miško Hevery](https://twitter.com/mhevery) for creating Qwik
+- [Justin Fagnani](https://twitter.com/justinfagnani) for LIT
+- [Supabase Team](https://supabase.com/about) for the amazing backend
+- [Cloudflare Team](https://cloudflare.com) for edge computing
+- All contributors and early adopters!
 
 ---
 
-<p align="center">
-  <a href="https://github.com/zaste/qwik-lit-builder-stack/stargazers">
-    ⭐ Star this repo if you find it helpful!
-  </a>
-</p>
+Built with ❤️ using Qwik, LIT, Supabase, and Cloudflare
