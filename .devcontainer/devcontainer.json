@@ -1,5 +1,5 @@
 {
-  "name": "Qwik + LIT + Builder.io Development",
+  "name": "Qwik + LIT + Builder.io + Supabase + Cloudflare",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
   
   "features": {
@@ -11,7 +11,6 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers-contrib/features/pnpm:2": {},
     "ghcr.io/devcontainers-contrib/features/playwright:1": {},
-    "ghcr.io/devcontainers/features/sshd:1": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
     }
@@ -33,14 +32,15 @@
           ["class=\"([^\"]*)", "([^\"]*)]
         ],
         "files.associations": {
-          "*.css": "tailwindcss"
+          "*.css": "tailwindcss",
+          "wrangler.toml": "toml"
         },
         "typescript.tsserver.maxTsServerMemory": 4096,
         "search.exclude": {
           "**/node_modules": true,
           "**/dist": true,
           "**/.turbo": true,
-          "**/server": true
+          "**/.wrangler": true
         }
       },
       
@@ -64,26 +64,34 @@
         "formulahendry.auto-rename-tag",
         "steoates.autoimport",
         "wix.vscode-import-cost",
-        "prisma.prisma",
         "graphql.vscode-graphql",
         "graphql.vscode-graphql-syntax",
         "yzhang.markdown-all-in-one",
         "bierner.markdown-mermaid",
         "mikestead.dotenv",
-        "amazonwebservices.aws-toolkit-vscode"
+        "tamasfe.even-better-toml",
+        "cloudflare.wrangler-vscode"
       ]
     },
     
     "codespaces": {
       "openFiles": [
         "README.md",
-        "src/routes/index.tsx"
+        "src/routes/index.tsx",
+        ".env.example"
       ]
     }
   },
   
   "forwardPorts": [
-    5173, 4173, 9229, 6006, 3333, 5432, 6379, 9000, 8080, 3000
+    5173,    // Vite dev server
+    4173,    // Vite preview
+    9229,    // Node debugger
+    6006,    // Storybook
+    8787,    // Wrangler dev server
+    54321,   // Supabase local (if needed)
+    8025,    // Mailhog Web UI
+    1025     // Mailhog SMTP
   ],
   
   "portsAttributes": {
@@ -95,12 +103,12 @@
       "label": "Storybook",
       "onAutoForward": "silent"
     },
-    "3333": {
-      "label": "API Server",
+    "8787": {
+      "label": "Wrangler Dev",
       "onAutoForward": "silent"
     },
-    "8080": {
-      "label": "Database Admin",
+    "8025": {
+      "label": "Email UI",
       "onAutoForward": "silent"
     }
   },
@@ -112,12 +120,13 @@
   "remoteEnv": {
     "NODE_ENV": "development",
     "CODESPACES": "true",
-    "DEPLOY_TARGET": "static"
+    "DEPLOY_TARGET": "cloudflare"
   },
   
   "mounts": [
     "source=${localWorkspaceFolder}/.devcontainer/scripts,target=/scripts,type=bind,consistency=cached",
-    "source=node_modules-volume,target=${containerWorkspaceFolder}/node_modules,type=volume"
+    "source=node_modules-volume,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=wrangler-volume,target=${containerWorkspaceFolder}/.wrangler,type=volume"
   ],
   
   "runArgs": [
@@ -133,8 +142,9 @@
   "updateContentCommand": "pnpm install",
   
   "onCreateCommand": {
-    "install-global-tools": "npm install -g @builder.io/cli wrangler vercel @railway/cli",
-    "setup-git": "git config --global core.editor 'code --wait'"
+    "install-global-tools": "npm install -g @builder.io/cli wrangler vercel supabase",
+    "setup-git": "git config --global core.editor 'code --wait'",
+    "install-miniflare": "npm install -g miniflare"
   },
   
   "waitFor": "onCreateCommand"

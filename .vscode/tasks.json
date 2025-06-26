@@ -40,6 +40,26 @@
       }
     },
     {
+      "label": "Dev: Wrangler",
+      "type": "shell",
+      "command": "wrangler",
+      "args": ["dev"],
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting local server",
+          "endsPattern": "Ready on"
+        }
+      },
+      "presentation": {
+        "group": "development"
+      }
+    },
+    {
       "label": "Dev: Storybook",
       "type": "shell",
       "command": "pnpm",
@@ -98,37 +118,40 @@
       "group": "build"
     },
     {
-      "label": "DB: Migrate",
+      "label": "Supabase: Generate Types",
       "type": "shell",
       "command": "pnpm",
-      "args": ["prisma", "migrate", "dev"],
+      "args": ["supabase:types"],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated"
       }
     },
     {
-      "label": "DB: Studio",
+      "label": "Cloudflare: KV List",
       "type": "shell",
-      "command": "pnpm",
-      "args": ["prisma", "studio"],
-      "isBackground": true,
-      "problemMatcher": {
-        "pattern": {
-          "regexp": "^.*$"
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "Prisma Studio",
-          "endsPattern": "http://localhost:5555"
-        }
+      "command": "wrangler",
+      "args": ["kv:key", "list", "--binding=KV"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Cloudflare: R2 List",
+      "type": "shell",
+      "command": "wrangler",
+      "args": ["r2", "object", "list", "--bucket=your-app-storage"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
       }
     },
     {
       "label": "Services: Start",
       "type": "shell",
       "command": "docker-compose",
-      "args": ["up", "-d"],
+      "args": ["up", "-d", "mailhog"],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated"
@@ -139,6 +162,47 @@
       "type": "shell",
       "command": "docker-compose",
       "args": ["down"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Builder: Login",
+      "type": "shell",
+      "command": "builder",
+      "args": ["login"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Deploy: Cloudflare",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["deploy:cloudflare"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Generate: Component",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["generate:component"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Lint: Fix",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["lint:fix"],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated"
