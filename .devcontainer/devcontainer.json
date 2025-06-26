@@ -1,0 +1,141 @@
+{
+  "name": "Qwik + LIT + Builder.io Development",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "nodeGypDependencies": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers-contrib/features/pnpm:2": {},
+    "ghcr.io/devcontainers-contrib/features/playwright:1": {},
+    "ghcr.io/devcontainers/features/sshd:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    }
+  },
+  
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "typescript.preferences.importModuleSpecifier": "shortest",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"],
+        "tailwindCSS.experimental.classRegex": [
+          ["class=\"([^\"]*)", "([^\"]*)]
+        ],
+        "files.associations": {
+          "*.css": "tailwindcss"
+        },
+        "typescript.tsserver.maxTsServerMemory": 4096,
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/.turbo": true,
+          "**/server": true
+        }
+      },
+      
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "streetsidesoftware.code-spell-checker",
+        "ms-vscode.vscode-typescript-next",
+        "usernamehw.errorlens",
+        "qwik.qwik-vscode",
+        "bradlc.vscode-tailwindcss",
+        "runem.lit-plugin",
+        "vitest.explorer",
+        "ms-playwright.playwright",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "github.copilot",
+        "github.copilot-chat",
+        "christian-kohler.path-intellisense",
+        "naumovs.color-highlight",
+        "formulahendry.auto-rename-tag",
+        "steoates.autoimport",
+        "wix.vscode-import-cost",
+        "prisma.prisma",
+        "graphql.vscode-graphql",
+        "graphql.vscode-graphql-syntax",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-mermaid",
+        "mikestead.dotenv",
+        "amazonwebservices.aws-toolkit-vscode"
+      ]
+    },
+    
+    "codespaces": {
+      "openFiles": [
+        "README.md",
+        "src/routes/index.tsx"
+      ]
+    }
+  },
+  
+  "forwardPorts": [
+    5173, 4173, 9229, 6006, 3333, 5432, 6379, 9000, 8080, 3000
+  ],
+  
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "notify"
+    },
+    "6006": {
+      "label": "Storybook",
+      "onAutoForward": "silent"
+    },
+    "3333": {
+      "label": "API Server",
+      "onAutoForward": "silent"
+    },
+    "8080": {
+      "label": "Database Admin",
+      "onAutoForward": "silent"
+    }
+  },
+  
+  "postCreateCommand": ".devcontainer/scripts/post-create.sh",
+  "postStartCommand": ".devcontainer/scripts/post-start.sh",
+  "postAttachCommand": ".devcontainer/scripts/post-attach.sh",
+  
+  "remoteEnv": {
+    "NODE_ENV": "development",
+    "CODESPACES": "true",
+    "DEPLOY_TARGET": "static"
+  },
+  
+  "mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/scripts,target=/scripts,type=bind,consistency=cached",
+    "source=node_modules-volume,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ],
+  
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined",
+    "--init",
+    "--memory=8g",
+    "--cpus=4"
+  ],
+  
+  "remoteUser": "node",
+  "updateContentCommand": "pnpm install",
+  
+  "onCreateCommand": {
+    "install-global-tools": "npm install -g @builder.io/cli wrangler vercel @railway/cli",
+    "setup-git": "git config --global core.editor 'code --wait'"
+  },
+  
+  "waitFor": "onCreateCommand"
+}
