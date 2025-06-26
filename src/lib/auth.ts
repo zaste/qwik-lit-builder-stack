@@ -1,1 +1,0 @@
-// This file has been removed. Use src/lib/supabase.ts instead
