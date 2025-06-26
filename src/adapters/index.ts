@@ -1,17 +1,34 @@
 import type { QwikCityVitePluginOptions } from '@builder.io/qwik-city/vite';
-import cloudflareAdapter from '@builder.io/qwik-city/adapters/cloudflare-pages/vite';
-import vercelAdapter from '@builder.io/qwik-city/adapters/vercel-edge/vite';
-import nodeAdapter from '@builder.io/qwik-city/adapters/node-server/vite';
-import staticAdapter from '@builder.io/qwik-city/adapters/static/vite';
+
+/**
+ * Import adapters dynamically to avoid build errors
+ */
+async function importAdapters() {
+  const [
+    { default: cloudflareAdapter },
+    { default: vercelAdapter },
+    { default: nodeAdapter },
+    { default: staticAdapter }
+  ] = await Promise.all([
+    import('@builder.io/qwik-city/adapters/cloudflare-pages/vite'),
+    import('@builder.io/qwik-city/adapters/vercel-edge/vite'),
+    import('@builder.io/qwik-city/adapters/node-server/vite'),
+    import('@builder.io/qwik-city/adapters/static/vite')
+  ]);
+
+  return { cloudflareAdapter, vercelAdapter, nodeAdapter, staticAdapter };
+}
 
 export type DeployTarget = 'cloudflare' | 'vercel' | 'static' | 'node';
 
-export function getAdapter(target?: string): QwikCityVitePluginOptions['adapter'] {
+export async function getAdapter(target?: string): Promise<QwikCityVitePluginOptions['adapter']> {
   const deployTarget = (target || process.env.DEPLOY_TARGET || 'cloudflare') as DeployTarget;
+  
+  const adapters = await importAdapters();
   
   switch (deployTarget) {
     case 'cloudflare':
-      return cloudflareAdapter({
+      return adapters.cloudflareAdapter({
         ssg: {
           include: ['/*'],
           exclude: ['/api/*', '/admin/*', '/(app)/*'],
@@ -19,7 +36,7 @@ export function getAdapter(target?: string): QwikCityVitePluginOptions['adapter'
       });
       
     case 'vercel':
-      return vercelAdapter({
+      return adapters.vercelAdapter({
         outputConfig: true,
         ssg: {
           include: ['/*'],
@@ -28,12 +45,12 @@ export function getAdapter(target?: string): QwikCityVitePluginOptions['adapter'
       });
       
     case 'static':
-      return staticAdapter({
+      return adapters.staticAdapter({
         origin: process.env.ORIGIN || 'https://localhost:5173',
       });
       
     case 'node':
-      return nodeAdapter({
+      return adapters.nodeAdapter({
         ssg: {
           include: ['/*'],
           exclude: ['/api/*', '/admin/*', '/(app)/*'],
@@ -42,6 +59,6 @@ export function getAdapter(target?: string): QwikCityVitePluginOptions['adapter'
       
     default:
       console.warn(`Unknown deploy target: ${deployTarget}, falling back to cloudflare`);
-      return cloudflareAdapter();
+      return adapters.cloudflareAdapter();
   }
 }
