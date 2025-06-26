@@ -24,10 +24,11 @@
       "@types/node"
     ],
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "@qwik-city-plan": ["./src/routes"]
     }
   },
-  "files": ["./.eslintrc.cjs", "./src/global.d.ts"],
+  "files": ["./eslintrc.cjs", "./src/global.d.ts"],
   "include": ["src", "tests"],
-  "exclude": ["node_modules", "dist", "server", "tmp"]
+  "exclude": ["node_modules", "dist", "server", "tmp", "build"]
 }
