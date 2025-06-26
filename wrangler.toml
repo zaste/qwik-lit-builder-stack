@@ -5,13 +5,14 @@ compatibility_date = "2024-01-01"
 # KV Namespaces for caching
 [[kv_namespaces]]
 binding = "KV"
-id = "your_kv_namespace_id"
-preview_id = "your_kv_preview_id"
+# These will be set via environment variables or GitHub secrets
+# id = "KV_NAMESPACE_ID"
+# preview_id = "KV_PREVIEW_ID"
 
 # R2 Storage Buckets
 [[r2_buckets]]
 binding = "R2"
-bucket_name = "your-app-storage"
+# bucket_name will be set via environment variable R2_BUCKET_NAME
 
 # Environment Variables
 [vars]
@@ -28,7 +29,7 @@ vars = { ENVIRONMENT = "production" }
 # Routes
 [routes]
 include = ["/*"]
-exclude = ["/*.xml", "/*.txt", "/favicon.ico"]
+exclude = ["/*.xml", "/*.txt", "/favicon.ico", "/robots.txt", "/sitemap.xml"]
 
 # Build configuration
 [build]
@@ -36,3 +37,15 @@ command = "pnpm build:cloudflare"
 
 [site]
 bucket = "./dist"
+
+# Compatibility flags
+[compatibility_flags]
+nodejs_compat = true
+
+# Workers configuration
+[placement]
+mode = "smart"
+
+# Performance hints
+[limits]
+cpu_ms = 50
