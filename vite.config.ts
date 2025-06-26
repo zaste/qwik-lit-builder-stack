@@ -5,13 +5,14 @@ import { qwikInsights } from '@builder.io/qwik-labs/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { getAdapter } from './src/adapters';
 
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(async ({ command, mode }) => {
   const isProd = mode === 'production';
+  const adapter = await getAdapter(process.env.DEPLOY_TARGET);
   
   return {
     plugins: [
       qwikCity({
-        adapter: getAdapter(process.env.DEPLOY_TARGET)
+        adapter
       }),
       qwikVite({
         // Optimization settings
