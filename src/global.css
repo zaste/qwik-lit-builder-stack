@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Design System Colors */
+    --color-primary: theme('colors.blue.600');
+    --color-primary-hover: theme('colors.blue.700');
+    --color-secondary: theme('colors.purple.600');
+    --color-secondary-hover: theme('colors.purple.700');
+    
+    /* Semantic Colors */
+    --color-success: theme('colors.green.600');
+    --color-warning: theme('colors.yellow.600');
+    --color-error: theme('colors.red.600');
+    --color-info: theme('colors.blue.500');
+    
+    /* Neutral Colors */
+    --color-background: theme('colors.white');
+    --color-surface: theme('colors.gray.50');
+    --color-border: theme('colors.gray.200');
+    --color-text-primary: theme('colors.gray.900');
+    --color-text-secondary: theme('colors.gray.600');
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background: theme('colors.gray.900');
+      --color-surface: theme('colors.gray.800');
+      --color-border: theme('colors.gray.700');
+      --color-text-primary: theme('colors.gray.100');
+      --color-text-secondary: theme('colors.gray.400');
+    }
+  }
+}
+
+@layer components {
+  .container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+  
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
+  }
+  
+  .btn-primary {
+    @apply btn text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+  }
+  
+  .btn-secondary {
+    @apply btn text-white bg-purple-600 hover:bg-purple-700 focus:ring-purple-500;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
