@@ -1,0 +1,38 @@
+name = "qwik-lit-builder-app"
+main = "dist/_worker.js"
+compatibility_date = "2024-01-01"
+
+# KV Namespaces for caching
+[[kv_namespaces]]
+binding = "KV"
+id = "your_kv_namespace_id"
+preview_id = "your_kv_preview_id"
+
+# R2 Storage Buckets
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "your-app-storage"
+
+# Environment Variables
+[vars]
+DEPLOY_TARGET = "cloudflare"
+
+# Development
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# Production
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# Routes
+[routes]
+include = ["/*"]
+exclude = ["/*.xml", "/*.txt", "/favicon.ico"]
+
+# Build configuration
+[build]
+command = "pnpm build:cloudflare"
+
+[site]
+bucket = "./dist"

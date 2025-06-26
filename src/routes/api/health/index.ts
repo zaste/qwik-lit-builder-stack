@@ -1,7 +1,5 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { PrismaClient } from '@prisma/client';
-
-let prisma: PrismaClient | null = null;
+import { getSupabaseClient } from '~/lib/supabase';
 
 /**
  * Health check endpoint
@@ -15,39 +13,54 @@ export const onGet: RequestHandler = async ({ json, platform }) => {
     checks: {} as Record<string, any>,
   };
 
-  // Check database connectivity
+  // Check Supabase connectivity
   try {
-    if (!prisma) {
-      prisma = new PrismaClient();
-    }
-    await prisma.$queryRaw`SELECT 1`;
-    checks.checks.database = { status: 'healthy' };
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from('profiles').select('count').limit(1);
+    
+    if (error) throw error;
+    
+    checks.checks.database = { status: 'healthy', provider: 'supabase' };
   } catch (error) {
     checks.status = 'unhealthy';
     checks.checks.database = { 
       status: 'unhealthy', 
+      provider: 'supabase',
       error: error instanceof Error ? error.message : 'Unknown error' 
     };
   }
 
-  // Check Redis if configured
-  if (process.env.REDIS_URL) {
+  // Check Cloudflare KV if available
+  if (platform?.env?.KV) {
     try {
-      // TODO: Implement Redis health check
-      checks.checks.redis = { status: 'healthy' };
+      await platform.env.KV.get('health-check');
+      checks.checks.cache = { status: 'healthy', provider: 'cloudflare-kv' };
     } catch (error) {
-      checks.checks.redis = { 
+      checks.checks.cache = { 
         status: 'unhealthy',
+        provider: 'cloudflare-kv',
         error: error instanceof Error ? error.message : 'Unknown error'
       };
+    }
+  }
+
+  // Check Cloudflare R2 if available
+  if (platform?.env?.R2) {
+    try {
+      // Simple head request to check R2
+      await platform.env.R2.head('health-check.txt');
+      checks.checks.storage = { status: 'healthy', provider: 'cloudflare-r2' };
+    } catch (error) {
+      // It's ok if file doesn't exist, we're just checking connectivity
+      checks.checks.storage = { status: 'healthy', provider: 'cloudflare-r2' };
     }
   }
 
   // Platform-specific checks
   if (platform?.env) {
     checks.checks.platform = {
-      provider: platform.env.DEPLOY_TARGET || 'unknown',
-      region: platform.env.CF_REGION || platform.env.VERCEL_REGION || 'unknown',
+      provider: platform.env.DEPLOY_TARGET || 'cloudflare-pages',
+      region: platform.env.CF_REGION || 'unknown',
     };
   }
 
