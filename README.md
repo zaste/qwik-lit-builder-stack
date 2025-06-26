@@ -1,6 +1,6 @@
-# 🚀 Qwik + LIT + Builder.io Stack
+# 🚀 Qwik + LIT + Builder.io + Supabase Stack
 
-> Modern web application stack with Qwik City, LIT Web Components, Builder.io CMS, and GitHub Codespaces - Production-ready for 2025
+> Modern web application stack with Qwik City, LIT Web Components, Builder.io CMS, Supabase Backend, and GitHub Codespaces - Production-ready for 2025
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/zaste/qwik-lit-builder-stack)
 
@@ -9,8 +9,9 @@
 - **Framework**: [Qwik City](https://qwik.builder.io/) - O(1) loading with resumability
 - **Design System**: [LIT](https://lit.dev/) - Native Web Components
 - **CMS**: [Builder.io](https://www.builder.io/) - Visual development platform
+- **Backend**: [Supabase](https://supabase.com/) - Auth, Database, Storage, Realtime
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: PostgreSQL with Prisma ORM + Supabase
 - **Testing**: Vitest + Playwright
 - **Deployment**: Multi-platform (Cloudflare, Vercel, Static)
 
@@ -36,6 +37,23 @@ pnpm install
 pnpm dev
 ```
 
+## 📦 Setup Supabase
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Get your project URL and anon key
+3. Update `.env.local` with your credentials:
+
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+4. Run migrations:
+```bash
+pnpm supabase:link
+pnpm supabase:migrate
+```
+
 ## 📁 Project Structure
 
 ```
@@ -43,12 +61,17 @@ src/
 ├── components/          # Qwik components
 ├── design-system/       # LIT web components
 ├── routes/              # Qwik City routes
+│   ├── (app)/           # Protected routes
+│   ├── api/             # API endpoints
+│   └── auth/            # Auth routes
 ├── integrations/        # External service integrations
 │   ├── builder/         # Builder.io setup
-│   ├── analytics/       # Analytics tracking
-│   └── monitoring/      # Error & performance monitoring
+│   └── supabase/        # Supabase client
 ├── lib/                 # Shared utilities
-└── global.css          # Global styles
+│   ├── auth.ts          # Auth helpers
+│   ├── supabase.ts      # Supabase client
+│   └── database.types.ts # Generated types
+└── middleware/          # Route middleware
 ```
 
 ## 🛠️ Available Scripts
@@ -72,6 +95,7 @@ pnpm preview          # Preview production build
 # Database
 pnpm db:migrate       # Run migrations
 pnpm db:studio        # Prisma Studio GUI
+pnpm supabase:types   # Generate TypeScript types
 
 # Deployment
 pnpm deploy:cloudflare
@@ -79,29 +103,30 @@ pnpm deploy:vercel
 pnpm deploy:static
 ```
 
-## 🔧 Configuration
+## 🔧 Key Features
 
-### Environment Variables
+### 🔐 Authentication
+- Social login (Google, GitHub, Discord)
+- Magic link authentication
+- Session management
+- Protected routes
 
-Copy `.env.example` to `.env.local` and update:
+### 💾 Storage
+- File uploads to Supabase Storage
+- Image transformations
+- CDN delivery
 
-```bash
-# Builder.io
-BUILDER_PUBLIC_KEY=your_key_here
+### 🔄 Realtime
+- Live collaboration
+- Presence indicators
+- Real-time updates
+- Broadcasting
 
-# Database
-DATABASE_URL=postgresql://...
-
-# Authentication
-AUTH_SECRET=your_secret_here
-```
-
-### Builder.io Setup
-
-1. Create account at [builder.io](https://www.builder.io/)
-2. Get your public API key
-3. Run `pnpm builder:login`
-4. Start creating visual components!
+### 🔒 Security
+- Row Level Security (RLS)
+- JWT authentication
+- CSRF protection
+- Content Security Policy
 
 ## 🚀 Deployment
 
@@ -151,4 +176,4 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
-Built with ❤️ using Qwik, LIT, and Builder.io
+Built with ❤️ using Qwik, LIT, Builder.io, and Supabase
