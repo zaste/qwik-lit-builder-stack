@@ -5,10 +5,10 @@ import type { QwikCityVitePluginOptions } from '@builder.io/qwik-city/vite';
  */
 async function importAdapters() {
   const [
-    { default: cloudflareAdapter },
-    { default: vercelAdapter },
-    { default: nodeAdapter },
-    { default: staticAdapter }
+    cfModule,
+    vercelModule,
+    nodeModule,
+    staticModule
   ] = await Promise.all([
     import('@builder.io/qwik-city/adapters/cloudflare-pages/vite'),
     import('@builder.io/qwik-city/adapters/vercel-edge/vite'),
@@ -16,7 +16,12 @@ async function importAdapters() {
     import('@builder.io/qwik-city/adapters/static/vite')
   ]);
 
-  return { cloudflareAdapter, vercelAdapter, nodeAdapter, staticAdapter };
+  return { 
+    cloudflareAdapter: cfModule.cloudflarePagesAdapter,
+    vercelAdapter: vercelModule.vercelEdgeAdapter,
+    nodeAdapter: nodeModule.nodeServerAdapter,
+    staticAdapter: staticModule.staticAdapter
+  };
 }
 
 export type DeployTarget = 'cloudflare' | 'vercel' | 'static' | 'node';
