@@ -66,8 +66,6 @@
   "dependencies": {
     "@builder.io/qwik": "^1.14.1",
     "@builder.io/qwik-city": "^1.14.1",
-    "@builder.io/sdk": "^2.1.0",
-    "@builder.io/sdk-qwik": "^0.0.5",
     "@supabase/supabase-js": "^2.39.0",
     "@supabase/auth-helpers-qwik": "^0.5.0",
     "lit": "^3.3.0",
@@ -124,6 +122,10 @@
     "vercel": "^33.0.0",
     "@cloudflare/workers-types": "^4.20240117.0",
     "miniflare": "^3.20231030.0"
+  },
+  "optionalDependencies": {
+    "@builder.io/sdk": "^2.1.0",
+    "@builder.io/sdk-qwik": "^0.0.5"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
