@@ -8,6 +8,7 @@
     "pnpm": ">=8.0.0"
   },
   "scripts": {
+    "setup": "mv npmrc .npmrc 2>/dev/null || true && mv eslintrc.cjs .eslintrc.cjs 2>/dev/null || true && mv gitignore .gitignore 2>/dev/null || true",
     "dev": "vite --mode ssr --host 0.0.0.0",
     "dev:all": "concurrently -n \"VITE,STORY\" -c \"blue,magenta\" \"pnpm dev\" \"pnpm storybook\"",
     "dev:debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr",
