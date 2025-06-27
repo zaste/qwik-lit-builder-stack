@@ -9,6 +9,30 @@ export default defineConfig(async ({ command, mode }) => {
   const isProd = mode === 'production';
   const adapter = await getAdapter(process.env.DEPLOY_TARGET);
   
+  // Check if Builder.io dependencies are available
+  let hasBuilderDeps = false;
+  try {
+    await import('@builder.io/sdk');
+    await import('@builder.io/sdk-qwik');
+    hasBuilderDeps = true;
+  } catch {
+    console.warn('Builder.io dependencies not found - CMS features will be disabled');
+  }
+  
+  // Base dependencies to optimize
+  const baseDepsToInclude = [
+    '@builder.io/qwik',
+    '@builder.io/qwik-city',
+    'lit',
+    '@lit/reactive-element',
+    '@lit/task'
+  ];
+  
+  // Add Builder.io deps only if available
+  const optimizeDepsInclude = hasBuilderDeps 
+    ? [...baseDepsToInclude, '@builder.io/sdk', '@builder.io/sdk-qwik']
+    : baseDepsToInclude;
+  
   return {
     plugins: [
       qwikCity({
@@ -39,15 +63,8 @@ export default defineConfig(async ({ command, mode }) => {
     
     // Optimization for dependencies
     optimizeDeps: {
-      include: [
-        '@builder.io/qwik',
-        '@builder.io/qwik-city',
-        '@builder.io/sdk',
-        '@builder.io/sdk-qwik',
-        'lit',
-        '@lit/reactive-element',
-        '@lit/task'
-      ]
+      include: optimizeDepsInclude,
+      exclude: ['@builder.io/qwik-city']
     },
     
     // Environment variables
