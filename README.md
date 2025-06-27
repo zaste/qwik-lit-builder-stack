@@ -4,20 +4,18 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/zaste/qwik-lit-builder-stack)
 
-## ⚠️ Important: Builder.io Installation Notice
+## ⚠️ Builder.io SDK (Optional)
 
-**Builder.io SDK is optional** due to its dependency on `isolated-vm` which requires native compilation. If you experience installation issues:
+**Builder.io SDK may fail in some environments** due to its `isolated-vm` dependency requiring native compilation.
 
 ```bash
-# Install without optional dependencies
+# If installation fails, install without optional dependencies
 pnpm install --no-optional
 
-# Or if already failing, clean and retry
-pnpm clean:all
-pnpm install --no-optional
+# The app works without CMS features
 ```
 
-See [BUILDER_IO_ISSUES.md](./BUILDER_IO_ISSUES.md) for detailed information and solutions.
+For detailed troubleshooting, see our [compatibility notes](#troubleshooting).
 
 ## 🎯 Stack Overview
 
@@ -47,11 +45,8 @@ See [BUILDER_IO_ISSUES.md](./BUILDER_IO_ISSUES.md) for detailed information and 
 git clone https://github.com/zaste/qwik-lit-builder-stack.git
 cd qwik-lit-builder-stack
 
-# Rename configuration files
-mv npmrc .npmrc
-mv eslintrc.cjs .eslintrc.cjs
-mv prettierrc.json .prettierrc.json
-mv gitignore .gitignore
+# Setup configuration files
+pnpm run setup
 
 # Install dependencies
 pnpm install
@@ -101,8 +96,6 @@ CLOUDFLARE_ACCOUNT_ID=your-account-id
 
 ### 3. Builder.io Setup (Optional)
 
-⚠️ **Note**: Builder.io requires `isolated-vm` which may cause installation issues in some environments.
-
 1. Create account at [builder.io](https://www.builder.io/)
 2. Get your public API key
 3. Update `.env.local`:
@@ -111,7 +104,7 @@ CLOUDFLARE_ACCOUNT_ID=your-account-id
 BUILDER_PUBLIC_KEY=your-public-key
 ```
 
-If Builder.io SDK installation fails, the application will still work without CMS features. Use the helper functions in `src/lib/builder.tsx` to safely integrate Builder.io components.
+If Builder.io SDK installation fails, the application will still work without CMS features.
 
 ## 📁 Project Structure
 
@@ -195,7 +188,7 @@ pnpm generate:route     # Generate new route
 pnpm generate:lit       # Generate LIT component
 ```
 
-## 🔑 Key Features
+## 🚀 Key Features
 
 ### 🔐 Authentication & Security
 - **Social Login**: Google, GitHub, Discord via Supabase Auth
@@ -210,7 +203,7 @@ pnpm generate:lit       # Generate LIT component
 - **Image Storage**: Supabase Storage with transformations
 - **Edge Caching**: Cloudflare KV for global cache
 
-### 🔄 Real-time Features
+### 📡 Real-time Features
 - **Live Collaboration**: Cursor tracking, presence
 - **Real-time Updates**: Supabase Channels
 - **Broadcasting**: Custom events
@@ -230,7 +223,7 @@ pnpm generate:lit       # Generate LIT component
 - **Git Hooks**: Automated quality checks
 - **VS Code Integration**: Tasks and debugging
 
-## 📊 Performance Metrics
+## 📈 Performance Metrics
 
 - **Lighthouse Score**: 100/100/100/100
 - **First Contentful Paint**: < 0.5s
@@ -312,13 +305,13 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - `test:` Test updates
 - `chore:` Build process updates
 
-## 🐛 Troubleshooting
+## 🐞 Troubleshooting
 
 ### Common Issues
 
 **Installation Timeouts**
 - Use `pnpm install --no-optional` to skip problematic dependencies
-- See [BUILDER_IO_ISSUES.md](./BUILDER_IO_ISSUES.md) for Builder.io specific issues
+- Builder.io requires native compilation tools
 
 **Supabase Connection Failed**
 - Check your `.env.local` has correct URLs and keys
@@ -333,7 +326,24 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - Restart TypeScript server in VS Code
 
 **File Naming Issues**
-- Rename files without dots: `npmrc` → `.npmrc`, `eslintrc.cjs` → `.eslintrc.cjs`, etc.
+- Run `pnpm setup` to rename configuration files
+
+### Builder.io Specific Issues
+
+**Environments where Builder.io works:**
+- ✅ Local development with build tools
+- ✅ Cloudflare Pages
+- ✅ Vercel
+
+**Environments where Builder.io may fail:**
+- ❌ GitHub Codespaces (without additional setup)
+- ❌ Lightweight Docker containers
+- ❌ CI/CD without compilation tools
+
+**If Builder.io fails:**
+1. Install with `pnpm install --no-optional`
+2. App continues to work without CMS features
+3. Use Supabase for dynamic content instead
 
 ## 📚 Resources
 
