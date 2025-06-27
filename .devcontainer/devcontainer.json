@@ -9,8 +9,6 @@
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers-contrib/features/pnpm:2": {},
-    "ghcr.io/devcontainers-contrib/features/playwright:1": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
     }
@@ -145,9 +143,10 @@
   ],
   
   "remoteUser": "node",
-  "updateContentCommand": "pnpm install",
+  "updateContentCommand": "npm install",
   
   "onCreateCommand": {
+    "install-pnpm": "npm install -g pnpm@latest",
     "install-global-tools": "npm install -g @builder.io/cli wrangler vercel supabase",
     "setup-git": "git config --global core.editor 'code --wait'",
     "install-miniflare": "npm install -g miniflare"
