@@ -10,21 +10,15 @@ async function importAdapters() {
     nodeModule,
     staticModule
   ] = await Promise.all([
-    import('@builder.io/qwik-city/adapters/cloudflare-pages/vite'),
-    import('@builder.io/qwik-city/adapters/vercel-edge/vite'),
-    import('@builder.io/qwik-city/adapters/node-server/vite'),
-    import('@builder.io/qwik-city/adapters/static/vite')
+    import('@builder.io/qwik-city/adapters/cloudflare-pages/vite')
   ]);
 
   return { 
-    cloudflareAdapter: cfModule.cloudflarePagesAdapter,
-    vercelAdapter: vercelModule.vercelEdgeAdapter,
-    nodeAdapter: nodeModule.nodeServerAdapter,
-    staticAdapter: staticModule.staticAdapter
+    cloudflareAdapter: cfModule.cloudflarePagesAdapter
   };
 }
 
-export type DeployTarget = 'cloudflare' | 'vercel' | 'static' | 'node';
+export type DeployTarget = 'cloudflare';
 
 export async function getAdapter(target?: string): Promise<QwikCityVitePluginOptions['adapter']> {
   const deployTarget = (target || process.env.DEPLOY_TARGET || 'cloudflare') as DeployTarget;
@@ -34,28 +28,6 @@ export async function getAdapter(target?: string): Promise<QwikCityVitePluginOpt
   switch (deployTarget) {
     case 'cloudflare':
       return adapters.cloudflareAdapter({
-        ssg: {
-          include: ['/*'],
-          exclude: ['/api/*', '/admin/*', '/(app)/*'],
-        },
-      });
-      
-    case 'vercel':
-      return adapters.vercelAdapter({
-        outputConfig: true,
-        ssg: {
-          include: ['/*'],
-          exclude: ['/api/*', '/admin/*', '/(app)/*'],
-        },
-      });
-      
-    case 'static':
-      return adapters.staticAdapter({
-        origin: process.env.ORIGIN || 'https://localhost:5173',
-      });
-      
-    case 'node':
-      return adapters.nodeAdapter({
         ssg: {
           include: ['/*'],
           exclude: ['/api/*', '/admin/*', '/(app)/*'],
