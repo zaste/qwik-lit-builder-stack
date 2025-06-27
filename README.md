@@ -4,11 +4,26 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/zaste/qwik-lit-builder-stack)
 
+## ⚠️ Important: Builder.io Installation Notice
+
+**Builder.io SDK is optional** due to its dependency on `isolated-vm` which requires native compilation. If you experience installation issues:
+
+```bash
+# Install without optional dependencies
+pnpm install --no-optional
+
+# Or if already failing, clean and retry
+pnpm clean:all
+pnpm install --no-optional
+```
+
+See [BUILDER_IO_ISSUES.md](./BUILDER_IO_ISSUES.md) for detailed information and solutions.
+
 ## 🎯 Stack Overview
 
 - **Framework**: [Qwik City](https://qwik.builder.io/) - O(1) loading with resumability
 - **Components**: [LIT](https://lit.dev/) - Native Web Components
-- **CMS**: [Builder.io](https://www.builder.io/) - Visual development platform
+- **CMS**: [Builder.io](https://www.builder.io/) - Visual development platform (Optional)
 - **Backend**: [Supabase](https://supabase.com/) - Auth, Database, Storage, Realtime
 - **Edge**: [Cloudflare](https://cloudflare.com/) - KV Cache, R2 Storage, Pages hosting
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
@@ -22,7 +37,8 @@
 1. Click the "Open in GitHub Codespaces" button above
 2. Wait for environment setup (3-5 minutes)
 3. Configure your `.env.local` with Supabase credentials
-4. Run `pnpm dev` to start development
+4. Run `pnpm install --no-optional` (to skip Builder.io if problematic)
+5. Run `pnpm dev` to start development
 
 ### Option 2: Local Development
 
@@ -31,11 +47,19 @@
 git clone https://github.com/zaste/qwik-lit-builder-stack.git
 cd qwik-lit-builder-stack
 
+# Rename configuration files
+mv npmrc .npmrc
+mv eslintrc.cjs .eslintrc.cjs
+mv prettierrc.json .prettierrc.json
+mv gitignore .gitignore
+
 # Install dependencies
 pnpm install
+# OR without optional dependencies if issues occur
+pnpm install --no-optional
 
 # Copy environment variables
-cp .env.example .env.local
+cp env.example .env.local
 # Edit .env.local with your credentials
 
 # Start development server
@@ -77,6 +101,8 @@ CLOUDFLARE_ACCOUNT_ID=your-account-id
 
 ### 3. Builder.io Setup (Optional)
 
+⚠️ **Note**: Builder.io requires `isolated-vm` which may cause installation issues in some environments.
+
 1. Create account at [builder.io](https://www.builder.io/)
 2. Get your public API key
 3. Update `.env.local`:
@@ -84,6 +110,8 @@ CLOUDFLARE_ACCOUNT_ID=your-account-id
 ```bash
 BUILDER_PUBLIC_KEY=your-public-key
 ```
+
+If Builder.io SDK installation fails, the application will still work without CMS features. Use the helper functions in `src/lib/builder.tsx` to safely integrate Builder.io components.
 
 ## 📁 Project Structure
 
@@ -108,9 +136,12 @@ src/
 ├── lib/                 # Shared utilities
 │   ├── supabase.ts     # Supabase client & helpers
 │   ├── cloudflare.ts   # Cloudflare KV & R2 helpers
+│   ├── builder.tsx     # Builder.io optional integration
 │   └── database.types.ts # Generated Supabase types
-└── middleware/          # Route middleware
-    └── auth.ts         # Auth protection
+├── middleware/          # Route middleware
+│   └── auth.ts         # Auth protection
+└── adapters/           # Multi-platform deployment adapters
+    └── index.ts        # Adapter configuration
 ```
 
 ## 🛠️ Available Scripts
@@ -164,7 +195,7 @@ pnpm generate:route     # Generate new route
 pnpm generate:lit       # Generate LIT component
 ```
 
-## 🌟 Key Features
+## 🔑 Key Features
 
 ### 🔐 Authentication & Security
 - **Social Login**: Google, GitHub, Discord via Supabase Auth
@@ -245,18 +276,19 @@ pnpm deploy:static
 2. **LIT**: Framework-agnostic components that work everywhere
 3. **Supabase**: Complete backend with minimal setup
 4. **Cloudflare**: Global edge network for maximum performance
-5. **Builder.io**: Visual CMS for marketing teams
+5. **Builder.io**: Visual CMS for marketing teams (when available)
 
 ### Trade-offs
 
 - **Complexity**: Multiple services to manage
 - **Learning Curve**: New concepts (resumability, web components)
 - **Vendor Lock-in**: Tied to Supabase + Cloudflare features
+- **Optional CMS**: Builder.io may not work in all environments
 
 ### Best For
 
 - **SaaS Applications**: Auth, real-time, and storage built-in
-- **Content Sites**: Builder.io for visual editing
+- **Content Sites**: Builder.io for visual editing (when available)
 - **Global Apps**: Edge deployment for low latency
 - **Team Projects**: Great DX with Codespaces
 
@@ -284,6 +316,10 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Common Issues
 
+**Installation Timeouts**
+- Use `pnpm install --no-optional` to skip problematic dependencies
+- See [BUILDER_IO_ISSUES.md](./BUILDER_IO_ISSUES.md) for Builder.io specific issues
+
 **Supabase Connection Failed**
 - Check your `.env.local` has correct URLs and keys
 - Ensure your IP is whitelisted in Supabase settings
@@ -295,6 +331,9 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 **Type Errors After Schema Changes**
 - Run `pnpm supabase:types` to regenerate types
 - Restart TypeScript server in VS Code
+
+**File Naming Issues**
+- Rename files without dots: `npmrc` → `.npmrc`, `eslintrc.cjs` → `.eslintrc.cjs`, etc.
 
 ## 📚 Resources
 
