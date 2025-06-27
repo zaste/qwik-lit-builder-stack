@@ -3,12 +3,10 @@
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
   
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20",
-      "nodeGypDependencies": true
-    },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "dockerDashComposeVersion": "v2"
+    },
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
     }
@@ -23,7 +21,7 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
+          "source.fixAll.eslint": "explicit"
         },
         "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"],
         "tailwindCSS.experimental.classRegex": [
@@ -44,112 +42,116 @@
           "**/node_modules": true,
           "**/dist": true,
           "**/.turbo": true,
-          "**/.wrangler": true
-        }
+          "**/.wrangler": true,
+          "**/coverage": true
+        },
+        // Qwik-specific settings
+        "qwik.enableCodeLens": true,
+        "qwik.enableTypeChecking": true,
+        // LIT-specific settings  
+        "lit-plugin.strict": true,
+        "lit-plugin.rules.no-unknown-tag-name": "error"
       },
       
       "extensions": [
+        // Core development
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "streetsidesoftware.code-spell-checker",
+        "esbenp.prettier-vscode", 
         "ms-vscode.vscode-typescript-next",
         "usernamehw.errorlens",
+        
+        // Framework-specific
         "qwik.qwik-vscode",
-        "bradlc.vscode-tailwindcss",
         "runem.lit-plugin",
+        "bradlc.vscode-tailwindcss",
+        
+        // Testing & Quality
         "vitest.explorer",
         "ms-playwright.playwright",
+        "snyk-security.snyk-vulnerability-scanner",
+        
+        // Git & Collaboration
         "eamodio.gitlens",
         "github.vscode-pull-request-github",
         "github.copilot",
         "github.copilot-chat",
+        
+        // Utilities (cleaned up)
         "christian-kohler.path-intellisense",
-        "naumovs.color-highlight",
-        "formulahendry.auto-rename-tag",
-        "steoates.autoimport",
-        "wix.vscode-import-cost",
-        "graphql.vscode-graphql",
-        "graphql.vscode-graphql-syntax",
+        "streetsidesoftware.code-spell-checker",
+        
+        // File support
         "yzhang.markdown-all-in-one",
-        "bierner.markdown-mermaid",
         "mikestead.dotenv",
         "tamasfe.even-better-toml",
-        "cloudflare.wrangler-vscode"
+        
+        // Cloud services
+        "cloudflare.wrangler-vscode",
+        "supabase.supabase"
       ]
     },
     
     "codespaces": {
       "openFiles": [
         "README.md",
-        "src/routes/index.tsx",
-        ".env.example"
+        ".env.example",
+        "src/routes/index.tsx"
       ]
     }
   },
   
   "forwardPorts": [
-    5173,    // Vite dev server
-    4173,    // Vite preview
-    9229,    // Node debugger
-    6006,    // Storybook
-    8787,    // Wrangler dev server
-    54321,   // Supabase local (if needed)
-    8025,    // Mailhog Web UI
-    1025     // Mailhog SMTP
+    5173,    // Vite dev server (primary)
+    8787     // Wrangler dev server (primary)
   ],
   
   "portsAttributes": {
     "5173": {
-      "label": "Vite Dev Server",
+      "label": "Qwik Dev Server",
       "onAutoForward": "notify"
     },
-    "6006": {
-      "label": "Storybook",
-      "onAutoForward": "silent"
-    },
     "8787": {
-      "label": "Wrangler Dev",
-      "onAutoForward": "silent"
-    },
-    "8025": {
-      "label": "Email UI",
+      "label": "Cloudflare Workers",
       "onAutoForward": "silent"
     }
   },
   
   "postCreateCommand": ".devcontainer/scripts/post-create.sh",
-  "postStartCommand": ".devcontainer/scripts/post-start.sh",
+  "postStartCommand": ".devcontainer/scripts/post-start.sh", 
   "postAttachCommand": ".devcontainer/scripts/post-attach.sh",
   
   "remoteEnv": {
     "NODE_ENV": "development",
     "CODESPACES": "true",
-    "DEPLOY_TARGET": "cloudflare"
+    "DEPLOY_TARGET": "cloudflare",
+    "SKIP_INTERACTIVE": "true",
+    "QWIK_INSIGHTS": "false"
   },
   
   "mounts": [
-    "source=${localWorkspaceFolder}/.devcontainer/scripts,target=/scripts,type=bind,consistency=cached",
     "source=node_modules-volume,target=${containerWorkspaceFolder}/node_modules,type=volume",
-    "source=wrangler-volume,target=${containerWorkspaceFolder}/.wrangler,type=volume"
+    "source=wrangler-volume,target=${containerWorkspaceFolder}/.wrangler,type=volume",
+    "source=pnpm-cache-volume,target=/home/node/.pnpm-store,type=volume"
   ],
   
   "runArgs": [
     "--cap-add=SYS_PTRACE",
     "--security-opt",
-    "seccomp=unconfined",
+    "seccomp=unconfined", 
     "--init",
-    "--memory=8g",
-    "--cpus=4"
+    "--memory=7g",
+    "--cpus=2"
   ],
   
   "remoteUser": "node",
-  "updateContentCommand": "npm install",
+  "updateContentCommand": "command -v pnpm >/dev/null 2>&1 && pnpm install || npm install",
   
   "onCreateCommand": {
-    "install-pnpm": "npm install -g pnpm@latest",
-    "install-global-tools": "npm install -g @builder.io/cli wrangler vercel supabase",
-    "setup-git": "git config --global core.editor 'code --wait'",
-    "install-miniflare": "npm install -g miniflare"
+    "setup-pnpm": "npm install -g pnpm@latest && pnpm config set store-dir /home/node/.pnpm-store && pnpm config set prefer-offline true",
+    "install-tools": "npm install -g wrangler@latest @builder.io/cli@latest",
+    "install-supabase": "curl -sSfL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xzf - && sudo mv supabase /usr/local/bin/ || npm install -g @supabase/supabase-js@latest",
+    "setup-git": "git config --global core.editor 'code --wait' || true",
+    "create-dirs": "mkdir -p .vscode tmp logs .cache .devcontainer src/components stories"
   },
   
   "waitFor": "onCreateCommand"
