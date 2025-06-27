@@ -29,8 +29,14 @@
         },
         "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"],
         "tailwindCSS.experimental.classRegex": [
-          ["class=\"([^\"]*)", "([^\"]*)]
+          ["classList={{([^}]*)\\}}", "\\s*?[\"'`]([^\"'`]*).*?:"],
+          ["class:\\s*[\"'`]([^\"'`]*)[\"'`]", "([^\\s]+)"],
+          ["class=\"([^\"]*)\"", "([^\\s]+)"]
         ],
+        "tailwindCSS.includeLanguages": {
+          "typescript": "javascript",
+          "typescriptreact": "javascript"
+        },
         "files.associations": {
           "*.css": "tailwindcss",
           "wrangler.toml": "toml"
