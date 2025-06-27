@@ -28,7 +28,6 @@
       "@qwik-city-plan": ["./src/routes"]
     }
   },
-  "files": ["./eslintrc.cjs", "./src/global.d.ts"],
-  "include": ["src", "tests"],
+  "include": ["src", "tests", ".eslintrc.cjs"],
   "exclude": ["node_modules", "dist", "server", "tmp", "build"]
 }
