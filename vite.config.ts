@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import { qwikVite } from '@builder.io/qwik/optimizer';
 import { qwikCity } from '@builder.io/qwik-city/vite';
-import { qwikInsights } from '@builder.io/qwik-labs/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { getAdapter } from './src/adapters';
 
@@ -48,8 +47,7 @@ export default defineConfig(async ({ command, mode }) => {
           include: ['lit', 'lit/decorators.js']
         }
       }),
-      tsconfigPaths(),
-      ...(isProd && process.env.QWIK_INSIGHTS_KEY ? [qwikInsights({ publicApiKey: process.env.QWIK_INSIGHTS_KEY })] : [])
+      tsconfigPaths()
     ],
     
     // LIT-specific config
