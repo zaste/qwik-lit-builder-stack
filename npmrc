@@ -1,0 +1,12 @@
+# pnpm configuration
+shamefully-hoist=true
+strict-peer-dependencies=false
+auto-install-peers=true
+
+# Optional: Skip optional dependencies if needed
+# no-optional=true
+
+# Prevent long build times from native modules
+# Use this if you have issues with isolated-vm or other native modules
+# node-gyp-build-from-source=false
+# fallback-to-build=false
