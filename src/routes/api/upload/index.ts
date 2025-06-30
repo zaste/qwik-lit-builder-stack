@@ -34,7 +34,7 @@ export const onPost: RequestHandler = async ({ request, json, platform }) => {
       // Upload to Cloudflare R2
       const services = getCloudflareServices(platform);
       const arrayBuffer = await validFile.arrayBuffer();
-      const result = await services.r2!.upload(path, arrayBuffer);
+      await services.r2!.upload(path, arrayBuffer);
 
       return json(200, {
         success: true,
