@@ -21,6 +21,7 @@ export const useBuilderContent = routeLoader$(async ({ url, env, error }) => {
 
     return content;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Error fetching Builder content:', e);
     throw error(500, 'Error loading content');
   }
