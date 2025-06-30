@@ -94,15 +94,16 @@ export default component$(() => {
         </div>
       </div>
 
-      {/* Example of using a LIT component */}
-      <div class="mt-16">
-        <h2 class="text-2xl font-bold mb-4 text-center">LIT Component Example</h2>
-        <div class="flex justify-center gap-4">
-          <ds-button variant="primary">Primary Button</ds-button>
-          <ds-button variant="secondary">Secondary Button</ds-button>
+        {/* Example of using a LIT component */}
+        <div class="mt-16">
+          <h2 class="text-2xl font-bold mb-4 text-center">LIT Component Example</h2>
+          <div class="flex justify-center gap-4">
+            <ds-button variant="primary">Primary Button</ds-button>
+            <ds-button variant="secondary">Secondary Button</ds-button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 });
 
