@@ -57,7 +57,7 @@ export const corsHeaders: RequestHandler = async ({ request, headers, next }) =>
     if (typeof allowed === 'string') {
       return allowed === origin;
     }
-    return allowed.test(origin);
+    return allowed?.test(origin);
   });
 
   if (isAllowed) {
