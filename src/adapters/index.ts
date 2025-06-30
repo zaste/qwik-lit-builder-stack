@@ -6,15 +6,18 @@
 async function importAdapters() {
   const [
     cfModule,
-    staticModule
+    staticModule,
+    vercelModule
   ] = await Promise.allSettled([
     import('@builder.io/qwik-city/adapters/cloudflare-pages/vite'),
-    import('@builder.io/qwik-city/adapters/static/vite')
+    import('@builder.io/qwik-city/adapters/static/vite'),
+    import('@builder.io/qwik-city/adapters/vercel-edge/vite')
   ]);
 
   return {
     cloudflareAdapter: cfModule.status === 'fulfilled' ? cfModule.value.cloudflarePagesAdapter : null,
-    staticAdapter: staticModule.status === 'fulfilled' ? staticModule.value.staticAdapter : null
+    staticAdapter: staticModule.status === 'fulfilled' ? staticModule.value.staticAdapter : null,
+    vercelAdapter: vercelModule.status === 'fulfilled' ? vercelModule.value.vercelEdgeAdapter : null
   };
 }
 
