@@ -48,6 +48,12 @@ export async function getAdapter(target?: string): Promise<any> {
         origin: 'https://localhost:3000'
       });
 
+    case 'vercel':
+      if (!adapters.vercelAdapter) {
+        throw new Error('Vercel adapter not available');
+      }
+      return adapters.vercelAdapter();
+
     default:
       if (!adapters.cloudflareAdapter) {
         throw new Error('No adapters available');
