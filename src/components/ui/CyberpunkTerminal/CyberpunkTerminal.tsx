@@ -215,17 +215,20 @@ export const CyberpunkTerminal = component$(() => {
 
     .title-word:nth-child(1) {
       animation: fadeInUp 1s ease-out 0.2s both;
+      will-change: transform, opacity;
     }
 
     .title-word:nth-child(2) {
       margin-left: 48px;
       animation: fadeInUp 1s ease-out 0.6s both;
+      will-change: transform, opacity;
     }
 
     .title-word:nth-child(3) {
       margin-left: 48px;
       color: rgb(255, 49, 49);
       animation: fadeInUp 1s ease-out 1s both, redGlow 2s ease-in-out infinite alternate;
+      will-change: transform, opacity, text-shadow;
     }
 
     .glitch-overlay {
