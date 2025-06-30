@@ -321,11 +321,13 @@ export const CyberpunkTerminal = component$(() => {
       font-family: 'JetBrains Mono', monospace;
       justify-content: center;
       min-height: 378px;
+      height: 378px;
       position: relative;
       text-align: center;
       transition-duration: 0.3s;
       width: 100%;
       margin-bottom: 48px;
+      contain: layout;
     }
 
     .terminal-header-bar {
