@@ -13,11 +13,11 @@ export class DSButton extends LitElement {
       background: var(--ds-color-primary, #2563eb);
       color: var(--ds-color-on-primary, #ffffff);
       border: none;
-      border-radius: var(--ds-radius-md, ${tokens.radius.md});
-      padding: var(--ds-space-sm, ${tokens.space.sm}) var(--ds-space-md, ${tokens.space.md});
-      font-family: var(--ds-font-sans, ${tokens.fonts.sans});
-      font-size: var(--ds-text-sm, ${tokens.fontSize.sm});
-      font-weight: var(--ds-weight-medium, ${tokens.fontWeight.medium});
+      border-radius: var(--ds-radius-md, 0.375rem);
+      padding: var(--ds-space-sm, 0.75rem) var(--ds-space-md, 1rem);
+      font-family: var(--ds-font-sans, Inter, system-ui, sans-serif);
+      font-size: var(--ds-text-sm, 0.875rem);
+      font-weight: var(--ds-weight-medium, 500);
       cursor: pointer;
       transition: all 0.2s ease;
       display: inline-flex;
@@ -26,7 +26,7 @@ export class DSButton extends LitElement {
       gap: 0.5rem;
 
       &:hover:not(:disabled) {
-        background: var(--ds-color-primary-hover, ${tokens.colors.primaryHover});
+        background: var(--ds-color-primary-hover, #1d4ed8);
         transform: translateY(-1px);
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       }
