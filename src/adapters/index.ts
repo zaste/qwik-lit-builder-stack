@@ -5,13 +5,16 @@ import type { QwikCityVitePluginOptions } from '@builder.io/qwik-city/vite';
  */
 async function importAdapters() {
   const [
-    cfModule
-  ] = await Promise.all([
-    import('@builder.io/qwik-city/adapters/cloudflare-pages/vite')
+    cfModule,
+    staticModule
+  ] = await Promise.allSettled([
+    import('@builder.io/qwik-city/adapters/cloudflare-pages/vite'),
+    import('@builder.io/qwik-city/adapters/static/vite')
   ]);
 
   return {
-    cloudflareAdapter: cfModule.cloudflarePagesAdapter
+    cloudflareAdapter: cfModule.status === 'fulfilled' ? cfModule.value.cloudflarePagesAdapter : null,
+    staticAdapter: staticModule.status === 'fulfilled' ? staticModule.value.staticAdapter : null
   };
 }
 
