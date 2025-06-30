@@ -27,6 +27,9 @@ export async function getAdapter(target?: string): Promise<any> {
 
   switch (deployTarget) {
     case 'cloudflare':
+      if (!adapters.cloudflareAdapter) {
+        throw new Error('Cloudflare adapter not available');
+      }
       return adapters.cloudflareAdapter({
         ssg: {
           include: ['/*'],
@@ -34,7 +37,18 @@ export async function getAdapter(target?: string): Promise<any> {
         },
       });
 
+    case 'static':
+      if (!adapters.staticAdapter) {
+        throw new Error('Static adapter not available');
+      }
+      return adapters.staticAdapter({
+        origin: 'https://localhost:3000'
+      });
+
     default:
+      if (!adapters.cloudflareAdapter) {
+        throw new Error('No adapters available');
+      }
       return adapters.cloudflareAdapter();
   }
 }
