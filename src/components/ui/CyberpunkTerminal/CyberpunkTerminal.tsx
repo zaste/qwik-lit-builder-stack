@@ -406,6 +406,7 @@ export const CyberpunkTerminal = component$(() => {
     .status-bar {
       align-items: center;
       bottom: 0px;
+      color: rgba(255, 255, 255, 0.8);
       display: flex;
       flex-wrap: wrap;
       font-size: 10.4px;
