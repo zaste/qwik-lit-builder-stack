@@ -18,9 +18,6 @@ export function initializeMonitoring() {
       integrations: [
         new Sentry.BrowserTracing({
           tracingOrigins: ['localhost', /^\//],
-          routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-            window.history
-          ),
         }),
         new Sentry.Replay({
           maskAllText: false,
@@ -59,7 +56,7 @@ export function initializeMonitoring() {
   window.addEventListener('error', (event) => {
     if (event.error) {
       console.error('Global error:', event.error);
-      
+
       // Log to Datadog
       if (window.datadog) {
         datadogLogs.logger.error('Global error', {
