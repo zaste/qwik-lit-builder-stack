@@ -195,15 +195,16 @@ export const CyberpunkTerminal = component$(() => {
     }
 
     .main-title {
-      font-size: clamp(2.5rem, 8vw, 6rem);
+      font-size: 96px;
       font-weight: 800;
       color: rgb(255, 255, 255);
       text-transform: uppercase;
       letter-spacing: -2px;
-      line-height: 1.1;
+      line-height: 105.6px;
       margin-bottom: 16px;
       text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
       animation: titleGlow 2s ease-in-out infinite alternate;
+      text-align: center;
     }
 
     .title-word {
