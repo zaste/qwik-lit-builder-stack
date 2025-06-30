@@ -61,8 +61,8 @@ export class DSButton extends LitElement {
     }
 
     .size-large {
-      padding: var(--ds-space-md, ${tokens.space.md}) var(--ds-space-lg, ${tokens.space.lg});
-      font-size: var(--ds-text-base, ${tokens.fontSize.base});
+      padding: var(--ds-space-md, 1rem) var(--ds-space-lg, 1.5rem);
+      font-size: var(--ds-text-base, 1rem);
     }
 
     @media (prefers-reduced-motion: reduce) {
