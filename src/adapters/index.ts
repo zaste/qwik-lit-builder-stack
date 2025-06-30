@@ -18,7 +18,7 @@ async function importAdapters() {
   };
 }
 
-export type DeployTarget = 'cloudflare' | 'static';
+export type DeployTarget = 'cloudflare' | 'static' | 'vercel';
 
 export async function getAdapter(target?: string): Promise<any> {
   const deployTarget = (target || process.env.DEPLOY_TARGET || 'cloudflare') as DeployTarget;
