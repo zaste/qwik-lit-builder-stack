@@ -5,6 +5,7 @@ import { getBuilderContent } from './index';
 /**
  * Route loader to fetch Builder.io content
  */
+// eslint-disable-next-line qwik/loader-location
 export const useBuilderContent = routeLoader$(async ({ url, env, error }) => {
   const apiKey = env.get('BUILDER_PUBLIC_KEY');
 
