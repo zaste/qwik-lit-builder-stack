@@ -48,6 +48,7 @@ export function initializeMonitoring() {
 
   // Log unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
+    // eslint-disable-next-line no-console
     console.error('Unhandled promise rejection:', event.reason);
     Sentry.captureException(event.reason);
   });
@@ -55,6 +56,7 @@ export function initializeMonitoring() {
   // Enhanced error logging
   window.addEventListener('error', (event) => {
     if (event.error) {
+      // eslint-disable-next-line no-console
       console.error('Global error:', event.error);
 
       // Log to Datadog
