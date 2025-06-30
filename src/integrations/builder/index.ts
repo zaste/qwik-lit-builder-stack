@@ -85,7 +85,7 @@ export const getBuilderContent = async (model: string, url: string, apiKey: stri
       throw new Error(`Builder.io API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     const content = data.results?.[0] || null;
 
     // Cache the result
