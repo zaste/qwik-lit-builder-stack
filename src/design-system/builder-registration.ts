@@ -46,5 +46,6 @@ export function registerBuilderComponents() {
     } as any
   );
 
+  // eslint-disable-next-line no-console
   console.log('Design System components registered with Builder.io');
 }
