@@ -1,18 +1,45 @@
 import { component$ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
+import { CyberpunkTerminal } from '~/components/ui/CyberpunkTerminal';
 
 export default component$(() => {
   return (
-    <div class="container py-12">
-      <div class="text-center mb-12">
-        <h1 class="text-5xl font-bold text-gray-900 mb-4">
-          Welcome to Qwik + LIT + Builder.io
-        </h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-          A modern web stack with resumability, web components, and visual development
-        </p>
+    <>
+      {/* Builder.io Editable Section */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        minHeight: '100px',
+        padding: '20px',
+      }}>
+        <section style={{
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          minHeight: '100px',
+          padding: '20px',
+          width: '100%',
+          alignSelf: 'stretch',
+          flexGrow: '1',
+          maxWidth: '1200px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}>
+          <CyberpunkTerminal />
+        </section>
       </div>
-      
+
+      <div class="container py-12">
+        <div class="text-center mb-12">
+          <h1 class="text-5xl font-bold text-gray-900 mb-4">
+            Welcome to Qwik + LIT + Builder.io
+          </h1>
+          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            A modern web stack with resumability, web components, and visual development
+          </p>
+        </div>
+
       <div class="grid md:grid-cols-3 gap-8 mt-16">
         <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="text-blue-600 mb-4">
@@ -25,7 +52,7 @@ export default component$(() => {
             Qwik's resumability means zero hydration and instant interactivity
           </p>
         </div>
-        
+
         <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="text-purple-600 mb-4">
             <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
@@ -37,7 +64,7 @@ export default component$(() => {
             Build reusable components with LIT that work everywhere
           </p>
         </div>
-        
+
         <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="text-green-600 mb-4">
             <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
@@ -51,22 +78,22 @@ export default component$(() => {
           </p>
         </div>
       </div>
-      
+
       <div class="mt-16 text-center">
         <h2 class="text-3xl font-bold mb-8">Ready to Get Started?</h2>
         <div class="flex gap-4 justify-center">
           <a href="/demo" class="btn-primary">
             View Demo
           </a>
-          <a href="https://github.com/zaste/qwik-lit-builder-stack" 
-             target="_blank" 
+          <a href="https://github.com/zaste/qwik-lit-builder-stack"
+             target="_blank"
              rel="noopener noreferrer"
              class="btn bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-500">
             GitHub
           </a>
         </div>
       </div>
-      
+
       {/* Example of using a LIT component */}
       <div class="mt-16">
         <h2 class="text-2xl font-bold mb-4 text-center">LIT Component Example</h2>
