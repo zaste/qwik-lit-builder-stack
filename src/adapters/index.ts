@@ -1,4 +1,4 @@
-import type { QwikCityVitePluginOptions } from '@builder.io/qwik-city/vite';
+// Adapter configuration for different deployment targets
 
 /**
  * Import adapters dynamically to avoid build errors
