@@ -209,10 +209,8 @@ export const CyberpunkTerminal = component$(() => {
 
     .title-word {
       display: inline-block;
-    }
-
-    .title-word {
-      display: inline-block;
+      min-height: 105.6px;
+      vertical-align: top;
     }
 
     .title-word:nth-child(1) {
