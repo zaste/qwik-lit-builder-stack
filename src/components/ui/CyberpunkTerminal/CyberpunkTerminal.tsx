@@ -495,6 +495,21 @@ export const CyberpunkTerminal = component$(() => {
       animation-delay: 0.5s;
     }
 
+    .terminals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .terminals-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+      }
+    }
+
     @media (max-width: 640px) {
       .hero-3d-container {
         width: 250px !important;
@@ -515,6 +530,13 @@ export const CyberpunkTerminal = component$(() => {
       .hero-status {
         flex-direction: column !important;
         gap: 16px !important;
+      }
+      .terminals-grid {
+        gap: 16px !important;
+      }
+      .terminal-title {
+        font-size: 32px !important;
+        line-height: 36px !important;
       }
     }
   `);
