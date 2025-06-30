@@ -59,7 +59,7 @@ export const onDelete: RequestHandler = async ({ json, platform, error, query })
 
   try {
     await services.kv.delete(key);
-    return json(200, { success: true, key });
+    throw json(200, { success: true, key });
   } catch (err) {
     throw error(500, 'Failed to delete cache value');
   }
