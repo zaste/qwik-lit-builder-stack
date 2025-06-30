@@ -1,5 +1,5 @@
 import { component$, Slot } from '@builder.io/qwik';
-import type { QwikIntrinsicElements } from '@builder.io/qwik';
+import type { QwikIntrinsicElements, HTMLAttributes } from '@builder.io/qwik';
 
 /**
  * Qwik wrapper for ds-button web component
@@ -26,14 +26,14 @@ export const DSButton = component$<{
 
 // Type declarations for LIT components
 declare module '@builder.io/qwik' {
-  export namespace QwikIntrinsicElements {
-    export interface DsButton extends Omit<HTMLAttributes<HTMLElement>, 'size'> {
+  namespace QwikIntrinsicElements {
+    interface DsButton extends Omit<HTMLAttributes<HTMLElement>, 'size'> {
       variant?: 'primary' | 'secondary';
       size?: 'medium' | 'large';
       disabled?: boolean;
     }
-    
-    export interface IntrinsicElements {
+
+    interface IntrinsicElements {
       'ds-button': DsButton;
     }
   }
