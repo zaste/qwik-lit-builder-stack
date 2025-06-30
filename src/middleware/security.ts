@@ -70,7 +70,7 @@ export const corsHeaders: RequestHandler = async ({ request, headers, next }) =>
     headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     headers.set('Access-Control-Max-Age', '86400');
-    return new Response(null, { status: 204, headers });
+    throw new Response(null, { status: 204, headers });
   }
 
   await next();
