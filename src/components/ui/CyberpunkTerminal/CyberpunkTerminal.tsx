@@ -547,107 +547,31 @@ export const CyberpunkTerminal = component$(() => {
       <div class="scan-line"></div>
 
       <div class="content-container">
-        <div class="terminals-grid">
-          {/* Terminal 1 */}
-          <div class="terminal-window">
-            <div class="terminal-header-bar">
-              <span>RUN:REBEL &gt; SYSTEM READY</span>
+        <div class="terminal-window">
+          <div class="terminal-header-bar">
+            <span>RUN:REBEL &gt; SYSTEM READY</span>
+          </div>
+
+          <div class="terminal-content">
+            <div class="terminal-title" style="font-size: 48px; line-height: 52px;">
+              <h1 class="main-title">
+                <span class="title-word">BUILD</span>
+                <span class="title-word">YOUR</span>
+                <span class="title-word">DREAMS</span>
+              </h1>
             </div>
-
-            <div class="terminal-content">
-              <div class="terminal-title" style="font-size: 48px; line-height: 52px;">
-                <p>FORGE THE FUTURE. BREAK THE CODE. CLAIM YOUR DESTINY.</p>
-              </div>
-              <div style="align-items: center; display: flex; justify-content: center; min-height: 32px; width: 100%;">
-                <span class="cursor"></span>
-              </div>
-            </div>
-
-            <button class="run-button">
-              <span style="position: relative; z-index: 2;">RUN: REBEL</span>
-            </button>
-
-            <div class="status-bar">
-              <div>LAT: 42.8770° N | LON: 8.5475° W</div>
-              <div class="status-live">LIVE</div>
+            <div style="align-items: center; display: flex; justify-content: center; min-height: 32px; width: 100%;">
+              <span class="cursor"></span>
             </div>
           </div>
 
-          {/* Terminal 2 */}
-          <div class="terminal-window">
-            <div class="terminal-header-bar">
-              <span>RUN:NEXUS &gt; CORE ACTIVE</span>
-            </div>
+          <button class="run-button">
+            <span style="position: relative; z-index: 2;">RUN: REBEL</span>
+          </button>
 
-            <div class="terminal-content">
-              <div class="terminal-title" style="font-size: 48px; line-height: 52px;">
-                <p>BUILD. DEPLOY. DOMINATE. THE DIGITAL REALM.</p>
-              </div>
-              <div style="align-items: center; display: flex; justify-content: center; min-height: 32px; width: 100%;">
-                <span class="cursor" style="animation-delay: 0.6s;"></span>
-              </div>
-            </div>
-
-            <button class="run-button" style="background-color: rgba(0, 255, 136, 0.1); border-color: rgb(0, 255, 136); box-shadow: rgba(0, 255, 136, 0.3) 0px 0px 20px;">
-              <span style="position: relative; z-index: 2; color: rgb(0, 255, 136);">RUN: NEXUS</span>
-            </button>
-
-            <div class="status-bar">
-              <div>GRID: 51.5074° N | LON: 0.1278° W</div>
-              <div style="color: rgb(0, 255, 136); font-weight: 700; gap: 4.8px; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center;">
-                ACTIVE
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="terminal-header">
-          <h1 class="main-title">
-            <span class="title-word">BUILD</span>
-            <span class="title-word">YOUR</span>
-            <span class="title-word">DREAMS</span>
-          </h1>
-          <div class="glitch-overlay">BUILD YOUR DREAMS</div>
-        </div>
-
-        <p class="subtitle">AI-POWERED CREATIVITY FOR THE NEXT GENERATION</p>
-
-        <div class="hero-3d-container">
-          <div class="hero-3d-main">
-            <div class="hero-3d-ring"></div>
-            <div class="hero-3d-core"></div>
-          </div>
-        </div>
-
-        <button class="action-button">
-          <span style="position: relative; z-index: 2;">SCROLL TO EXPLORE</span>
-          <div class="button-sweep"></div>
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 22 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="scroll-icon"
-          >
-            <path d="M11 5V17" stroke="white" stroke-width="2" stroke-linecap="round"></path>
-            <path
-              d="M6 12L11 17L16 12"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-            ></path>
-          </svg>
-        </button>
-
-        <div class="hero-status">
-          <div class="status-indicator">
-            <div class="status-dot status-online"></div>
-            <span>SYSTEM ONLINE</span>
-          </div>
-          <div class="status-indicator">
-            <div class="status-dot status-ai"></div>
-            <span>AI READY</span>
+          <div class="status-bar">
+            <div>LAT: 42.8770° N | LON: 8.5475° W</div>
+            <div class="status-live">LIVE</div>
           </div>
         </div>
       </div>
