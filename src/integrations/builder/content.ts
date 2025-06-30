@@ -7,18 +7,18 @@ import { getBuilderContent } from './index';
  */
 export const useBuilderContent = routeLoader$(async ({ url, env, error }) => {
   const apiKey = env.get('BUILDER_PUBLIC_KEY');
-  
+
   if (!apiKey) {
     throw error(500, 'Builder.io API key not configured');
   }
 
   try {
     const content = await getBuilderContent('page', url.pathname, apiKey);
-    
+
     if (!content) {
       throw error(404, 'Page not found');
     }
-    
+
     return content;
   } catch (e) {
     console.error('Error fetching Builder content:', e);
