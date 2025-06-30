@@ -44,5 +44,5 @@ export const onPost: RequestHandler = async ({ request, env, json }) => {
       console.log('Unknown webhook event:', payload.event);
   }
 
-  return json(200, { received: true });
+  throw json(200, { received: true });
 };
