@@ -32,7 +32,6 @@ export async function getAdapter(target?: string): Promise<QwikCityVitePluginOpt
       });
 
     default:
-      console.warn(`Unknown deploy target: ${deployTarget}, falling back to cloudflare`);
       return adapters.cloudflareAdapter();
   }
 }
