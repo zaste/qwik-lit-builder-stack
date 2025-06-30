@@ -4,7 +4,7 @@ import type { RequestHandler } from '@builder.io/qwik-city';
  * Catch-all API 404 handler
  */
 export const onGet: RequestHandler = async ({ json }) => {
-  return json(404, {
+  throw json(404, {
     error: {
       code: 'NOT_FOUND',
       message: 'API endpoint not found',
