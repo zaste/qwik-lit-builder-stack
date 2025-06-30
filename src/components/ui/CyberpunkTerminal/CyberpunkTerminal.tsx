@@ -547,7 +547,7 @@ export const CyberpunkTerminal = component$(() => {
       <div class="scan-line"></div>
 
       <div class="content-container">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 1400px;">
+        <div class="terminals-grid">
           {/* Terminal 1 */}
           <div class="terminal-window">
             <div class="terminal-header-bar">
