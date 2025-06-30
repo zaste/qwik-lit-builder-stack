@@ -42,7 +42,7 @@ export const BuilderContent = component$<{ content: any }>(({ content }) => {
         <div key={index} class="builder-block">
           {block.component === 'Text' && <div dangerouslySetInnerHTML={block.options.text} />}
           {block.component === 'Image' && (
-            <img src={block.options.image} alt={block.options.alt || 'Image'} />
+            <img src={block.options.image} alt={block.options.alt || 'Image'} width="auto" height="auto" />
           )}
           {block.component === 'Button' && (
             <button class="btn btn-primary">{block.options.text}</button>
