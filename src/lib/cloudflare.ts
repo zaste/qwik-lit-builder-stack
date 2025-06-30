@@ -13,7 +13,7 @@ export class KVCache {
   async get<T = any>(key: string): Promise<T | null> {
     const value = await this.kv.get(key);
     if (!value) return null;
-    
+
     try {
       return JSON.parse(value);
     } catch {
@@ -78,8 +78,8 @@ export class R2Storage {
  */
 export function getCloudflareServices(platform: PlatformCloudflarePages) {
   return {
-    kv: platform.env.KV ? new KVCache(platform.env.KV) : null,
-    r2: platform.env.R2 ? new R2Storage(platform.env.R2) : null,
+    kv: platform.env?.KV ? new KVCache(platform.env.KV) : null,
+    r2: platform.env?.R2 ? new R2Storage(platform.env.R2) : null,
     env: platform.env,
   };
 }

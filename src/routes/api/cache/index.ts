@@ -6,7 +6,7 @@ import { getCloudflareServices } from '~/lib/cloudflare';
  */
 export const onGet: RequestHandler = async ({ json, platform, error, query }) => {
   const services = getCloudflareServices(platform);
-  
+
   if (!services.kv) {
     throw error(503, 'KV storage not available');
   }
@@ -18,7 +18,7 @@ export const onGet: RequestHandler = async ({ json, platform, error, query }) =>
 
   try {
     const value = await services.kv.get(key);
-    return json(200, { key, value, found: value !== null });
+    throw json(200, { key, value, found: value !== null });
   } catch (err) {
     throw error(500, 'Failed to get cache value');
   }
@@ -26,20 +26,20 @@ export const onGet: RequestHandler = async ({ json, platform, error, query }) =>
 
 export const onPost: RequestHandler = async ({ json, platform, error, request }) => {
   const services = getCloudflareServices(platform);
-  
+
   if (!services.kv) {
     throw error(503, 'KV storage not available');
   }
 
   try {
     const { key, value, ttl } = await request.json();
-    
+
     if (!key) {
       throw error(400, 'Key is required');
     }
 
     await services.kv.set(key, value, ttl);
-    return json(200, { success: true, key });
+    throw json(200, { success: true, key });
   } catch (err) {
     throw error(500, 'Failed to set cache value');
   }
@@ -47,7 +47,7 @@ export const onPost: RequestHandler = async ({ json, platform, error, request })
 
 export const onDelete: RequestHandler = async ({ json, platform, error, query }) => {
   const services = getCloudflareServices(platform);
-  
+
   if (!services.kv) {
     throw error(503, 'KV storage not available');
   }
@@ -59,7 +59,7 @@ export const onDelete: RequestHandler = async ({ json, platform, error, query })
 
   try {
     await services.kv.delete(key);
-    return json(200, { success: true, key });
+    throw json(200, { success: true, key });
   } catch (err) {
     throw error(500, 'Failed to delete cache value');
   }

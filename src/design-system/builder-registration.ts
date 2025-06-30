@@ -40,11 +40,12 @@ export function registerBuilderComponents() {
     },
     {
       // Custom render function for Builder.io
-      render: ({ variant, size, disabled, text }) => {
+      render: ({ variant, size, disabled, text }: any) => {
         return `<ds-button variant="${variant}" size="${size}" ${disabled ? 'disabled' : ''}>${text}</ds-button>`;
       },
-    }
+    } as any
   );
 
+  // eslint-disable-next-line no-console
   console.log('Design System components registered with Builder.io');
 }

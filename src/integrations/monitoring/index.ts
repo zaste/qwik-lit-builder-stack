@@ -18,9 +18,6 @@ export function initializeMonitoring() {
       integrations: [
         new Sentry.BrowserTracing({
           tracingOrigins: ['localhost', /^\//],
-          routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-            window.history
-          ),
         }),
         new Sentry.Replay({
           maskAllText: false,
@@ -51,6 +48,7 @@ export function initializeMonitoring() {
 
   // Log unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
+    // eslint-disable-next-line no-console
     console.error('Unhandled promise rejection:', event.reason);
     Sentry.captureException(event.reason);
   });
@@ -58,8 +56,9 @@ export function initializeMonitoring() {
   // Enhanced error logging
   window.addEventListener('error', (event) => {
     if (event.error) {
+      // eslint-disable-next-line no-console
       console.error('Global error:', event.error);
-      
+
       // Log to Datadog
       if (window.datadog) {
         datadogLogs.logger.error('Global error', {
@@ -71,6 +70,7 @@ export function initializeMonitoring() {
     }
   });
 
+  // eslint-disable-next-line no-console
   console.log('🔍 Monitoring services initialized');
 }
 

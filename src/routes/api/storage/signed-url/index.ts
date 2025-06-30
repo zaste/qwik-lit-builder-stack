@@ -1,5 +1,4 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { getCloudflareServices } from '~/lib/cloudflare';
 
 /**
  * Generate signed URLs for R2 storage
@@ -18,15 +17,15 @@ export const onGet: RequestHandler = async ({ query, json, platform, error }) =>
 
   // In production, you'd want to verify the user has access to this file
   // For now, we'll just generate the URL
-  
+
   try {
     // R2 doesn't have built-in signed URLs like S3
     // You would typically use Cloudflare Workers to proxy authenticated requests
     // Or use Cloudflare Access for authentication
-    
+
     // For now, return a proxied URL through your API
     const proxyUrl = new URL(`/api/storage/proxy/${key}`, platform.request.url);
-    
+
     return json(200, {
       url: proxyUrl.toString(),
       expires: new Date(Date.now() + expires * 1000).toISOString(),

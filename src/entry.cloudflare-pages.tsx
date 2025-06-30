@@ -8,6 +8,7 @@ const fetch = createQwikCity({ render, qwikCityPlan, manifest });
 export default {
   fetch,
 } satisfies ExportedHandler<{
+  ASSETS: { fetch: (req: Request) => Response };
   KV: KVNamespace;
   R2: R2Bucket;
   SUPABASE_URL: string;

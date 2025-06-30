@@ -1,11 +1,10 @@
 import { component$ } from '@builder.io/qwik';
-import { useNavigate } from '@builder.io/qwik-city';
 import type { RequestHandler } from '@builder.io/qwik-city';
 
 /**
  * Handle OAuth callbacks from Supabase
  */
-export const onGet: RequestHandler = async ({ url, cookie, redirect }) => {
+export const onGet: RequestHandler = async ({ url, redirect }) => {
   const code = url.searchParams.get('code');
   const next = url.searchParams.get('next') || '/';
 
@@ -21,8 +20,6 @@ export const onGet: RequestHandler = async ({ url, cookie, redirect }) => {
 };
 
 export default component$(() => {
-  const navigate = useNavigate();
-
   // This component shows while processing the auth callback
   return (
     <div class="min-h-screen flex items-center justify-center">

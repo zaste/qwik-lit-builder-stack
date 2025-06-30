@@ -1,12 +1,13 @@
 import { component$, Slot, useVisibleTask$ } from '@builder.io/qwik';
 import type { RequestHandler } from '@builder.io/qwik-city';
 
-export const onRequest: RequestHandler = async ({ env, cookie }) => {
+export const onRequest: RequestHandler = async () => {
   // Global middleware logic here
 };
 
 export default component$(() => {
   // Register design system on client
+  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(async () => {
     if (typeof window !== 'undefined') {
       // Lazy load design system
@@ -33,11 +34,11 @@ export default component$(() => {
           </div>
         </div>
       </nav>
-      
+
       <main class="min-h-screen">
         <Slot />
       </main>
-      
+
       <footer class="bg-gray-50 mt-12">
         <div class="container py-8">
           <p class="text-center text-gray-600">

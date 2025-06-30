@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { tokens } from '../tokens';
 
 @customElement('ds-button')
 export class DSButton extends LitElement {
@@ -8,63 +7,63 @@ export class DSButton extends LitElement {
     :host {
       display: inline-block;
     }
-    
+
     button {
-      background: var(--ds-color-primary, ${tokens.colors.primary});
-      color: var(--ds-color-on-primary, ${tokens.colors.onPrimary});
+      background: var(--ds-color-primary, #2563eb);
+      color: var(--ds-color-on-primary, #ffffff);
       border: none;
-      border-radius: var(--ds-radius-md, ${tokens.radius.md});
-      padding: var(--ds-space-sm, ${tokens.space.sm}) var(--ds-space-md, ${tokens.space.md});
-      font-family: var(--ds-font-sans, ${tokens.fonts.sans});
-      font-size: var(--ds-text-sm, ${tokens.fontSize.sm});
-      font-weight: var(--ds-weight-medium, ${tokens.fontWeight.medium});
+      border-radius: var(--ds-radius-md, 0.375rem);
+      padding: var(--ds-space-sm, 0.75rem) var(--ds-space-md, 1rem);
+      font-family: var(--ds-font-sans, Inter, system-ui, sans-serif);
+      font-size: var(--ds-text-sm, 0.875rem);
+      font-weight: var(--ds-weight-medium, 500);
       cursor: pointer;
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      
+
       &:hover:not(:disabled) {
-        background: var(--ds-color-primary-hover, ${tokens.colors.primaryHover});
+        background: var(--ds-color-primary-hover, #1d4ed8);
         transform: translateY(-1px);
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       }
-      
+
       &:active:not(:disabled) {
         transform: translateY(0);
         box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       }
-      
+
       &:disabled {
         opacity: 0.6;
         cursor: not-allowed;
       }
-      
+
       &:focus-visible {
-        outline: 2px solid var(--ds-color-primary, ${tokens.colors.primary});
+        outline: 2px solid var(--ds-color-primary, #2563eb);
         outline-offset: 2px;
       }
     }
-    
+
     .variant-secondary {
-      background: var(--ds-color-secondary, ${tokens.colors.secondary});
-      color: var(--ds-color-on-secondary, ${tokens.colors.onSecondary});
-      
+      background: var(--ds-color-secondary, #7c3aed);
+      color: var(--ds-color-on-secondary, #ffffff);
+
       &:hover:not(:disabled) {
-        background: var(--ds-color-secondary-hover, ${tokens.colors.secondaryHover});
+        background: var(--ds-color-secondary-hover, #6d28d9);
       }
-      
+
       &:focus-visible {
-        outline-color: var(--ds-color-secondary, ${tokens.colors.secondary});
+        outline-color: var(--ds-color-secondary, #7c3aed);
       }
     }
-    
+
     .size-large {
-      padding: var(--ds-space-md, ${tokens.space.md}) var(--ds-space-lg, ${tokens.space.lg});
-      font-size: var(--ds-text-base, ${tokens.fontSize.base});
+      padding: var(--ds-space-md, 1rem) var(--ds-space-lg, 1.5rem);
+      font-size: var(--ds-text-base, 1rem);
     }
-    
+
     @media (prefers-reduced-motion: reduce) {
       button {
         transition: none;
@@ -78,7 +77,7 @@ export class DSButton extends LitElement {
 
   render() {
     return html`
-      <button 
+      <button
         class="variant-${this.variant} size-${this.size}"
         ?disabled=${this.disabled}
         @click=${this._handleClick}
@@ -95,7 +94,7 @@ export class DSButton extends LitElement {
       e.stopPropagation();
       return;
     }
-    
+
     // Dispatch custom event
     this.dispatchEvent(
       new CustomEvent('ds-click', {

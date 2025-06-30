@@ -5,22 +5,24 @@ import { getBuilderContent } from './index';
 /**
  * Route loader to fetch Builder.io content
  */
+// eslint-disable-next-line qwik/loader-location
 export const useBuilderContent = routeLoader$(async ({ url, env, error }) => {
   const apiKey = env.get('BUILDER_PUBLIC_KEY');
-  
+
   if (!apiKey) {
     throw error(500, 'Builder.io API key not configured');
   }
 
   try {
     const content = await getBuilderContent('page', url.pathname, apiKey);
-    
+
     if (!content) {
       throw error(404, 'Page not found');
     }
-    
+
     return content;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Error fetching Builder content:', e);
     throw error(500, 'Error loading content');
   }
@@ -34,20 +36,20 @@ export const BuilderContent = component$<{ content: any }>(({ content }) => {
     return <div>No content found</div>;
   }
 
-  // TODO: Implement proper Builder.io content rendering
-  // This is a simplified version
   return (
     <div class="builder-content">
       {content.data?.blocks?.map((block: any, index: number) => (
         <div key={index} class="builder-block">
-          {/* Render block based on type */}
-          {block.component === 'Text' && (
-            <div dangerouslySetInnerHTML={block.options.text} />
-          )}
+          {block.component === 'Text' && <div dangerouslySetInnerHTML={block.options.text} />}
           {block.component === 'Image' && (
-            <img src={block.options.image} alt={block.options.alt || ''} />
+            <img src={block.options.image} alt={block.options.alt || 'Image'} width={400} height={300} />
           )}
-          {/* Add more block types as needed */}
+          {block.component === 'Button' && (
+            <button class="btn btn-primary">{block.options.text}</button>
+          )}
+          {block.component === 'Heading' && (
+            <h2 class="text-2xl font-bold">{block.options.text}</h2>
+          )}
         </div>
       ))}
     </div>
