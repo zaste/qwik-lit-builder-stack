@@ -386,6 +386,7 @@ export const CyberpunkTerminal = component$(() => {
       border: 2px solid rgb(255, 49, 49);
       border-radius: 4px;
       box-shadow: rgba(255, 49, 49) 0px 0px 20px;
+      color: rgb(255, 255, 255);
       cursor: pointer;
       display: flex;
       font-family: 'JetBrains Mono', monospace;
