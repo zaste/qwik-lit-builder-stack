@@ -21,8 +21,6 @@ export const onGet: RequestHandler = async ({ url, redirect }) => {
 };
 
 export default component$(() => {
-  const navigate = useNavigate();
-
   // This component shows while processing the auth callback
   return (
     <div class="min-h-screen flex items-center justify-center">
