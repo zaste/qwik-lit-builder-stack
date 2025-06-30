@@ -428,6 +428,7 @@ export const CyberpunkTerminal = component$(() => {
       gap: 4.8px;
       letter-spacing: 1px;
       pointer-events: none;
+      text-shadow: 0 0 8px rgba(255, 49, 49, 0.8);
       text-transform: uppercase;
     }
 
