@@ -42,21 +42,21 @@ export class DSButton extends LitElement {
       }
 
       &:focus-visible {
-        outline: 2px solid var(--ds-color-primary, ${tokens.colors.primary});
+        outline: 2px solid var(--ds-color-primary, #2563eb);
         outline-offset: 2px;
       }
     }
 
     .variant-secondary {
-      background: var(--ds-color-secondary, ${tokens.colors.secondary});
-      color: var(--ds-color-on-secondary, ${tokens.colors.onSecondary});
+      background: var(--ds-color-secondary, #7c3aed);
+      color: var(--ds-color-on-secondary, #ffffff);
 
       &:hover:not(:disabled) {
-        background: var(--ds-color-secondary-hover, ${tokens.colors.secondaryHover});
+        background: var(--ds-color-secondary-hover, #6d28d9);
       }
 
       &:focus-visible {
-        outline-color: var(--ds-color-secondary, ${tokens.colors.secondary});
+        outline-color: var(--ds-color-secondary, #7c3aed);
       }
     }
 
