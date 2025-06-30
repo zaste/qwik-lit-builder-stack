@@ -5,15 +5,12 @@ import type { QwikCityVitePluginOptions } from '@builder.io/qwik-city/vite';
  */
 async function importAdapters() {
   const [
-    cfModule,
-    vercelModule,
-    nodeModule,
-    staticModule
+    cfModule
   ] = await Promise.all([
     import('@builder.io/qwik-city/adapters/cloudflare-pages/vite')
   ]);
 
-  return { 
+  return {
     cloudflareAdapter: cfModule.cloudflarePagesAdapter
   };
 }
@@ -22,9 +19,9 @@ export type DeployTarget = 'cloudflare';
 
 export async function getAdapter(target?: string): Promise<QwikCityVitePluginOptions['adapter']> {
   const deployTarget = (target || process.env.DEPLOY_TARGET || 'cloudflare') as DeployTarget;
-  
+
   const adapters = await importAdapters();
-  
+
   switch (deployTarget) {
     case 'cloudflare':
       return adapters.cloudflareAdapter({
@@ -33,7 +30,7 @@ export async function getAdapter(target?: string): Promise<QwikCityVitePluginOpt
           exclude: ['/api/*', '/admin/*', '/(app)/*'],
         },
       });
-      
+
     default:
       console.warn(`Unknown deploy target: ${deployTarget}, falling back to cloudflare`);
       return adapters.cloudflareAdapter();
