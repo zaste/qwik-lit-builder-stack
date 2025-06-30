@@ -53,7 +53,7 @@ export const CACHE_STRATEGIES = {
 export class CacheManager {
   constructor(
     private platform: PlatformCloudflarePages,
-    private cacheControl: CacheControl
+    private cacheControl: (options: any) => void
   ) {}
 
   /**
