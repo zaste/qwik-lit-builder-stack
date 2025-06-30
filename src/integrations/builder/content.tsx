@@ -34,18 +34,20 @@ export const BuilderContent = component$<{ content: any }>(({ content }) => {
     return <div>No content found</div>;
   }
 
-  // TODO: Implement proper Builder.io content rendering
-  // This is a simplified version
   return (
     <div class="builder-content">
       {content.data?.blocks?.map((block: any, index: number) => (
         <div key={index} class="builder-block">
-          {/* Render block based on type */}
           {block.component === 'Text' && <div dangerouslySetInnerHTML={block.options.text} />}
           {block.component === 'Image' && (
-            <img src={block.options.image} alt={block.options.alt || ''} />
+            <img src={block.options.image} alt={block.options.alt || 'Image'} />
           )}
-          {/* Add more block types as needed */}
+          {block.component === 'Button' && (
+            <button class="btn btn-primary">{block.options.text}</button>
+          )}
+          {block.component === 'Heading' && (
+            <h2 class="text-2xl font-bold">{block.options.text}</h2>
+          )}
         </div>
       ))}
     </div>
