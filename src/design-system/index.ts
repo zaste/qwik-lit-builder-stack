@@ -1,5 +1,5 @@
 // Design System Entry Point
-import './components/ds-button.js';
+import './components/ds-button';
 
 // Register all components
 export function registerDesignSystem() {
