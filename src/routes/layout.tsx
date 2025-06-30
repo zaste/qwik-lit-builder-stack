@@ -7,7 +7,7 @@ export const onRequest: RequestHandler = async () => {
 
 export default component$(() => {
   // Register design system on client
-  // eslint-disable-next-line qwik/use-visible-task
+  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(async () => {
     if (typeof window !== 'undefined') {
       // Lazy load design system
