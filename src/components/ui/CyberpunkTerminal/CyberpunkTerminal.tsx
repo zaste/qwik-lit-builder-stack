@@ -187,6 +187,8 @@ export const CyberpunkTerminal = component$(() => {
       max-width: 1200px;
       padding: 0 20px;
       width: 100%;
+      min-height: 500px;
+      contain: layout style;
     }
 
     .terminal-header {
