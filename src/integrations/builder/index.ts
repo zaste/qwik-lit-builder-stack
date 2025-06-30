@@ -95,6 +95,7 @@ export const getBuilderContent = async (model: string, url: string, apiKey: stri
 
     return content;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Builder.io fetch failed:', error);
 
     // Return fallback content
