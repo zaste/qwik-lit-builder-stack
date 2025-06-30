@@ -8,10 +8,10 @@ export class DSButton extends LitElement {
     :host {
       display: inline-block;
     }
-    
+
     button {
-      background: var(--ds-color-primary, ${tokens.colors.primary});
-      color: var(--ds-color-on-primary, ${tokens.colors.onPrimary});
+      background: var(--ds-color-primary, #2563eb);
+      color: var(--ds-color-on-primary, #ffffff);
       border: none;
       border-radius: var(--ds-radius-md, ${tokens.radius.md});
       padding: var(--ds-space-sm, ${tokens.space.sm}) var(--ds-space-md, ${tokens.space.md});
@@ -24,47 +24,47 @@ export class DSButton extends LitElement {
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      
+
       &:hover:not(:disabled) {
         background: var(--ds-color-primary-hover, ${tokens.colors.primaryHover});
         transform: translateY(-1px);
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       }
-      
+
       &:active:not(:disabled) {
         transform: translateY(0);
         box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       }
-      
+
       &:disabled {
         opacity: 0.6;
         cursor: not-allowed;
       }
-      
+
       &:focus-visible {
         outline: 2px solid var(--ds-color-primary, ${tokens.colors.primary});
         outline-offset: 2px;
       }
     }
-    
+
     .variant-secondary {
       background: var(--ds-color-secondary, ${tokens.colors.secondary});
       color: var(--ds-color-on-secondary, ${tokens.colors.onSecondary});
-      
+
       &:hover:not(:disabled) {
         background: var(--ds-color-secondary-hover, ${tokens.colors.secondaryHover});
       }
-      
+
       &:focus-visible {
         outline-color: var(--ds-color-secondary, ${tokens.colors.secondary});
       }
     }
-    
+
     .size-large {
       padding: var(--ds-space-md, ${tokens.space.md}) var(--ds-space-lg, ${tokens.space.lg});
       font-size: var(--ds-text-base, ${tokens.fontSize.base});
     }
-    
+
     @media (prefers-reduced-motion: reduce) {
       button {
         transition: none;
@@ -78,7 +78,7 @@ export class DSButton extends LitElement {
 
   render() {
     return html`
-      <button 
+      <button
         class="variant-${this.variant} size-${this.size}"
         ?disabled=${this.disabled}
         @click=${this._handleClick}
@@ -95,7 +95,7 @@ export class DSButton extends LitElement {
       e.stopPropagation();
       return;
     }
-    
+
     // Dispatch custom event
     this.dispatchEvent(
       new CustomEvent('ds-click', {
