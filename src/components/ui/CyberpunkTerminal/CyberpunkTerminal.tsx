@@ -161,7 +161,7 @@ export const CyberpunkTerminal = component$(() => {
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: 
+      background-image:
         linear-gradient(rgba(255, 49, 49, 0.1) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 49, 49, 0.1) 1px, transparent 1px);
       background-size: 50px 50px;
@@ -275,7 +275,7 @@ export const CyberpunkTerminal = component$(() => {
       border-radius: 50%;
       position: relative;
       animation: rotate 10s linear infinite;
-      box-shadow: 
+      box-shadow:
         inset 0 0 50px rgba(255, 49, 49, 0.3),
         0 0 100px rgba(255, 49, 49, 0.2);
     }
@@ -525,27 +525,57 @@ export const CyberpunkTerminal = component$(() => {
       <div class="scan-line"></div>
 
       <div class="content-container">
-        <div class="terminal-window">
-          <div class="terminal-header-bar">
-            <span>RUN:REBEL &gt; SYSTEM READY</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 1400px;">
+          {/* Terminal 1 */}
+          <div class="terminal-window">
+            <div class="terminal-header-bar">
+              <span>RUN:REBEL &gt; SYSTEM READY</span>
+            </div>
+
+            <div class="terminal-content">
+              <div class="terminal-title" style="font-size: 48px; line-height: 52px;">
+                <p>FORGE THE FUTURE. BREAK THE CODE. CLAIM YOUR DESTINY.</p>
+              </div>
+              <div style="align-items: center; display: flex; justify-content: center; min-height: 32px; width: 100%;">
+                <span class="cursor"></span>
+              </div>
+            </div>
+
+            <button class="run-button">
+              <span style="position: relative; z-index: 2;">RUN: REBEL</span>
+            </button>
+
+            <div class="status-bar">
+              <div>LAT: 42.8770° N | LON: 8.5475° W</div>
+              <div class="status-live">LIVE</div>
+            </div>
           </div>
 
-          <div class="terminal-content">
-            <div class="terminal-title">
-              <p>FORGE THE FUTURE. BREAK THE CODE. CLAIM YOUR DESTINY.</p>
+          {/* Terminal 2 */}
+          <div class="terminal-window">
+            <div class="terminal-header-bar">
+              <span>RUN:NEXUS &gt; CORE ACTIVE</span>
             </div>
-            <div style="align-items: center; display: flex; justify-content: center; min-height: 32px; width: 100%;">
-              <span class="cursor"></span>
+
+            <div class="terminal-content">
+              <div class="terminal-title" style="font-size: 48px; line-height: 52px;">
+                <p>BUILD. DEPLOY. DOMINATE. THE DIGITAL REALM.</p>
+              </div>
+              <div style="align-items: center; display: flex; justify-content: center; min-height: 32px; width: 100%;">
+                <span class="cursor" style="animation-delay: 0.6s;"></span>
+              </div>
             </div>
-          </div>
 
-          <button class="run-button">
-            <span style="position: relative; z-index: 2;">RUN: REBEL</span>
-          </button>
+            <button class="run-button" style="background-color: rgba(0, 255, 136, 0.1); border-color: rgb(0, 255, 136); box-shadow: rgba(0, 255, 136, 0.3) 0px 0px 20px;">
+              <span style="position: relative; z-index: 2; color: rgb(0, 255, 136);">RUN: NEXUS</span>
+            </button>
 
-          <div class="status-bar">
-            <div>LAT: 42.8770° N | LON: 8.5475° W</div>
-            <div class="status-live">LIVE</div>
+            <div class="status-bar">
+              <div>GRID: 51.5074° N | LON: 0.1278° W</div>
+              <div style="color: rgb(0, 255, 136); font-weight: 700; gap: 4.8px; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center;">
+                ACTIVE
+              </div>
+            </div>
           </div>
         </div>
 
