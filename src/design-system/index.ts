@@ -4,6 +4,7 @@ import './components/ds-button';
 // Register all components
 export function registerDesignSystem() {
   // Components are auto-registered via custom elements
+  // eslint-disable-next-line no-console
   console.log('Design System registered');
 }
 
