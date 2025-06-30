@@ -8,9 +8,9 @@ export const onPost: RequestHandler = async ({ request, env, json }) => {
   // Verify webhook signature
   const signature = request.headers.get('x-builder-signature');
   const secret = env.get('BUILDER_WEBHOOK_SECRET');
-  
+
   if (!signature || !secret) {
-    return json(401, { error: 'Unauthorized' });
+    throw json(401, { error: 'Unauthorized' });
   }
 
   // Get raw body for signature verification
@@ -21,12 +21,12 @@ export const onPost: RequestHandler = async ({ request, env, json }) => {
     .digest('hex');
 
   if (signature !== expectedSignature) {
-    return json(401, { error: 'Invalid signature' });
+    throw json(401, { error: 'Invalid signature' });
   }
 
   // Parse webhook payload
   const payload = JSON.parse(rawBody);
-  
+
   // Handle different webhook events
   switch (payload.event) {
     case 'content.published':
@@ -34,12 +34,12 @@ export const onPost: RequestHandler = async ({ request, env, json }) => {
       console.log('Content published:', payload.data.modelName, payload.data.id);
       // TODO: Implement cache invalidation
       break;
-      
+
     case 'content.deleted':
       console.log('Content deleted:', payload.data.modelName, payload.data.id);
       // TODO: Handle content deletion
       break;
-      
+
     default:
       console.log('Unknown webhook event:', payload.event);
   }
