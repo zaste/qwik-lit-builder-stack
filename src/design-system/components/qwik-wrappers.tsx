@@ -1,5 +1,5 @@
 import { component$, Slot } from '@builder.io/qwik';
-import type { QwikIntrinsicElements, HTMLAttributes } from '@builder.io/qwik';
+import type { HTMLAttributes } from '@builder.io/qwik';
 
 /**
  * Qwik wrapper for ds-button web component
