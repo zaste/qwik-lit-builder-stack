@@ -17,7 +17,7 @@ async function importAdapters() {
 
 export type DeployTarget = 'cloudflare';
 
-export async function getAdapter(target?: string): Promise<QwikCityVitePluginOptions['adapter']> {
+export async function getAdapter(target?: string): Promise<any> {
   const deployTarget = (target || process.env.DEPLOY_TARGET || 'cloudflare') as DeployTarget;
 
   const adapters = await importAdapters();
