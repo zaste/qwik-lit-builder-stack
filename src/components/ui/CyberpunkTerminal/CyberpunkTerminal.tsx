@@ -495,19 +495,10 @@ export const CyberpunkTerminal = component$(() => {
       animation-delay: 0.5s;
     }
 
-    .terminals-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
+    .single-terminal {
       width: 100%;
-      max-width: 1400px;
-    }
-
-    @media (max-width: 1024px) {
-      .terminals-grid {
-        grid-template-columns: 1fr !important;
-        gap: 24px !important;
-      }
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     @media (max-width: 640px) {
