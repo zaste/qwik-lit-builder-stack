@@ -70,6 +70,7 @@ export function initializeMonitoring() {
     }
   });
 
+  // eslint-disable-next-line no-console
   console.log('🔍 Monitoring services initialized');
 }
 
