@@ -77,6 +77,14 @@ export class R2Storage {
  * Get Cloudflare services from platform
  */
 export function getCloudflareServices(platform: PlatformCloudflarePages) {
+  if (!platform.env) {
+    return {
+      kv: null,
+      r2: null,
+      env: undefined,
+    };
+  }
+  
   return {
     kv: platform.env.KV ? new KVCache(platform.env.KV) : null,
     r2: platform.env.R2 ? new R2Storage(platform.env.R2) : null,

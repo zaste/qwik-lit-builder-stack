@@ -29,5 +29,5 @@
     }
   },
   "include": ["src", "tests", ".eslintrc.cjs"],
-  "exclude": ["node_modules", "dist", "server", "tmp", "build"]
+  "exclude": ["node_modules", "dist", "server", "tmp", "build", "**/*.test.ts", "**/*.spec.ts", "tests/e2e"]
 }

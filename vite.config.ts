@@ -2,11 +2,19 @@ import { defineConfig } from 'vite';
 import { qwikVite } from '@builder.io/qwik/optimizer';
 import { qwikCity } from '@builder.io/qwik-city/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { getAdapter } from './src/adapters';
+import { cloudflarePagesAdapter } from '@builder.io/qwik-city/adapters/cloudflare-pages/vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(async ({ command, mode }) => {
   const isProd = mode === 'production';
-  const adapter = await getAdapter(process.env.DEPLOY_TARGET);
+  
+  // Simplified adapter configuration for testing
+  const adapter = cloudflarePagesAdapter({
+    ssg: {
+      include: ['/*'],
+      exclude: ['/api/*', '/admin/*', '/(app)/*'],
+    },
+  });
   
   // Check if Builder.io dependencies are available
   let hasBuilderDeps = false;
@@ -47,16 +55,69 @@ export default defineConfig(async ({ command, mode }) => {
           include: ['lit', 'lit/decorators.js']
         }
       }),
-      tsconfigPaths()
-    ],
+      tsconfigPaths(),
+      // Bundle analysis plugin (only in analyze mode)
+      mode === 'analyze' && visualizer({
+        filename: 'dist/bundle-analysis.html',
+        open: true,
+        gzipSize: true,
+        brotliSize: true
+      })
+    ].filter(Boolean),
     
-    // LIT-specific config
+    // CSS optimization
+    css: {
+      preprocessorOptions: {
+        css: {
+          charset: false
+        }
+      }
+    },
+    
+    // LIT-specific config with optimization
     build: {
       target: 'es2020',
       outDir: 'dist',
       rollupOptions: {
-        external: isProd ? [] : ['lit']
-      }
+        external: isProd ? [] : ['lit'],
+        output: {
+          // Better code splitting
+          manualChunks: (id) => {
+            // Bundle analysis showed these are heavy - split them out
+            if (id.includes('node_modules/@builder.io/sdk')) {
+              return 'builder-sdk';
+            }
+            if (id.includes('src/lib/error-handler')) {
+              return 'error-handling';
+            }
+            if (id.includes('src/lib/sentry')) {
+              return 'monitoring';
+            }
+            if (id.includes('src/lib/websocket-manager')) {
+              return 'websocket';
+            }
+            if (id.includes('src/lib/advanced-file-manager')) {
+              return 'file-management';
+            }
+            if (id.includes('src/lib/rbac')) {
+              return 'auth-rbac';
+            }
+            // Keep vendor libraries separate
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+          }
+        }
+      },
+      // Tree shaking optimization
+      minify: isProd ? 'terser' : false,
+      terserOptions: isProd ? {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+          pure_funcs: ['console.log', 'console.info', 'console.debug']
+        }
+      } : undefined
     },
     
     // Optimization for dependencies

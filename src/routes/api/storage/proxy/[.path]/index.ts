@@ -5,7 +5,7 @@ import { NotFoundError } from '~/lib/errors';
 /**
  * Proxy endpoint for R2 storage files
  */
-export const onGet: RequestHandler = async ({ params, platform, error, cacheControl }) => {
+export const onGet: RequestHandler = async ({ params, platform, error, cacheControl, send }) => {
   const path = params.path;
   
   if (!path || !platform?.env?.R2) {
@@ -28,15 +28,15 @@ export const onGet: RequestHandler = async ({ params, platform, error, cacheCont
       immutable: true,
     });
     
-    // Return the file
-    return new Response(object.body, {
+    // Send the file response
+    send(new Response(object.body, {
       headers: {
         'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
         'Content-Length': object.size.toString(),
         'ETag': object.httpEtag || '',
         'Cache-Control': 'public, max-age=2592000, immutable',
       },
-    });
+    }));
   } catch (err) {
     if (err instanceof NotFoundError) {
       throw error(404, 'File not found');

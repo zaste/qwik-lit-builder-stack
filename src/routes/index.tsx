@@ -1,10 +1,45 @@
 import { component$ } from '@builder.io/qwik';
+import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
+import { getBuilderContent } from '~/integrations/builder/index';
+import { BuilderContent } from '~/integrations/builder/content';
+
+// Route loader para obtener contenido de Builder.io
+export const useBuilderContent = routeLoader$(async ({ url, env }) => {
+  const apiKey = env.get('BUILDER_PUBLIC_KEY');
+  
+  if (!apiKey) {
+    console.warn('Builder.io API key not configured');
+    return null;
+  }
+
+  try {
+    const content = await getBuilderContent('page', url.pathname, apiKey);
+    return content;
+  } catch (e) {
+    console.error('Error fetching Builder content:', e);
+    return null;
+  }
+});
 
 export default component$(() => {
+  const builderContent = useBuilderContent();
+  
+  // If Builder.io content exists, render it; otherwise show fallback
+  if (builderContent.value) {
+    return <BuilderContent content={builderContent.value} model="page" />;
+  }
+  
+  // Fallback content for development/testing
   return (
     <div class="container py-12">
       <div class="text-center mb-12">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+          <p class="text-blue-800">
+            🔧 Builder.io está configurado correctamente pero no hay contenido para esta página. 
+            <a href="https://builder.io" target="_blank" class="underline font-semibold">Crear contenido en Builder.io</a>
+          </p>
+        </div>
         <h1 class="text-5xl font-bold text-gray-900 mb-4">
           Welcome to Qwik + LIT + Builder.io
         </h1>
@@ -54,15 +89,78 @@ export default component$(() => {
       
       <div class="mt-16 text-center">
         <h2 class="text-3xl font-bold mb-8">Ready to Get Started?</h2>
-        <div class="flex gap-4 justify-center">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
           <a href="/demo" class="btn-primary">
-            View Demo
+            🎮 View Demo
+          </a>
+          <a href="/dashboard" class="btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
+            📊 Dashboard
+          </a>
+          <a href="/dashboard/media" class="btn bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500">
+            📁 Media Library
           </a>
           <a href="https://github.com/zaste/qwik-lit-builder-stack" 
              target="_blank" 
              rel="noopener noreferrer"
              class="btn bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-500">
-            GitHub
+            📚 GitHub
+          </a>
+        </div>
+      </div>
+      
+      {/* Quick Access Section */}
+      <div class="mt-16 bg-gray-50 rounded-xl p-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">🚀 Sprint 5A Features</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-2">📊 Real Dashboard</h3>
+            <p class="text-gray-600 mb-4">Live statistics from Supabase database with real-time updates</p>
+            <a href="/dashboard" class="text-blue-600 hover:text-blue-800 font-medium">View Dashboard →</a>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-2">📁 File Management</h3>
+            <p class="text-gray-600 mb-4">Upload files to R2 storage with thumbnail generation</p>
+            <a href="/dashboard/media" class="text-purple-600 hover:text-purple-800 font-medium">Manage Files →</a>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-2">🔧 APIs</h3>
+            <p class="text-gray-600 mb-4">RESTful APIs with authentication and real database operations</p>
+            <a href="/api/docs" class="text-green-600 hover:text-green-800 font-medium">API Docs →</a>
+          </div>
+        </div>
+      </div>
+      
+      {/* System Status Section */}
+      <div class="mt-16 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">✨ Sprint 5A Status</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+          <div class="bg-white p-4 rounded-lg">
+            <div class="text-2xl mb-2">✅</div>
+            <h3 class="font-semibold">File Upload</h3>
+            <p class="text-sm text-gray-600">R2 Storage Real</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg">
+            <div class="text-2xl mb-2">✅</div>
+            <h3 class="font-semibold">Database</h3>
+            <p class="text-sm text-gray-600">Supabase Schema</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg">
+            <div class="text-2xl mb-2">✅</div>
+            <h3 class="font-semibold">APIs</h3>
+            <p class="text-sm text-gray-600">5 Endpoints</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg">
+            <div class="text-2xl mb-2">✅</div>
+            <h3 class="font-semibold">Dashboard</h3>
+            <p class="text-sm text-gray-600">Real-time Stats</p>
+          </div>
+        </div>
+        <div class="text-center mt-6">
+          <p class="text-gray-600 mb-4">All mock implementations converted to real services!</p>
+          <a href="/dashboard" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            🚀 Try the Dashboard
           </a>
         </div>
       </div>

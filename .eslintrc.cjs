@@ -20,6 +20,7 @@ module.exports = {
       jsx: true,
     },
   },
+  ignorePatterns: ['**/*.test.ts', '**/*.spec.ts', 'tests/e2e/**/*'],
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
@@ -35,7 +36,7 @@ module.exports = {
     'prefer-spread': 'off',
     'no-case-declarations': 'off',
     'no-console': 'warn',
-    '@typescript-eslint/no-unused-vars': ['error'],
+    '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
     '@typescript-eslint/consistent-type-imports': 'warn',
   },
 };

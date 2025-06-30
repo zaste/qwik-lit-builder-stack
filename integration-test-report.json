@@ -1,0 +1,112 @@
+{
+  "summary": {
+    "total": 10,
+    "success": 8,
+    "errors": 1,
+    "warnings": 1,
+    "executionTime": "2025-06-28T20:44:15.183Z"
+  },
+  "results": [
+    {
+      "test": "Cache Metrics API",
+      "status": "SUCCESS",
+      "message": "Retrieved cache metrics successfully",
+      "data": {
+        "totalRequests": 0,
+        "hitRate": 0,
+        "performanceScore": 100
+      },
+      "timestamp": "2025-06-28T20:44:15.093Z"
+    },
+    {
+      "test": "Cache Export API",
+      "status": "SUCCESS",
+      "message": "Cache export working",
+      "data": {
+        "dataPoints": 0,
+        "insights": 1
+      },
+      "timestamp": "2025-06-28T20:44:15.100Z"
+    },
+    {
+      "test": "Cache Clear API",
+      "status": "SUCCESS",
+      "message": "Cache cleared successfully",
+      "data": {
+        "cleared": "analytics",
+        "timestamp": 1751143455108
+      },
+      "timestamp": "2025-06-28T20:44:15.110Z"
+    },
+    {
+      "test": "File Upload",
+      "status": "ERROR",
+      "message": "HTTP 500: {\"error\":{\"code\":\"INTERNAL_ERROR\",\"message\":\"An unexpected error occurred\"}}",
+      "data": null,
+      "timestamp": "2025-06-28T20:44:15.122Z"
+    },
+    {
+      "test": "Auth Status API",
+      "status": "SUCCESS",
+      "message": "Auth status API working",
+      "data": {
+        "authenticated": false,
+        "status": 200
+      },
+      "timestamp": "2025-06-28T20:44:15.129Z"
+    },
+    {
+      "test": "Builder Webhook",
+      "status": "WARNING",
+      "message": "Webhook test: {\"error\":\"Unauthorized\"}",
+      "data": {
+        "status": 401
+      },
+      "timestamp": "2025-06-28T20:44:15.134Z"
+    },
+    {
+      "test": "Route /",
+      "status": "SUCCESS",
+      "message": "Route accessible (200)",
+      "data": {
+        "contentType": "text/html; charset=utf-8",
+        "status": 200
+      },
+      "timestamp": "2025-06-28T20:44:15.150Z"
+    },
+    {
+      "test": "Route /dashboard",
+      "status": "SUCCESS",
+      "message": "Route accessible (200)",
+      "data": {
+        "contentType": null,
+        "status": 200
+      },
+      "timestamp": "2025-06-28T20:44:15.165Z"
+    },
+    {
+      "test": "Route /dashboard/media",
+      "status": "SUCCESS",
+      "message": "Route accessible (200)",
+      "data": {
+        "contentType": null,
+        "status": 200
+      },
+      "timestamp": "2025-06-28T20:44:15.176Z"
+    },
+    {
+      "test": "Schema Validation",
+      "status": "SUCCESS",
+      "message": "Validation correctly rejected invalid data",
+      "data": {
+        "errorCode": "INTERNAL_ERROR",
+        "errorMessage": "An unexpected error occurred"
+      },
+      "timestamp": "2025-06-28T20:44:15.183Z"
+    }
+  ],
+  "recommendations": [
+    "🔧 Fix critical errors before production deployment",
+    "⚠️ Review warnings for potential improvements"
+  ]
+}

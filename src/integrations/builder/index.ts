@@ -1,11 +1,11 @@
-import { Builder } from '@builder.io/sdk';
+import { Builder, builder } from '@builder.io/sdk';
 
 // Initialize Builder SDK
 let builderInitialized = false;
 
 export function initializeBuilder(apiKey: string) {
   if (!builderInitialized && typeof window !== 'undefined') {
-    Builder.apiKey = apiKey;
+    builder.init(apiKey);
     builderInitialized = true;
     
     // Register custom components
@@ -78,14 +78,10 @@ export const getBuilderContent = async (model: string, url: string, apiKey: stri
     );
     
     if (!response.ok) {
-      // Try fallback content
-      const fallback = await getFallbackContent(model, url);
-      if (fallback) return fallback;
-      
-      throw new Error(`Builder.io API error: ${response.status}`);
+      throw new Error(`Builder.io API error: ${response.status} - ${response.statusText}`);
     }
     
-    const data = await response.json();
+    const data = await response.json() as { results?: any[] };
     const content = data.results?.[0] || null;
     
     // Cache the result
@@ -97,18 +93,9 @@ export const getBuilderContent = async (model: string, url: string, apiKey: stri
   } catch (error) {
     console.error('Builder.io fetch failed:', error);
     
-    // Return fallback content
-    return getFallbackContent(model, url);
+    // No fallback - real error handling
+    throw new Error(`Builder.io content fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
-// Fallback content loader
-async function getFallbackContent(model: string, url: string) {
-  try {
-    // Try to load static fallback content
-    const module = await import(`./content/${model}/${url.replace(/\//g, '_')}.json`);
-    return module.default;
-  } catch {
-    return null;
-  }
-}
+// Fallback content system removed - all content comes from Builder.io API

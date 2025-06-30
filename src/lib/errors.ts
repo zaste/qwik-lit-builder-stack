@@ -65,7 +65,9 @@ export class ExternalServiceError extends AppError {
 
 // Error handler for API routes
 export function handleApiError(error: unknown) {
-  console.error('API Error:', error);
+  import('./logger').then(({ logger }) => {
+    logger.error('API Error occurred', { error: error instanceof Error ? error.message : String(error) });
+  });
   
   if (error instanceof AppError) {
     return {

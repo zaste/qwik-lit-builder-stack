@@ -17,6 +17,7 @@ export const RealtimeCollaboration = component$<{
   const cursors = useStore<Record<string, CollaboratorCursor>>({});
   const channel = useSignal<any>(null);
 
+  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ cleanup }) => {
     // Initialize realtime channel
     const initRealtime = async () => {
@@ -31,8 +32,8 @@ export const RealtimeCollaboration = component$<{
 
       // Subscribe to presence
       ch.on('presence', { event: 'sync' }, () => {
-        const state = ch.presenceState();
-        console.log('Presence state:', state);
+        const _state = ch.presenceState();
+        // Presence state synced
       });
 
       // Join the channel

@@ -13,7 +13,7 @@ export function getSupabaseClient() {
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Missing Supabase environment variables');
+      throw new Error('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
     }
 
     supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -38,6 +38,8 @@ export function getSupabaseClient() {
 
   return supabaseClient;
 }
+
+// Mock client removed - using real Supabase only
 
 /**
  * Supabase auth helpers

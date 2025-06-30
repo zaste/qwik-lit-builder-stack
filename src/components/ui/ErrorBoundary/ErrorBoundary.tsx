@@ -13,6 +13,7 @@ export const ErrorBoundary = component$(() => {
   useVisibleTask$(() => {
     // Set up global error handler
     const handleError = (event: ErrorEvent) => {
+      // eslint-disable-next-line no-console
       console.error('ErrorBoundary caught:', event.error);
       state.hasError = true;
       state.error = event.error;

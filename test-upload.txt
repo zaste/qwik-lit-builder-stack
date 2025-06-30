@@ -1,0 +1,5 @@
+Test file for upload validation
+This is a simple test file to verify our storage system is working correctly.
+File size: Small (<5MB) - goes to R2 (all files go to R2)
+Content: Plain text
+Date: 2025-06-30

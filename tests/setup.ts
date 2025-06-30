@@ -32,21 +32,21 @@ beforeAll(() => {
   }));
   
   // Mock Cloudflare KV
-  global.KV = {
+  (global as any).KV = {
     get: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
     list: vi.fn(),
-  } as any;
+  };
 
-  // Mock Cloudflare R2
-  global.R2 = {
+  // Mock Cloudflare R2  
+  (global as any).R2 = {
     get: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
     list: vi.fn(),
     head: vi.fn(),
-  } as any;
+  };
   
   // Mock Supabase client
   vi.mock('~/lib/supabase', () => ({

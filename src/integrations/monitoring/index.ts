@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/browser';
-import { datadogLogs } from '@datadog/browser-logs';
 import { performanceMonitor } from '~/lib/monitoring';
 
 /**
@@ -8,7 +7,6 @@ import { performanceMonitor } from '~/lib/monitoring';
 export function initializeMonitoring() {
   const isDev = import.meta.env.DEV;
   const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
-  const datadogToken = import.meta.env.VITE_DATADOG_CLIENT_TOKEN;
 
   // Sentry Error Tracking
   if (sentryDsn && !isDev) {
@@ -18,9 +16,6 @@ export function initializeMonitoring() {
       integrations: [
         new Sentry.BrowserTracing({
           tracingOrigins: ['localhost', /^\//],
-          routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-            window.history
-          ),
         }),
         new Sentry.Replay({
           maskAllText: false,
@@ -33,48 +28,28 @@ export function initializeMonitoring() {
     });
   }
 
-  // Datadog Logging
-  if (datadogToken && !isDev) {
-    datadogLogs.init({
-      clientToken: datadogToken,
-      site: 'datadoghq.com',
-      service: 'qwik-lit-builder-app',
-      env: import.meta.env.MODE,
-      forwardErrorsToLogs: true,
-      forwardConsoleLogs: ['error', 'warn'],
-      sampleRate: 100,
-    });
-  }
-
   // Performance Monitoring
   performanceMonitor.trackWebVitals();
 
   // Log unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
-    console.error('Unhandled promise rejection:', event.reason);
+    // console.error('Unhandled promise rejection:', event.reason);
     Sentry.captureException(event.reason);
   });
 
   // Enhanced error logging
   window.addEventListener('error', (event) => {
     if (event.error) {
-      console.error('Global error:', event.error);
+      // console.error('Global error:', event.error);
       
-      // Log to Datadog
-      if (window.datadog) {
-        datadogLogs.logger.error('Global error', {
-          error: event.error.message,
-          stack: event.error.stack,
-          url: window.location.href,
-        });
-      }
+      // Log to Sentry
+      Sentry.captureException(event.error);
     }
   });
 
-  console.log('🔍 Monitoring services initialized');
+  // console.log('🔍 Monitoring services initialized');
 }
 
 // Export monitoring utilities
 export { performanceMonitor } from '~/lib/monitoring';
 export { Sentry };
-export { datadogLogs };

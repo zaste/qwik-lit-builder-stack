@@ -10,6 +10,7 @@ export default {
 } satisfies ExportedHandler<{
   KV: KVNamespace;
   R2: R2Bucket;
+  ASSETS: { fetch: (req: Request) => Response };
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_KEY?: string;
