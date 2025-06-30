@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { tokens } from '../tokens';
 
 @customElement('ds-button')
 export class DSButton extends LitElement {
