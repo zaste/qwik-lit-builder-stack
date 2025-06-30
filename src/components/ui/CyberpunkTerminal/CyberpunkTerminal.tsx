@@ -314,7 +314,7 @@ export const CyberpunkTerminal = component$(() => {
       align-items: center;
       backdrop-filter: blur(2px);
       background-color: rgba(0, 0, 0, 0.85);
-      border-bottom: 2px solid rgb(255, 49, 49);
+      border: 2px solid rgb(255, 49, 49);
       border-radius: 4px;
       box-shadow: rgba(255, 49, 49, 0.125) 0px 20px 40px inset, rgba(0, 0, 0, 0.5) 0px 40px 80px;
       cursor: pointer;
