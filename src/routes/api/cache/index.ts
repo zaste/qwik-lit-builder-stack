@@ -39,7 +39,7 @@ export const onPost: RequestHandler = async ({ json, platform, error, request })
     }
 
     await services.kv.set(key, value, ttl);
-    return json(200, { success: true, key });
+    throw json(200, { success: true, key });
   } catch (err) {
     throw error(500, 'Failed to set cache value');
   }
