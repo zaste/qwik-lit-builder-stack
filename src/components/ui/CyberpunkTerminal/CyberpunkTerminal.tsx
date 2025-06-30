@@ -507,32 +507,16 @@ export const CyberpunkTerminal = component$(() => {
     }
 
     @media (max-width: 640px) {
-      .hero-3d-container {
-        width: 250px !important;
-        height: 250px !important;
+      .main-title {
+        font-size: 48px !important;
+        line-height: 52px !important;
       }
-      .hero-3d-main {
-        width: 150px !important;
-        height: 150px !important;
+      .title-word:nth-child(2),
+      .title-word:nth-child(3) {
+        margin-left: 24px !important;
       }
-      .hero-3d-ring {
-        width: 75px !important;
-        height: 75px !important;
-      }
-      .hero-3d-core {
-        width: 35px !important;
-        height: 35px !important;
-      }
-      .hero-status {
-        flex-direction: column !important;
-        gap: 16px !important;
-      }
-      .terminals-grid {
-        gap: 16px !important;
-      }
-      .terminal-title {
-        font-size: 32px !important;
-        line-height: 36px !important;
+      .terminal-window {
+        min-height: 300px !important;
       }
     }
   `);
