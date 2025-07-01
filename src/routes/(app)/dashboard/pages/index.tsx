@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
+import { component$, useSignal, useTask$, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 interface Page {
@@ -109,7 +109,7 @@ export default component$(() => {
     }
   });
 
-  useVisibleTask$(async () => {
+  useTask$(async () => {
     await loadPages();
   });
 

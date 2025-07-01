@@ -1,5 +1,6 @@
-import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
+import { component$, useSignal, useTask$, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
+import { logger } from '../lib/logger';
 
 export default component$(() => {
   const systemStatus = useSignal<any>(null);
@@ -8,16 +9,16 @@ export default component$(() => {
   const designSystemDemo = useSignal('button');
 
   // Update time every second
-  useVisibleTask$(() => {
+  useTask$(({ cleanup }) => {
     const interval = setInterval(() => {
       currentTime.value = new Date().toLocaleTimeString();
     }, 1000);
     
-    return () => clearInterval(interval);
+    cleanup(() => clearInterval(interval));
   });
 
   // Load real system status
-  useVisibleTask$(async () => {
+  useTask$(async () => {
     try {
       const response = await fetch('/api/health');
       if (response.ok) {
@@ -25,7 +26,7 @@ export default component$(() => {
         systemStatus.value = data;
       }
     } catch (error) {
-      console.error('Failed to load system status:', error);
+      logger.error('Failed to load system status', { error: error instanceof Error ? error.message : String(error) });
     }
   });
 

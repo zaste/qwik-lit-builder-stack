@@ -7,6 +7,7 @@
 
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { logger } from '../../lib/logger';
 // Simple validation types for the multi-step form
 interface SimpleValidationError {
   field: string;
@@ -646,7 +647,7 @@ export class DSMultiStepForm extends LitElement {
       }));
       
     } catch (error) {
-      console.error('Form submission failed:', error);
+      logger.error('Form submission failed', { error: error instanceof Error ? error.message : String(error) });
       
       // Dispatch error event
       this.dispatchEvent(new CustomEvent('ds-form-error', {

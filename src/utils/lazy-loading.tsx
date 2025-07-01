@@ -4,6 +4,7 @@
  */
 
 import { component$, type Component } from '@builder.io/qwik';
+import { logger } from '../lib/logger';
 
 /**
  * Create a lazy-loaded component with loading state
@@ -55,7 +56,7 @@ export async function loadModule<T>(
   } catch (loadError) {
     // eslint-disable-next-line no-console
     const errorMessage = loadError instanceof Error ? loadError.message : String(loadError);
-    console.error('Module loading failed', { error: errorMessage });
+    logger.error('Module loading failed', { error: errorMessage });
     if (fallback) {
       return fallback;
     }

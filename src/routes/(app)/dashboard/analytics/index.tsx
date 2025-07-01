@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
+import { component$, useSignal, useTask$, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { logger } from '~/lib/logger';
 
@@ -104,7 +104,7 @@ export default component$(() => {
   });
 
   // Load real data on component mount and time range change
-  useVisibleTask$(async ({ track }) => {
+  useTask$(async ({ track }) => {
     track(() => timeRange.value);
     await fetchRealAnalyticsData(timeRange.value);
   });

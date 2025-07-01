@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useSignal, useTask$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { getCurrentUser } from '~/lib/auth';
@@ -84,7 +84,7 @@ export default component$(() => {
   const realtimeStats = useSignal<any>(null);
 
   // Fetch realtime stats from API
-  useVisibleTask$(async () => {
+  useTask$(async () => {
     try {
       const response = await fetch('/api/dashboard/stats', {
         headers: {

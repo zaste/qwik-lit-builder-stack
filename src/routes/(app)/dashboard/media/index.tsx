@@ -4,6 +4,7 @@ import type { DocumentHead } from '@builder.io/qwik-city';
 import { getCurrentUser } from '~/lib/auth';
 import { getSupabaseClient } from '~/lib/supabase';
 import { DSFileUpload } from '~/design-system/components/qwik-wrappers';
+import { logger } from '~/lib/logger';
 
 // Import correct MediaFile interface
 import type { MediaFile } from '~/routes/api/files/list/index';
@@ -112,7 +113,7 @@ export default component$(() => {
       // Properly handle and expose file list refresh errors
       const errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown error';
       
-      console.error('Failed to refresh file list', {
+      logger.error('Failed to refresh file list', {
         error: errorMessage,
         endpoint: '/api/files/list',
         userId: mediaData.value.user?.id
