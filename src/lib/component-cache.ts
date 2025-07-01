@@ -8,6 +8,7 @@
 import type { CacheManager} from './cache-strategies';
 import { getCacheKey } from './cache-strategies';
 import { cacheAnalytics } from './cache-analytics';
+import { logger } from './logger';
 
 export interface ComponentCacheConfig {
   maxSize: number; // Maximum cache size in bytes
@@ -229,7 +230,7 @@ export class ComponentCacheManager {
       .filter(key => key.key.startsWith('component:'))
       .slice(0, 5);
 
-    console.debug('Starting component prefetching', {
+    logger.debug('Starting component prefetching', {
       frequentComponentsCount: frequentComponents.length,
       strategy: 'frequency-based'
     });
@@ -248,7 +249,7 @@ export class ComponentCacheManager {
           await this.getComponent(componentId);
           
           const prefetchTime = Date.now() - startTime;
-          console.debug('Component prefetched successfully', {
+          logger.debug('Component prefetched successfully', {
             componentId,
             cacheKey: component.key,
             prefetchTime,
@@ -258,7 +259,7 @@ export class ComponentCacheManager {
           this.prefetchQueue.delete(component.key);
           
         } catch (prefetchError) {
-          console.error('Component prefetch failed', {
+          logger.error('Component prefetch failed', {
             componentId: component.key.split(':')[1],
             error: prefetchError instanceof Error ? prefetchError.message : String(prefetchError),
             usage: component.requests
@@ -499,7 +500,7 @@ export class ComponentCacheManager {
       return btoa(String.fromCharCode(...combined));
       
     } catch (error) {
-      console.warn('Compression failed, storing uncompressed:', error);
+      logger.warn('Compression failed, storing uncompressed', { error: error instanceof Error ? error.message : String(error) });
       // Fallback to uncompressed if compression fails
       return content;
     }
@@ -552,7 +553,7 @@ export class ComponentCacheManager {
       return decoder.decode(combined);
       
     } catch (error) {
-      console.warn('Decompression failed, returning as-is:', error);
+      logger.warn('Decompression failed, returning as-is', { error: error instanceof Error ? error.message : String(error) });
       // Fallback to treating as uncompressed
       return compressedData;
     }

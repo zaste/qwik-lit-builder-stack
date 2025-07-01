@@ -8,6 +8,7 @@
 import type { CacheManager} from './cache-strategies';
 import { getCacheKey as _getCacheKey } from './cache-strategies';
 import { cacheAnalytics } from './cache-analytics';
+import { logger } from './logger';
 
 export interface WarmingStrategy {
   name: string;
@@ -262,7 +263,7 @@ export class CacheWarmingManager {
 
     const results: WarmingResult[] = [];
 
-    console.info('Starting Builder.io templates warming', {
+    logger.info('Starting Builder.io templates warming', {
       targetsCount: builderTargets.length,
       strategy: 'builder-templates'
     });
@@ -331,7 +332,7 @@ export class CacheWarmingManager {
           responseTime
         });
 
-        console.debug('Builder template warmed successfully', {
+        logger.debug('Builder template warmed successfully', {
           key: target.key,
           type: target.type,
           responseTime,
@@ -349,7 +350,7 @@ export class CacheWarmingManager {
         });
         
         // Log warming failures for monitoring
-        console.error('Cache warming failed for target', {
+        logger.error('Cache warming failed for target', {
           key: target.key,
           type: target.type,
           error: errorMessage
@@ -573,7 +574,7 @@ export class CacheWarmingManager {
   stopScheduledWarmings(): void {
     this.scheduledWarmings.forEach((timer, name) => {
       clearInterval(timer);
-      console.log(`Stopped warming schedule: ${name}`);
+      logger.info(`Stopped warming schedule: ${name}`);
     });
     this.scheduledWarmings.clear();
   }

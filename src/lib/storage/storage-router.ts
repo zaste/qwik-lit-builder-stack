@@ -7,6 +7,7 @@
 
 import type { R2Client } from './r2-client';
 import { createR2Client } from './r2-client';
+import { logger } from '../logger';
 
 export interface StorageUploadResult {
   success: boolean;
@@ -60,7 +61,7 @@ export class StorageRouter {
       // All files go to R2 - simple and consistent
       return await this.uploadToR2(file, userId);
     } catch (error) {
-      console.error('Storage upload failed:', error);
+      logger.error('Storage upload failed', { error: error instanceof Error ? error.message : String(error) });
       return {
         success: false,
         provider: 'r2',
@@ -76,7 +77,7 @@ export class StorageRouter {
     try {
       return await this.r2Client.deleteFile(path);
     } catch (error) {
-      console.error('Storage deletion failed:', error);
+      logger.error('Storage deletion failed', { error: error instanceof Error ? error.message : String(error) });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown delete error'
@@ -99,7 +100,7 @@ export class StorageRouter {
       const prefix = userId ? `users/${userId}/` : 'uploads/';
       return await this.r2Client.listFiles(prefix);
     } catch (error) {
-      console.error('Storage listing failed:', error);
+      logger.error('Storage listing failed', { error: error instanceof Error ? error.message : String(error) });
       return [];
     }
   }

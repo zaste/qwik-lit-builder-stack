@@ -198,10 +198,10 @@ useVisibleTask$(() => {
 - [ ] Logger utility verified
 - [ ] Documentation strategy confirmed
 
-### **Phase 2: Console Cleanup - Status: PENDING**
-- [ ] security.ts (4 instances)
-- [ ] storage-router.ts (3 instances)
-- [ ] cache-warming.ts (4 instances)
+### **Phase 2: Console Cleanup - Status: IN PROGRESS**
+- [x] security.ts (4 instances) ✅ COMPLETED
+- [x] storage-router.ts (3 instances) ✅ COMPLETED
+- [x] cache-warming.ts (4 instances) ✅ COMPLETED
 - [ ] component-cache.ts (5 instances)
 - [ ] file-gallery.ts (3 instances)
 - [ ] multi-step-form.ts (1 instance)
@@ -209,7 +209,8 @@ useVisibleTask$(() => {
 - [ ] routes/index.tsx (1 instance)
 - [ ] lazy-loading.tsx (1 instance)
 
-**Progress**: 0/24 console statements cleaned
+**Progress**: 11/24 console statements cleaned (46% complete)
+**Remaining warnings**: 21 (reduced from 31)
 
 ### **Phase 3: useVisibleTask$ Migration - Status: PENDING**
 - [ ] layout.tsx (1 instance)

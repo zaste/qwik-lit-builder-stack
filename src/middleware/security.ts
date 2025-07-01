@@ -102,14 +102,14 @@ function generateCSP(isDev: boolean = false): string {
 async function getRateLimitData(env: any, key: string): Promise<{ count: number; resetTime: number } | null> {
   try {
     if (!env.KV_CACHE) {
-      console.warn('KV_CACHE not available, rate limiting disabled');
+      logger.warn('KV_CACHE not available, rate limiting disabled');
       return null;
     }
     
     const data = await env.KV_CACHE.get(key);
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    console.error('Failed to get rate limit data from KV', { key, error: error instanceof Error ? error.message : String(error) });
+    logger.error('Failed to get rate limit data from KV', { key, error: error instanceof Error ? error.message : String(error) });
     return null;
   }
 }
@@ -123,7 +123,7 @@ async function setRateLimitData(env: any, key: string, data: { count: number; re
     const ttl = Math.max(1, Math.ceil((data.resetTime - Date.now()) / 1000));
     await env.KV_CACHE.put(key, JSON.stringify(data), { expirationTtl: ttl });
   } catch (error) {
-    console.error('Failed to set rate limit data in KV', { key, error: error instanceof Error ? error.message : String(error) });
+    logger.error('Failed to set rate limit data in KV', { key, error: error instanceof Error ? error.message : String(error) });
   }
 }
 
@@ -150,7 +150,7 @@ async function checkRateLimit(request: Request, config: SecurityConfig, env: any
   }
   
   if (current.count >= config.rateLimitMaxRequests) {
-    console.warn('Rate limit exceeded', {
+    logger.security('Rate limit exceeded', 'medium', {
       ip: key,
       currentCount: current.count,
       maxRequests: config.rateLimitMaxRequests,

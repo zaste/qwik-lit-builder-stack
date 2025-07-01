@@ -7,6 +7,7 @@
 
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { logger } from '../../lib/logger';
 
 // File gallery interfaces
 export interface GalleryFile {
@@ -532,7 +533,7 @@ export class DSFileGallery extends LitElement {
           uploadedAt: new Date()
         });
         
-        console.info('File uploaded successfully', {
+        logger.info('File uploaded successfully', {
           fileName: file.name,
           fileSize: file.size,
           storageUrl: permanentUrl
@@ -544,7 +545,7 @@ export class DSFileGallery extends LitElement {
           error: uploadError instanceof Error ? uploadError.message : String(uploadError)
         });
         
-        console.error('File upload failed', {
+        logger.error('File upload failed', {
           fileName: file.name,
           error: uploadError instanceof Error ? uploadError.message : String(uploadError)
         });
@@ -774,7 +775,7 @@ export class DSFileGallery extends LitElement {
       return result.url; // Real storage URL from R2/S3
     } catch (error) {
       // Log upload failure with context
-      console.error('File upload to storage failed', {
+      logger.error('File upload to storage failed', {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
