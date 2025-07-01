@@ -16,7 +16,7 @@ export async function getCurrentUser(cookie: Cookie) {
   try {
     const { data: { user } } = await supabase.auth.getUser(sessionCookie.value);
     return user;
-  } catch {
+  } catch (_error) {
     return null;
   }
 }

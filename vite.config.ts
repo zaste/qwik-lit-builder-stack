@@ -16,29 +16,18 @@ export default defineConfig(async ({ command, mode }) => {
     },
   });
   
-  // Check if Builder.io dependencies are available
-  let hasBuilderDeps = false;
-  try {
-    await import('@builder.io/sdk');
-    await import('@builder.io/sdk-qwik');
-    hasBuilderDeps = true;
-  } catch {
-    console.warn('Builder.io dependencies not found - CMS features will be disabled');
-  }
   
   // Base dependencies to optimize
   const baseDepsToInclude = [
     '@builder.io/qwik',
     '@builder.io/qwik-city',
     'lit',
+    'lit/decorators.js',
     '@lit/reactive-element',
     '@lit/task'
   ];
   
-  // Add Builder.io deps only if available
-  const optimizeDepsInclude = hasBuilderDeps 
-    ? [...baseDepsToInclude, '@builder.io/sdk', '@builder.io/sdk-qwik']
-    : baseDepsToInclude;
+  const optimizeDepsInclude = baseDepsToInclude;
   
   return {
     plugins: [
@@ -49,11 +38,7 @@ export default defineConfig(async ({ command, mode }) => {
         // Optimization settings
         entryStrategy: { type: 'smart' },
         srcDir: 'src',
-        tsconfigFileNames: ['tsconfig.json'],
-        // LIT integration
-        optimizeDeps: {
-          include: ['lit', 'lit/decorators.js']
-        }
+        tsconfigFileNames: ['tsconfig.json']
       }),
       tsconfigPaths(),
       // Bundle analysis plugin (only in analyze mode)
@@ -84,9 +69,6 @@ export default defineConfig(async ({ command, mode }) => {
           // Better code splitting
           manualChunks: (id) => {
             // Bundle analysis showed these are heavy - split them out
-            if (id.includes('node_modules/@builder.io/sdk')) {
-              return 'builder-sdk';
-            }
             if (id.includes('src/lib/error-handler')) {
               return 'error-handling';
             }
@@ -128,7 +110,6 @@ export default defineConfig(async ({ command, mode }) => {
     
     // Environment variables
     define: {
-      'import.meta.env.BUILDER_PUBLIC_KEY': JSON.stringify(process.env.BUILDER_PUBLIC_KEY || ''),
       'import.meta.env.DEPLOY_TARGET': JSON.stringify(process.env.DEPLOY_TARGET || 'cloudflare'),
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || '')

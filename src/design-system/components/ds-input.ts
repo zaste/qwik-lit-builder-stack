@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { ValidationRule} from '../controllers/validation.js';
-import { ValidationController, ValidationRules } from '../controllers/validation.js';
+import type { ValidationRule} from '../controllers/validation';
+import { ValidationController, ValidationRules } from '../controllers/validation';
 
 @customElement('ds-input')
 export class DSInput extends LitElement {
@@ -9,41 +9,45 @@ export class DSInput extends LitElement {
     :host {
       display: block;
       width: 100%;
-      /* Use design system variables with fallbacks */
-      --ds-color-primary: var(--ds-color-primary, var(--primary-color, #2563eb));
-      --ds-color-border: var(--ds-color-border-default, #d1d5db);
-      --ds-color-border-focus: var(--ds-color-border-focus, var(--primary-color, #3b82f6));
-      --ds-color-border-error: var(--ds-color-border-error, var(--error-color, #ef4444));
-      --ds-color-text-primary: var(--ds-color-text-primary, #111827);
-      --ds-color-text-secondary: var(--ds-color-text-secondary, #6b7280);
-      --ds-color-text-error: var(--ds-color-error, #dc2626);
-      --ds-color-background: var(--ds-color-background, #ffffff);
-      --ds-color-background-filled: var(--ds-color-surface, #f9fafb);
-      --ds-color-background-disabled: var(--ds-color-text-disabled, #f3f4f6);
-      /* Apply design system spacing and typography */
-      --ds-radius-md: var(--ds-radius-md, var(--border-radius, 0.375rem));
-      --ds-space-xs: var(--ds-space-xs, 0.25rem);
-      --ds-space-sm: var(--ds-space-sm, 0.5rem);
-      --ds-space-md: var(--ds-space-md, 0.75rem);
-      --ds-space-lg: var(--ds-space-lg, 1rem);
-      --ds-font-family: var(--ds-font-family, Inter, system-ui, -apple-system, sans-serif);
-      --ds-text-xs: var(--ds-text-xs, 0.75rem);
-      --ds-text-sm: var(--ds-text-sm, 0.875rem);
-      --ds-text-base: var(--ds-text-base, 1rem);
-      --ds-text-lg: var(--ds-text-lg, 1.125rem);
-      --ds-weight-normal: var(--ds-weight-normal, 400);
-      --ds-weight-medium: var(--ds-weight-medium, 500);
-      --ds-weight-semibold: var(--ds-weight-semibold, 600);
+      /* Spectrum-inspired tokens for colors */
+      --ds-color-primary: var(--blue-500, #2680eb);
+      --ds-color-border-default: var(--gray-300, #b3b3b3);
+      --ds-color-border-focus: var(--blue-500, #2680eb);
+      --ds-color-border-error: var(--red-600, #d7373f);
+      --ds-color-text-primary: var(--gray-800, #1f1f1f);
+      --ds-color-text-secondary: var(--gray-600, #464646);
+      --ds-color-text-error: var(--red-600, #d7373f);
+      --ds-color-background: var(--gray-50, #fafafa);
+      --ds-color-background-filled: var(--gray-100, #f5f5f5);
+      --ds-color-background-disabled: var(--gray-200, #e1e1e1);
+      /* Spectrum-inspired tokens for spacing */
+      --ds-radius: var(--size-100, 8px);
+      --ds-space-xs: var(--size-50, 4px);
+      --ds-space-sm: var(--size-100, 8px);
+      --ds-space-md: var(--size-150, 12px);
+      --ds-space-lg: var(--size-200, 16px);
+      --ds-gap: var(--size-65, 5px);
+      /* Spectrum-inspired tokens for typography */
+      --ds-font-sans: var(--font-family-sans, adobe-clean, "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+      --ds-text-xs: 0.75rem;
+      --ds-text-sm: 0.875rem;
+      --ds-text-base: 1rem;
+      --ds-text-lg: 1.125rem;
+      --ds-weight-regular: var(--font-weight-regular, 400);
+      --ds-weight-medium: var(--font-weight-medium, 500);
+      /* Spectrum-inspired tokens for animation */
+      --ds-transition-fast: var(--animation-duration-200, 160ms);
+      --ds-transition-slow: var(--animation-duration-300, 190ms);
     }
 
     .input-container {
       display: flex;
       flex-direction: column;
-      gap: var(--ds-space-xs);
+      gap: var(--ds-gap);
     }
 
     .label {
-      font-family: var(--ds-font-family);
+      font-family: var(--ds-font-sans);
       font-size: var(--ds-text-sm);
       font-weight: var(--ds-weight-medium);
       color: var(--ds-color-text-primary);
@@ -63,18 +67,18 @@ export class DSInput extends LitElement {
 
     .input {
       width: 100%;
-      border: 1px solid var(--ds-color-border);
-      border-radius: var(--ds-radius-md);
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius);
       background: var(--ds-color-background);
-      font-family: var(--ds-font-family);
+      font-family: var(--ds-font-sans);
       font-size: var(--ds-text-base);
-      font-weight: var(--ds-weight-normal);
+      font-weight: var(--ds-weight-regular);
       color: var(--ds-color-text-primary);
-      transition: all 0.2s ease;
+      transition: all var(--ds-transition-fast) ease;
       outline: none;
     }
 
-    /* Size variants */
+    /* Size variants with Spectrum spacing */
     .input.size-small {
       padding: var(--ds-space-sm) var(--ds-space-md);
       font-size: var(--ds-text-sm);
@@ -90,10 +94,10 @@ export class DSInput extends LitElement {
       font-size: var(--ds-text-lg);
     }
 
-    /* Variant styles */
+    /* Variant styles with Spectrum tokens */
     .input.variant-default {
       background: var(--ds-color-background);
-      border: 1px solid var(--ds-color-border);
+      border: 1px solid var(--ds-color-border-default);
     }
 
     .input.variant-filled {
@@ -103,13 +107,14 @@ export class DSInput extends LitElement {
 
     .input.variant-outlined {
       background: transparent;
-      border: 2px solid var(--ds-color-border);
+      border: 2px solid var(--ds-color-border-default);
     }
 
-    /* Focus states */
+    /* Focus states with Spectrum colors */
     .input:focus {
       border-color: var(--ds-color-border-focus);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgba(38, 128, 235, 0.1);
+      transition: all var(--ds-transition-fast) ease;
     }
 
     .input.variant-outlined:focus {
@@ -117,14 +122,14 @@ export class DSInput extends LitElement {
       box-shadow: 0 0 0 1px var(--ds-color-border-focus);
     }
 
-    /* Error state */
+    /* Error state with Spectrum tokens */
     .input.has-error {
       border-color: var(--ds-color-border-error);
     }
 
     .input.has-error:focus {
       border-color: var(--ds-color-border-error);
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 0 3px rgba(215, 55, 63, 0.1);
     }
 
     /* Disabled state */
@@ -142,21 +147,21 @@ export class DSInput extends LitElement {
     }
 
     .error-message {
-      font-family: var(--ds-font-family);
+      font-family: var(--ds-font-sans);
       font-size: var(--ds-text-xs);
       color: var(--ds-color-text-error);
       margin-top: var(--ds-space-xs);
     }
 
     .helper-text {
-      font-family: var(--ds-font-family);
+      font-family: var(--ds-font-sans);
       font-size: var(--ds-text-xs);
       color: var(--ds-color-text-secondary);
       margin-top: var(--ds-space-xs);
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * {
+      .input {
         transition: none !important;
       }
     }
@@ -336,8 +341,8 @@ export class DSInput extends LitElement {
       try {
         const customRules = JSON.parse(this.rules) as ValidationRule[];
         rules.push(...customRules);
-      } catch (error) {
-        // console.warn('Invalid validation rules JSON:', this.rules);
+      } catch (_error) {
+        // 
       }
     }
 

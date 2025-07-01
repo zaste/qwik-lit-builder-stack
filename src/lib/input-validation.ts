@@ -75,8 +75,8 @@ export class InputValidator {
         securityFlags
       };
 
-    } catch (error: any) {
-      const errors = error.errors?.map((e: any) => 
+    } catch (_error) {
+      const errors = (_error as any)?.errors?.map((e: any) => 
         `${e.path.join('.')}: ${e.message}`
       ) || ['Invalid input'];
 
@@ -264,7 +264,7 @@ export class InputValidator {
       }
       
       return url.toString();
-    } catch {
+    } catch (_error) {
       // If URL parsing fails, return empty string
       return '';
     }

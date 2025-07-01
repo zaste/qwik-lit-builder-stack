@@ -21,15 +21,11 @@ export interface MediaFile {
 
 export const onGet: RequestHandler = async ({ json, env, request, url }) => {
   try {
-    console.log('📁 Files list request received');
-    
     // Get query parameters
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '20');
     const filter = url.searchParams.get('filter') || 'all'; // all, images, videos, documents
     const search = url.searchParams.get('search') || '';
-    
-    console.log('📋 Query params:', { page, limit, filter, search });
 
     // Get user from authentication header
     const authHeader = request.headers.get('authorization');
@@ -43,7 +39,6 @@ export const onGet: RequestHandler = async ({ json, env, request, url }) => {
     const supabaseServiceKey = env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('❌ Missing Supabase configuration');
       json(500, { error: 'Server configuration error' });
       return;
     }
@@ -55,12 +50,9 @@ export const onGet: RequestHandler = async ({ json, env, request, url }) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      console.error('❌ Authentication failed:', authError);
       json(401, { error: 'Invalid authentication' });
       return;
     }
-
-    console.log('✅ User authenticated:', user.id);
 
     // Build query based on filters
     let query = supabase
@@ -100,12 +92,9 @@ export const onGet: RequestHandler = async ({ json, env, request, url }) => {
     const { data: files, error: filesError, count } = await query;
 
     if (filesError) {
-      console.error('❌ Failed to fetch files:', filesError);
       json(500, { error: 'Failed to fetch files' });
       return;
     }
-
-    console.log('📁 Files retrieved:', files?.length || 0);
 
     // Generate file URLs (R2 public URLs)
     const cloudflareAccountId = env.get('CLOUDFLARE_ACCOUNT_ID') || '';
@@ -130,12 +119,7 @@ export const onGet: RequestHandler = async ({ json, env, request, url }) => {
     const totalPages = Math.ceil(totalFiles / limit);
     const hasMore = page < totalPages;
 
-    console.log('📊 Files response:', {
-      filesCount: mediaFiles.length,
-      totalFiles,
-      currentPage: page,
-      hasMore
-    });
+    // Files response prepared successfully
 
     // Return real file list
     json(200, {
@@ -154,7 +138,6 @@ export const onGet: RequestHandler = async ({ json, env, request, url }) => {
     });
 
   } catch (error) {
-    console.error('💥 Files list error:', error);
     const { statusCode, body } = handleApiError(error);
     json(statusCode, body);
   }

@@ -8,28 +8,29 @@ export class DSFileUpload extends LitElement {
     :host {
       display: block;
       width: 100%;
-      --ds-color-primary: #2563eb;
-      --ds-color-primary-hover: #1d4ed8;
-      --ds-color-border: #d1d5db;
-      --ds-color-border-focus: #3b82f6;
-      --ds-color-text-primary: #111827;
-      --ds-color-text-secondary: #6b7280;
-      --ds-color-background: #ffffff;
-      --ds-color-background-hover: #f9fafb;
-      --ds-color-success: #10b981;
-      --ds-color-error: #ef4444;
-      --ds-radius-lg: 0.5rem;
-      --ds-space-sm: 0.5rem;
-      --ds-space-md: 1rem;
-      --ds-space-lg: 1.5rem;
-      --ds-space-xl: 2rem;
-      --ds-font-sans: Inter, system-ui, -apple-system, sans-serif;
+      --ds-color-primary: var(--blue-500, #2680eb);
+      --ds-color-primary-hover: var(--blue-600, #1473e6);
+      --ds-color-border: var(--gray-300, #b3b3b3);
+      --ds-color-border-focus: var(--blue-500, #2680eb);
+      --ds-color-text-primary: var(--gray-800, #1f1f1f);
+      --ds-color-text-secondary: var(--gray-600, #464646);
+      --ds-color-background: var(--gray-50, #fafafa);
+      --ds-color-background-hover: var(--gray-100, #f5f5f5);
+      --ds-color-success: var(--green-500, #10b981);
+      --ds-color-error: var(--red-600, #d7373f);
+      --ds-radius-lg: var(--size-150, 12px);
+      --ds-space-sm: var(--size-100, 8px);
+      --ds-space-md: var(--size-200, 16px);
+      --ds-space-lg: var(--size-300, 24px);
+      --ds-space-xl: var(--size-400, 32px);
+      --ds-font-sans: var(--font-family-sans, adobe-clean, "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
       --ds-text-sm: 0.875rem;
       --ds-text-base: 1rem;
       --ds-text-lg: 1.125rem;
-      --ds-weight-normal: 400;
-      --ds-weight-medium: 500;
-      --ds-weight-semibold: 600;
+      --ds-weight-regular: var(--font-weight-regular, 400);
+      --ds-weight-medium: var(--font-weight-medium, 500);
+      --ds-weight-bold: var(--font-weight-bold, 700);
+      --ds-transition-fast: var(--animation-duration-200, 160ms);
     }
 
     .upload-area {
@@ -38,7 +39,7 @@ export class DSFileUpload extends LitElement {
       background: var(--ds-color-background);
       padding: var(--ds-space-xl);
       text-align: center;
-      transition: all 0.2s ease;
+      transition: all var(--ds-transition-fast) ease;
       cursor: pointer;
       position: relative;
       overflow: hidden;
@@ -70,7 +71,7 @@ export class DSFileUpload extends LitElement {
     .upload-text {
       font-family: var(--ds-font-sans);
       font-size: var(--ds-text-lg);
-      font-weight: var(--ds-weight-semibold);
+      font-weight: var(--ds-weight-bold);
       color: var(--ds-color-text-primary);
       margin-bottom: var(--ds-space-sm);
     }
@@ -84,7 +85,7 @@ export class DSFileUpload extends LitElement {
 
     .upload-button {
       background: var(--ds-color-primary);
-      color: white;
+      color: var(--gray-50, #fafafa);
       border: none;
       border-radius: var(--ds-radius-lg);
       padding: var(--ds-space-sm) var(--ds-space-lg);
@@ -92,7 +93,7 @@ export class DSFileUpload extends LitElement {
       font-size: var(--ds-text-sm);
       font-weight: var(--ds-weight-medium);
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background var(--ds-transition-fast) ease;
     }
 
     .upload-button:hover {
@@ -189,7 +190,7 @@ export class DSFileUpload extends LitElement {
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * {
+      .upload-area, .upload-button {
         transition: none !important;
         transform: none !important;
       }
@@ -198,7 +199,7 @@ export class DSFileUpload extends LitElement {
 
   @property() endpoint = '/api/upload';
   @property() accept = 'image/*,application/pdf,text/*';
-  @property({ type: Number }) maxSize = 10 * 1024 * 1024; // 10MB default
+  @property({ type: Number }) maxSize = 10 * 1024 * 1024;
   @property({ type: Boolean }) multiple = false;
   @property() bucket = 'uploads';
 
@@ -218,7 +219,6 @@ export class DSFileUpload extends LitElement {
              @dragleave=${this._handleDragLeave}
              @drop=${this._handleDrop}>
           
-          <!-- Upload Icon -->
           <div class="upload-icon">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -227,7 +227,6 @@ export class DSFileUpload extends LitElement {
             </svg>
           </div>
 
-          <!-- Upload Text -->
           <div class="upload-text">
             ${this._isUploading ? 'Uploading...' : 'Drop files here or click to upload'}
           </div>
@@ -236,14 +235,12 @@ export class DSFileUpload extends LitElement {
             ${this._getAcceptHint()} • Max size: ${this._formatFileSize(this.maxSize)}
           </div>
 
-          <!-- Upload Button -->
           ${!this._isUploading ? html`
             <button class="upload-button" @click=${this._handleButtonClick}>
               Choose Files
             </button>
           ` : ''}
 
-          <!-- Hidden File Input -->
           <input 
             type="file" 
             class="file-input"
@@ -252,7 +249,6 @@ export class DSFileUpload extends LitElement {
             @change=${this._handleFileSelect}
           >
 
-          <!-- Progress Bar -->
           ${this._isUploading ? html`
             <div class="progress-bar">
               <div class="progress-fill" style="width: ${this._progress}%"></div>
@@ -260,14 +256,12 @@ export class DSFileUpload extends LitElement {
           ` : ''}
         </div>
 
-        <!-- Error Message -->
         ${this._error ? html`
           <div class="error-message">
             ${this._error}
           </div>
         ` : ''}
 
-        <!-- File List -->
         ${this._uploadResults.length > 0 ? html`
           <div class="file-list">
             ${this._uploadResults.map(item => html`
@@ -334,7 +328,6 @@ export class DSFileUpload extends LitElement {
   private _processFiles(files: File[]) {
     this._error = null;
     
-    // Validate files
     const validFiles = files.filter(file => this._validateFile(file));
     
     if (validFiles.length === 0) return;
@@ -344,13 +337,11 @@ export class DSFileUpload extends LitElement {
   }
 
   private _validateFile(file: File): boolean {
-    // Size validation
     if (file.size > this.maxSize) {
       this._error = `File "${file.name}" is too large. Max size: ${this._formatFileSize(this.maxSize)}`;
       return false;
     }
 
-    // Type validation (basic)
     if (this.accept && this.accept !== '*/*') {
       const acceptedTypes = this.accept.split(',').map(type => type.trim());
       const fileType = file.type || '';
@@ -388,23 +379,19 @@ export class DSFileUpload extends LitElement {
           this._uploadResults[i] = { file, status: 'success', result };
           results.push({ file, status: 'success', result });
           
-          // Dispatch success event
           this._dispatchEvent('ds-upload-success', { file, result });
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+        } catch (_error) {
+          const errorMessage = _error instanceof Error ? _error.message : 'Upload failed';
           this._uploadResults[i] = { file, status: 'error', error: errorMessage };
           results.push({ file, status: 'error', error: errorMessage });
           
-          // Dispatch error event  
           this._dispatchEvent('ds-upload-error', { file, error: errorMessage });
         }
 
-        // Update progress
         this._progress = ((i + 1) / files.length) * 100;
         this.requestUpdate();
       }
 
-      // Dispatch complete event
       this._dispatchEvent('ds-upload-complete', { files, results });
       return results;
     },
@@ -418,8 +405,8 @@ export class DSFileUpload extends LitElement {
     
     try {
       await this._uploadTask.run();
-    } catch (error) {
-      this._error = error instanceof Error ? error.message : 'Upload failed';
+    } catch (_error) {
+      this._error = _error instanceof Error ? _error.message : 'Upload failed';
     } finally {
       this._isUploading = false;
     }

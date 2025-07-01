@@ -29,9 +29,9 @@ export const ErrorBoundary = component$<ErrorBoundaryProps>((props) => {
           details: errorInfo
         }
       });
-    }).catch((err) => {
+    }).catch((_error) => {
       import('../lib/logger').then(({ logger }) => {
-        logger.error('Failed to load error handler', { error: err.message });
+        logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
       });
     });
   });
@@ -152,10 +152,10 @@ export const withErrorBoundary = (WrappedComponent: any, errorBoundaryProps?: Er
   
   return component$((props: any) => {
     // Create a simple error handler without serialization issues
-    const wrappedErrorHandler = $((error: Error, _errorInfo: any) => {
+    const wrappedErrorHandler = $((_error: Error, _errorInfo: any) => {
       // Basic error logging without serializing the onError function
       // eslint-disable-next-line no-console
-      console.error('Error caught by withErrorBoundary:', error.message);
+      
     });
     
     return (
@@ -178,9 +178,9 @@ export const APIErrorBoundary = component$<{ children?: any }>(() => {
       handleUIError(error, {
         metadata: { context: 'API_REQUEST' }
       });
-    }).catch((err) => {
+    }).catch((_error) => {
       import('../lib/logger').then(({ logger }) => {
-        logger.error('Failed to load error handler', { error: err.message });
+        logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
       });
     });
   });
@@ -216,9 +216,9 @@ export const ComponentErrorBoundary = component$<{ componentName: string; childr
           componentName: props.componentName 
         }
       });
-    }).catch((err) => {
+    }).catch((_error) => {
       import('../lib/logger').then(({ logger }) => {
-        logger.error('Failed to load error handler', { error: err.message });
+        logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
       });
     });
   });

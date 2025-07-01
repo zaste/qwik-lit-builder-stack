@@ -21,12 +21,16 @@ class SentryService {
   private config: SentryConfig;
 
   constructor() {
+    // Safe environment variable access for browser/server compatibility
+    const isServer = typeof process !== 'undefined';
+    const isDev = isServer ? process.env.NODE_ENV !== 'production' : window.location.hostname === 'localhost';
+    
     this.config = {
-      dsn: process.env.SENTRY_DSN,
-      environment: process.env.NODE_ENV || 'development',
-      release: process.env.APP_VERSION || '1.0.0',
-      sampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-      tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+      dsn: isServer ? process.env.SENTRY_DSN : (import.meta.env.VITE_SENTRY_DSN || process.env.VITE_SENTRY_DSN),
+      environment: isServer ? (process.env.SENTRY_ENVIRONMENT || 'development') : 'development',
+      release: isServer ? process.env.APP_VERSION || '1.0.0' : '1.0.0',
+      sampleRate: isDev ? 1.0 : 0.1,
+      tracesSampleRate: isDev ? 1.0 : 0.1,
       enablePerformanceMonitoring: true,
       enableUserFeedback: true
     };
@@ -37,11 +41,15 @@ class SentryService {
       return;
     }
 
+    // Skip initialization if DSN not available
+    if (!this.config.dsn) {
+      logger.info('Sentry DSN not configured, skipping initialization', {
+        environment: this.config.environment
+      });
+      return;
+    }
+
     try {
-      if (!this.config.dsn) {
-        logger.warn('Sentry DSN not configured, error tracking disabled');
-        return;
-      }
 
       Sentry.init({
         dsn: this.config.dsn,
@@ -49,13 +57,19 @@ class SentryService {
         release: this.config.release,
         sampleRate: this.config.sampleRate,
         tracesSampleRate: this.config.tracesSampleRate,
+        replaysSessionSampleRate: this.config.environment === 'development' ? 0.1 : 0.01,
+        replaysOnErrorSampleRate: 1.0,
         integrations: [
-          new Sentry.BrowserTracing(),
-          new Sentry.Replay({
-            // Capture replays on errors
-            maskAllText: this.config.environment === 'production',
-            blockAllMedia: this.config.environment === 'production',
-          }),
+          // Simplified integrations for development to avoid module loading conflicts
+          ...(this.config.environment === 'production' ? [
+            new Sentry.BrowserTracing(),
+            new Sentry.Replay({
+              maskAllText: true,
+              blockAllMedia: true,
+            }),
+          ] : [
+            // Minimal integrations for development
+          ]),
         ],
         beforeSend: (event, hint) => {
           // Filter out noisy errors in development
@@ -105,8 +119,8 @@ class SentryService {
         release: this.config.release
       });
 
-    } catch (error) {
-      logger.error('Failed to initialize Sentry', {}, error instanceof Error ? error : new Error(String(error)));
+    } catch (initError) {
+      logger.error('Failed to initialize Sentry', {}, initError instanceof Error ? initError : new Error(String(initError)));
     }
   }
 
@@ -124,8 +138,8 @@ class SentryService {
         extra: context,
         level: this.mapSeverityToLevel(context?.severity)
       });
-    } catch (e) {
-      logger.error('Failed to capture error in Sentry', {}, e instanceof Error ? e : new Error(String(e)));
+    } catch (captureError) {
+      logger.error('Failed to capture error in Sentry', {}, captureError instanceof Error ? captureError : new Error(String(captureError)));
       return undefined;
     }
   }
@@ -143,8 +157,8 @@ class SentryService {
         },
         extra: context
       });
-    } catch (e) {
-      logger.error('Failed to capture message in Sentry', {}, e instanceof Error ? e : new Error(String(e)));
+    } catch (sentryError) {
+      logger.error('Failed to capture message in Sentry', {}, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
       return undefined;
     }
   }
@@ -156,8 +170,8 @@ class SentryService {
 
     try {
       Sentry.setUser(user);
-    } catch (error) {
-      logger.error('Failed to set Sentry user', {}, error instanceof Error ? error : new Error(String(error)));
+    } catch (sentryError) {
+      logger.error('Failed to set Sentry user', {}, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
     }
   }
 
@@ -168,8 +182,8 @@ class SentryService {
 
     try {
       Sentry.setContext(key, context);
-    } catch (error) {
-      logger.error('Failed to set Sentry context', { key }, error instanceof Error ? error : new Error(String(error)));
+    } catch (sentryError) {
+      logger.error('Failed to set Sentry context', { key }, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
     }
   }
 
@@ -186,8 +200,8 @@ class SentryService {
         timestamp: Date.now() / 1000,
         level: 'info'
       });
-    } catch (error) {
-      logger.error('Failed to add Sentry breadcrumb', { message, category }, error instanceof Error ? error : new Error(String(error)));
+    } catch (sentryError) {
+      logger.error('Failed to add Sentry breadcrumb', { message, category }, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
     }
   }
 
@@ -198,8 +212,8 @@ class SentryService {
 
     try {
       return Sentry.startTransaction({ name, op });
-    } catch (error) {
-      logger.error('Failed to start Sentry transaction', { name, op }, error instanceof Error ? error : new Error(String(error)));
+    } catch (sentryError) {
+      logger.error('Failed to start Sentry transaction', { name, op }, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
       return null;
     }
   }
@@ -214,8 +228,8 @@ class SentryService {
       if (eventId) {
         Sentry.showReportDialog({ eventId });
       }
-    } catch (error) {
-      logger.error('Failed to show Sentry feedback dialog', {}, error instanceof Error ? error : new Error(String(error)));
+    } catch (sentryError) {
+      logger.error('Failed to show Sentry feedback dialog', {}, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
     }
   }
 
@@ -261,8 +275,8 @@ class SentryService {
 
         observer.observe({ entryTypes: ['measure', 'navigation'] });
       }
-    } catch (error) {
-      logger.error('Failed to set up performance monitoring', {}, error instanceof Error ? error : new Error(String(error)));
+    } catch (sentryError) {
+      logger.error('Failed to set up performance monitoring', {}, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
     }
   }
 
@@ -281,8 +295,8 @@ class SentryService {
 
       // Set as tag for filtering
       Sentry.setTag(`perf.${name}`, value);
-    } catch (error) {
-      logger.error('Failed to report performance metric', { name, value }, error instanceof Error ? error : new Error(String(error)));
+    } catch (sentryError) {
+      logger.error('Failed to report performance metric', { name, value }, sentryError instanceof Error ? sentryError : new Error(String(sentryError)));
     }
   }
 }
@@ -292,7 +306,16 @@ export const sentryService = new SentryService();
 
 // Helper functions for easy integration
 export function initializeSentry(): void {
-  sentryService.initialize();
+  // Wait for DOM to be ready before initializing Sentry
+  if (typeof window !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        sentryService.initialize();
+      });
+    } else {
+      sentryService.initialize();
+    }
+  }
 }
 
 export function captureError(error: Error, context?: Record<string, any>): string | undefined {

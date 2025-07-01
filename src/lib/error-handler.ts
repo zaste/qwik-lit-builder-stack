@@ -129,13 +129,21 @@ export class GlobalErrorHandler {
           timestamp: report.context.timestamp.toISOString()
         });
         localStorage.setItem('critical_errors', JSON.stringify(criticalErrors.slice(0, 10)));
-      } catch (e) {
+      } catch (_error) {
         // Silent fallback - cannot use logger here to avoid circular dependency
       }
     }
   }
 
   private async reportError(report: ErrorReport): Promise<void> {
+    // Prevent infinite loops by filtering out error reporting errors
+    if (report.error.message.includes('Failed to report error') || 
+        report.error.message.includes('fetch') ||
+        report.error.message.includes('SyntaxError: Invalid or unexpected token') ||
+        report.context.metadata?.isErrorReportingError) {
+      return;
+    }
+
     // Add breadcrumb for error context
     addBreadcrumb(
       `${report.category.toUpperCase()} Error occurred`,
@@ -187,8 +195,8 @@ export class GlobalErrorHandler {
           })
         });
       }
-    } catch (e) {
-      logger.error('Failed to report error to API', { originalError: report.error.message }, e instanceof Error ? e : new Error(String(e)));
+    } catch (reportError) {
+      logger.error('Failed to report error to API', { originalError: report.error.message }, reportError instanceof Error ? reportError : new Error(String(reportError)));
     }
   }
 

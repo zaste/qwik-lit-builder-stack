@@ -103,37 +103,10 @@ export const supabaseAuth = {
 };
 
 /**
- * Supabase storage helpers
+ * Note: File storage moved to Cloudflare R2
+ * All file operations now handled by src/lib/storage/storage-router.ts
+ * Supabase only handles database and authentication
  */
-export const supabaseStorage = {
-  async uploadFile(bucket: string, path: string, file: File) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).upload(path, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-  },
-
-  async downloadFile(bucket: string, path: string) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).download(path);
-  },
-
-  async deleteFile(bucket: string, paths: string[]) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).remove(paths);
-  },
-
-  getPublicUrl(bucket: string, path: string) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).getPublicUrl(path);
-  },
-
-  async createSignedUrl(bucket: string, path: string, expiresIn: number) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
-  },
-};
 
 /**
  * Supabase realtime helpers

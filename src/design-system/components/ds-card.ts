@@ -1,33 +1,37 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('ds-card')
 export class DSCard extends LitElement {
   static styles = css`
     :host {
       display: block;
-      --ds-color-background: #ffffff;
-      --ds-color-border: #e5e7eb;
-      --ds-color-border-hover: #d1d5db;
-      --ds-color-text-primary: #111827;
-      --ds-color-text-secondary: #6b7280;
-      --ds-radius-sm: 0.25rem;
-      --ds-radius-md: 0.375rem;
-      --ds-radius-lg: 0.5rem;
-      --ds-radius-xl: 0.75rem;
+      /* Spectrum-inspired tokens for colors */
+      --ds-color-background: var(--gray-50, #fafafa);
+      --ds-color-border: var(--gray-300, #b3b3b3);
+      --ds-color-border-hover: var(--gray-400, #808080);
+      --ds-color-text-primary: var(--gray-800, #1f1f1f);
+      --ds-color-text-secondary: var(--gray-600, #464646);
+      --ds-color-primary: var(--blue-500, #2680eb);
+      /* Spectrum-inspired tokens for spacing */
+      --ds-radius-sm: var(--size-50, 4px);
+      --ds-radius-md: var(--size-100, 8px);
+      --ds-radius-lg: var(--size-150, 12px);
+      --ds-radius-xl: var(--size-200, 16px);
       --ds-space-none: 0;
-      --ds-space-sm: 1rem;
-      --ds-space-md: 1.5rem;
-      --ds-space-lg: 2rem;
-      --ds-font-sans: Inter, system-ui, -apple-system, sans-serif;
+      --ds-space-sm: var(--size-200, 16px);
+      --ds-space-md: var(--size-300, 24px);
+      --ds-space-lg: var(--size-400, 32px);
+      /* Spectrum-inspired tokens for typography */
+      --ds-font-sans: var(--font-family-sans, adobe-clean, "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
       --ds-text-sm: 0.875rem;
       --ds-text-base: 1rem;
       --ds-text-lg: 1.125rem;
       --ds-text-xl: 1.25rem;
-      --ds-weight-normal: 400;
-      --ds-weight-medium: 500;
-      --ds-weight-semibold: 600;
-      --ds-weight-bold: 700;
+      --ds-weight-regular: var(--font-weight-regular, 400);
+      --ds-weight-medium: var(--font-weight-medium, 500);
+      --ds-weight-bold: var(--font-weight-bold, 700);
+      /* Spectrum-inspired tokens for animation */
+      --ds-transition-fast: var(--animation-duration-200, 160ms);
     }
 
     .card {
@@ -35,7 +39,7 @@ export class DSCard extends LitElement {
       border-radius: var(--ds-radius-lg);
       font-family: var(--ds-font-sans);
       color: var(--ds-color-text-primary);
-      transition: all 0.2s ease;
+      transition: all var(--ds-transition-fast) ease;
       overflow: hidden;
       height: 100%;
       display: flex;
@@ -84,10 +88,10 @@ export class DSCard extends LitElement {
       transform: translateY(0);
     }
 
-    /* Header */
+    /* Header with Spectrum tokens */
     .header {
       border-bottom: 1px solid var(--ds-color-border);
-      font-weight: var(--ds-weight-semibold);
+      font-weight: var(--ds-weight-medium);
       font-size: var(--ds-text-lg);
       color: var(--ds-color-text-primary);
     }
@@ -131,7 +135,7 @@ export class DSCard extends LitElement {
       padding: var(--ds-space-lg);
     }
 
-    /* Footer */
+    /* Footer with Spectrum tokens */
     .footer {
       border-top: 1px solid var(--ds-color-border);
       font-size: var(--ds-text-sm);
@@ -181,7 +185,7 @@ export class DSCard extends LitElement {
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * {
+      .card {
         transition: none !important;
         transform: none !important;
       }
@@ -383,6 +387,9 @@ export class DSCard extends LitElement {
     );
   }
 }
+
+// Register the custom element
+customElements.define('ds-card', DSCard);
 
 declare global {
   interface HTMLElementTagNameMap {

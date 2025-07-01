@@ -544,14 +544,13 @@ export class DSMultiStepForm extends LitElement {
       
       this.dispatchEvent(submitEvent);
       
-      // If event wasn't prevented, show completion
+      // If event wasn't prevented, submit to real API
       if (!submitEvent.defaultPrevented) {
-        // Simulate async submission
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await this._submitToAPI();
         this._isCompleted = true;
       }
-    } catch (error) {
-      // console.error('Form submission error:', error);
+    } catch (_error) {
+      // 
     } finally {
       this._isSubmitting = false;
     }
@@ -606,6 +605,60 @@ export class DSMultiStepForm extends LitElement {
 
   reset() {
     this._resetForm();
+  }
+
+  /**
+   * Submit form data to real API endpoint
+   */
+  private async _submitToAPI(): Promise<void> {
+    try {
+      const response = await fetch('/api/forms/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formType: 'multi-step',
+          data: this._formData,
+          steps: this.steps.map(step => ({
+            id: step.id,
+            title: step.title,
+            fieldCount: step.fields.length
+          })),
+          submittedAt: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Form submission failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      // Dispatch success event with server response
+      this.dispatchEvent(new CustomEvent('ds-form-submitted', {
+        detail: {
+          success: true,
+          result,
+          formData: this._formData
+        },
+        bubbles: true
+      }));
+      
+    } catch (error) {
+      console.error('Form submission failed:', error);
+      
+      // Dispatch error event
+      this.dispatchEvent(new CustomEvent('ds-form-error', {
+        detail: {
+          error: error instanceof Error ? error.message : 'Submission failed',
+          formData: this._formData
+        },
+        bubbles: true
+      }));
+      
+      throw error;
+    }
   }
 }
 

@@ -62,3 +62,31 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
 }
+
+/* Prevent layout shifts */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure smooth font loading without layout shift */
+@font-face {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-display: swap;
+}
+
+/* Prevent CLS from images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Reserve space for dynamic content */
+.status-indicator {
+  min-height: 2rem;
+  display: block;
+}
+
+/* Ensure consistent button sizing */
+.btn {
+  min-height: 2.5rem;
+}

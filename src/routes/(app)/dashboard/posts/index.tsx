@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 export default component$(() => {
@@ -11,11 +11,11 @@ export default component$(() => {
     try {
       const response = await fetch('/api/content/posts');
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { posts?: any[] };
         posts.value = data.posts || [];
       }
-    } catch (error) {
-      console.error('Failed to fetch posts:', error);
+    } catch (_error) {
+      // Silently handle fetch errors - posts will remain empty
     } finally {
       loading.value = false;
     }
@@ -38,8 +38,8 @@ export default component$(() => {
         showCreateForm.value = false;
         await loadPosts();
       }
-    } catch (error) {
-      console.error('Failed to create post:', error);
+    } catch (_error) {
+      // Silently handle post creation errors
     }
   });
 

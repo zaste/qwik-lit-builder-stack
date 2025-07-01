@@ -17,8 +17,8 @@ export const ResultHelpers = {
     try {
       const data = await fn();
       return ResultHelpers.ok(data);
-    } catch (error) {
-      return ResultHelpers.error(error instanceof Error ? error.message : String(error));
+    } catch (_error) {
+      return ResultHelpers.error(_error instanceof Error ? _error.message : String(_error));
     }
   }
 };

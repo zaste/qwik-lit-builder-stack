@@ -7,11 +7,38 @@ import type { RequestHandler } from '@builder.io/qwik-city';
 import { handleApiError } from '~/lib/errors';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
+import { logger } from '~/lib/logger';
+
+/**
+ * Get active session count for user from database
+ */
+async function getActiveSessionCount(userId: string, supabase: any): Promise<number> {
+  try {
+    // Get active sessions from last 5 minutes
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    
+    // Query user sessions table
+    const { data, error } = await supabase
+      .from('user_sessions')
+      .select('session_id')
+      .eq('user_id', userId)
+      .gte('last_activity', fiveMinutesAgo)
+      .eq('active', true);
+    
+    if (error) {
+      logger.warn('Failed to get session count', { userId, error: error.message });
+      return 0;
+    }
+    
+    return data?.length || 0;
+  } catch (error) {
+    logger.warn('Session count query failed', { userId, error: error instanceof Error ? error.message : String(error) });
+    return 0;
+  }
+}
 
 export const onGet: RequestHandler = async ({ json, env, request }) => {
   try {
-    console.log('📊 Dashboard stats request received');
-    
     // Get user from authentication header
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -24,7 +51,6 @@ export const onGet: RequestHandler = async ({ json, env, request }) => {
     const supabaseServiceKey = env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('❌ Missing Supabase configuration');
       json(500, { error: 'Server configuration error' });
       return;
     }
@@ -36,12 +62,9 @@ export const onGet: RequestHandler = async ({ json, env, request }) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      console.error('❌ Authentication failed:', authError);
       json(401, { error: 'Invalid authentication' });
       return;
     }
-
-    console.log('✅ User authenticated:', user.id);
 
     // Get user file statistics from database
     const { data: userStats, error: statsError } = await supabase
@@ -51,7 +74,6 @@ export const onGet: RequestHandler = async ({ json, env, request }) => {
       .single();
 
     if (statsError) {
-      console.log('📊 No stats found, returning defaults');
       // Return default stats if no files exist yet
       json(200, {
         totalFiles: 0,
@@ -63,7 +85,7 @@ export const onGet: RequestHandler = async ({ json, env, request }) => {
         documentCount: 0,
         lastUpload: null,
         avgFileSize: 0,
-        activeSessions: 1 // TODO: Get from session tracking
+        activeSessions: await getActiveSessionCount(user.id, supabase)
       });
       return;
     }
@@ -78,10 +100,7 @@ export const onGet: RequestHandler = async ({ json, env, request }) => {
       return `${formattedSize} ${sizes[i]}`;
     };
 
-    console.log('📊 Stats retrieved successfully:', {
-      totalFiles: userStats.total_files,
-      totalSize: userStats.total_size
-    });
+    // Stats retrieved successfully
 
     // Return real statistics
     json(200, {
@@ -94,11 +113,10 @@ export const onGet: RequestHandler = async ({ json, env, request }) => {
       documentCount: userStats.document_count || 0,
       lastUpload: userStats.last_upload,
       avgFileSize: Math.round(userStats.avg_file_size || 0),
-      activeSessions: 1 // TODO: Implement real session tracking
+      activeSessions: await getActiveSessionCount(user.id, supabase)
     });
 
   } catch (error) {
-    console.error('💥 Dashboard stats error:', error);
     const { statusCode, body } = handleApiError(error);
     json(statusCode, body);
   }

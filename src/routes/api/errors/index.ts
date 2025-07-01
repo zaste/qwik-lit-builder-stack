@@ -45,7 +45,7 @@ export const onPost: RequestHandler = async ({ json, request, platform }) => {
     };
 
     // Log to console (will be captured by logging infrastructure)
-    // console.error('[ERROR_REPORT]', JSON.stringify(logEntry));
+    // 
 
     // Store critical errors in KV for immediate attention
     if (errorReport.severity === 'critical' && platform?.env?.ERROR_LOGS) {
@@ -63,8 +63,8 @@ export const onPost: RequestHandler = async ({ json, request, platform }) => {
       data: { errorId: `err_${Date.now()}_${Math.random().toString(36).slice(2)}` }
     } as ApiResponse);
 
-  } catch (error) {
-    // console.error('Error processing error report:', error);
+  } catch (_error) {
+    // 
     
     json(500, { 
       error: 'Failed to process error report' 
@@ -73,12 +73,49 @@ export const onPost: RequestHandler = async ({ json, request, platform }) => {
 };
 
 async function sendToErrorTracking(logEntry: any): Promise<void> {
-  // TODO: Integrate with Sentry or other error tracking service
-  // For now, we'll use a webhook approach
-  
   try {
-    // Placeholder for external service integration
-    // In production, this would send to Sentry, DataDog, etc.
+    // Send to Sentry if configured
+    const sentryDsn = process.env.SENTRY_DSN;
+    if (sentryDsn && logEntry.severity === 'critical') {
+      // Real Sentry integration
+      const sentryUrl = `${sentryDsn.replace('/sentry.io/', '/sentry.io/api/')}/store/`;
+      
+      await fetch(sentryUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Sentry-Auth': `Sentry sentry_version=7, sentry_key=${sentryDsn.split('@')[0].split('//')[1]}`
+        },
+        body: JSON.stringify({
+          message: logEntry.message,
+          level: logEntry.level,
+          platform: 'javascript',
+          timestamp: logEntry.timestamp,
+          tags: {
+            category: logEntry.category,
+            severity: logEntry.severity
+          },
+          extra: {
+            context: logEntry.context,
+            userAgent: logEntry.userAgent,
+            ip: logEntry.ip
+          },
+          exception: logEntry.stack ? [{
+            type: 'Error',
+            value: logEntry.message,
+            stacktrace: {
+              frames: logEntry.stack.split('\n').map((line: string) => ({
+                filename: 'unknown',
+                function: line.trim(),
+                lineno: 0
+              }))
+            }
+          }] : undefined
+        })
+      });
+    }
+    
+    // Also send to webhook if configured
     if (process.env.ERROR_WEBHOOK_URL && logEntry.severity === 'critical') {
       await fetch(process.env.ERROR_WEBHOOK_URL, {
         method: 'POST',
@@ -97,8 +134,8 @@ async function sendToErrorTracking(logEntry: any): Promise<void> {
         })
       });
     }
-  } catch (error) {
-    // console.error('Failed to send to error tracking service:', error);
+  } catch (_error) {
+    // Silently handle error tracking failures
   }
 }
 

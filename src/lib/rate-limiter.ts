@@ -296,6 +296,7 @@ export async function applyRateLimit(
     };
   } catch (error) {
     logger.error('Rate limiter error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
       url: request.url,
       method: request.method
     }, error as Error);

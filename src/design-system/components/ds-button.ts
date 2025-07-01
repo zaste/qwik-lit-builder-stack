@@ -1,25 +1,30 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
 
-@customElement('ds-button')
 export class DSButton extends LitElement {
   static styles = css`
     :host {
       display: inline-block;
-      --ds-color-primary: var(--primary-color, #2563eb);
-      --ds-color-primary-hover: var(--hover-color, #1d4ed8);
-      --ds-color-secondary: #7c3aed;
-      --ds-color-secondary-hover: #6d28d9;
-      --ds-color-on-primary: #ffffff;
-      --ds-color-on-secondary: #ffffff;
-      --ds-radius: var(--border-radius, 0.375rem);
-      --ds-space-sm: 0.75rem;
-      --ds-space-md: 1rem;
-      --ds-space-lg: 1.5rem;
-      --ds-font-sans: Inter, system-ui, -apple-system, sans-serif;
+      /* Spectrum-inspired tokens for colors */
+      --ds-color-primary: var(--blue-500, #2680eb);
+      --ds-color-primary-hover: var(--blue-600, #1473e6);
+      --ds-color-secondary: var(--blue-400, #378ef0);
+      --ds-color-secondary-hover: var(--blue-500, #2680eb);
+      --ds-color-on-primary: var(--gray-50, #fafafa);
+      --ds-color-on-secondary: var(--gray-50, #fafafa);
+      --ds-color-disabled: var(--gray-300, #b3b3b3);
+      /* Spectrum-inspired tokens for spacing */
+      --ds-radius: var(--size-150, 12px);
+      --ds-space-sm: var(--size-125, 10px);
+      --ds-space-md: var(--size-200, 16px);
+      --ds-space-lg: var(--size-300, 24px);
+      --ds-gap: var(--size-100, 8px);
+      /* Spectrum-inspired tokens for typography */
+      --ds-font-sans: var(--font-family-sans, adobe-clean, "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
       --ds-text-sm: 0.875rem;
       --ds-text-base: 1rem;
-      --ds-weight-medium: 500;
+      --ds-weight-medium: var(--font-weight-medium, 500);
+      /* Spectrum-inspired tokens for animation */
+      --ds-transition-fast: var(--animation-duration-200, 160ms);
     }
     
     :host([full-width]) {
@@ -37,11 +42,11 @@ export class DSButton extends LitElement {
       font-size: var(--ds-text-sm);
       font-weight: var(--ds-weight-medium);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all var(--ds-transition-fast) ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      gap: var(--ds-gap);
       width: 100%;
       
       &:hover:not(:disabled) {
@@ -56,8 +61,11 @@ export class DSButton extends LitElement {
       }
       
       &:disabled {
-        opacity: 0.6;
+        background: var(--ds-color-disabled) !important;
+        color: var(--gray-600, #464646);
         cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
       }
       
       &:focus-visible {
@@ -91,17 +99,31 @@ export class DSButton extends LitElement {
     }
   `;
 
-  @property() variant: 'primary' | 'secondary' = 'primary';
-  @property() size: 'medium' | 'large' = 'medium';
-  @property({ type: Boolean }) disabled = false;
-  @property() text = 'Button';
-  @property() icon = '';
-  @property() iconPosition: 'left' | 'right' = 'left';
-  @property({ type: Boolean }) loading = false;
-  @property() primaryColor = '#007acc';
-  @property() hoverColor = '#005999';
-  @property({ type: Number }) borderRadius = 6;
-  @property({ type: Boolean }) fullWidth = false;
+  static properties = {
+    variant: { type: String },
+    size: { type: String },
+    disabled: { type: Boolean },
+    text: { type: String },
+    icon: { type: String },
+    iconPosition: { type: String },
+    loading: { type: Boolean },
+    primaryColor: { type: String },
+    hoverColor: { type: String },
+    borderRadius: { type: Number },
+    fullWidth: { type: Boolean }
+  };
+
+  variant: 'primary' | 'secondary' = 'primary';
+  size: 'medium' | 'large' = 'medium';
+  disabled = false;
+  text = 'Button';
+  icon = '';
+  iconPosition: 'left' | 'right' = 'left';
+  loading = false;
+  primaryColor = '#007acc';
+  hoverColor = '#005999';
+  borderRadius = 6;
+  fullWidth = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -196,6 +218,9 @@ export class DSButton extends LitElement {
     );
   }
 }
+
+// Register the custom element
+customElements.define('ds-button', DSButton);
 
 declare global {
   interface HTMLElementTagNameMap {

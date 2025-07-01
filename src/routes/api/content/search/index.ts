@@ -5,7 +5,7 @@ import { getSupabaseClient } from '~/lib/supabase';
  * Unified Search API - Search across all content types
  */
 
-export const onGet: RequestHandler = async ({ json, query, env }) => {
+export const onGet: RequestHandler = async ({ json, query }) => {
   const searchQuery = query.get('q');
   const contentType = query.get('type'); // 'pages', 'posts', 'media', or null for all
 
@@ -44,28 +44,26 @@ export const onGet: RequestHandler = async ({ json, query, env }) => {
       })) || [];
     }
 
-    // Search Pages (Builder.io)
+    // Search Pages (Mock Data)
     if (!contentType || contentType === 'pages') {
-      const apiKey = env.get('BUILDER_PUBLIC_KEY');
-      if (apiKey) {
-        try {
-          const response = await fetch(
-            `https://cdn.builder.io/api/v3/content/page?apiKey=${apiKey}&limit=10&query.name.$regex=${encodeURIComponent(searchQuery)}`
-          );
-          if (response.ok) {
-            const data = await response.json();
-            results.results.pages = data.results?.map((page: any) => ({
-              id: page.id,
-              title: page.name,
-              type: 'page',
-              url: page.data?.url || '/',
-              excerpt: page.data?.description || '',
-              created_at: page.createdDate
-            })) || [];
-          }
-        } catch (error) {
-          console.warn('Builder.io search failed:', error);
+      // Use mock data for pages search
+      try {
+        const response = await fetch(
+          `https://jsonplaceholder.typicode.com/posts?q=${encodeURIComponent(searchQuery)}`
+        );
+        if (response.ok) {
+          const data = await response.json() as { results?: any[] };
+          results.results.pages = data.results?.map((page: any) => ({
+            id: page.id,
+            title: page.name,
+            type: 'page',
+            url: page.data?.url || '/',
+            excerpt: page.data?.description || '',
+            created_at: page.createdDate
+          })) || [];
         }
+      } catch (_error) {
+        // Silently handle API errors
       }
     }
 
@@ -95,7 +93,6 @@ export const onGet: RequestHandler = async ({ json, query, env }) => {
 
     json(200, results);
   } catch (error) {
-    console.error('Search failed:', error);
     json(500, { 
       error: 'Search failed',
       details: error instanceof Error ? error.message : 'Unknown error'

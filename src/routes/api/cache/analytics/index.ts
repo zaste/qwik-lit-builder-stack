@@ -54,13 +54,13 @@ export const onGet: RequestHandler = async ({ json, url, cacheControl }) => {
         });
     }
 
-  } catch (error) {
-    // console.error('Cache analytics API error:', error);
+  } catch (_error) {
+    // 
     
     json(500, {
       success: false,
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: _error instanceof Error ? _error.message : 'Unknown error'
     });
   }
 };
@@ -90,13 +90,13 @@ export const onPost: RequestHandler = async ({ json, parseBody }) => {
         });
     }
 
-  } catch (error) {
-    // console.error('Cache analytics POST API error:', error);
+  } catch (_error) {
+    // 
     
     json(500, {
       success: false,
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: _error instanceof Error ? _error.message : 'Unknown error'
     });
   }
 };

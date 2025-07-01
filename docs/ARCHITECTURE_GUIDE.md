@@ -11,7 +11,7 @@
 ### **System Design Philosophy**
 - **Edge-first**: Global deployment with Cloudflare Workers
 - **Component-driven**: Reusable LIT primitives with Qwik orchestration
-- **Hybrid storage**: Intelligent routing based on file size and type
+- **R2 storage**: All files in Cloudflare R2 with metadata in Supabase
 - **Progressive enhancement**: Core functionality works without advanced features
 - **Zero technical debt**: Systematic quality maintenance
 
@@ -27,7 +27,8 @@ TypeScript: Strict mode, 100% compliance
 Edge Runtime: Cloudflare Workers
 Database: Supabase (PostgreSQL)
 Authentication: Supabase Auth
-File Storage: Hybrid (Supabase <5MB, Cloudflare R2 >5MB)
+File Storage: Cloudflare R2 (all files)
+File Metadata: Supabase Database (file records, permissions)
 Caching: Cloudflare KV + sophisticated strategies
 CMS: Builder.io (visual editing)
 
@@ -61,8 +62,8 @@ Documentation: Comprehensive Markdown
            ▼                           ▼                           ▼
 ┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
 │   Supabase          │    │   Cloudflare R2     │    │   External APIs     │
-│   (DB + Auth +      │    │   (Large Files      │    │   (Analytics,       │
-│    Small Files)     │    │    >5MB Storage)    │    │    Monitoring)      │
+│   (DB + Auth +      │    │   (All Files        │    │   (Analytics,       │
+│    File Metadata)   │    │    Storage)         │    │    Monitoring)      │
 └─────────────────────┘    └─────────────────────┘    └─────────────────────┘
 ```
 
@@ -175,20 +176,11 @@ content (Builder.io integration)
 
 ### **Storage Architecture**
 ```typescript
-// Intelligent Storage Routing
+// Simplified Storage Implementation
 export class StorageRouter {
   route(file: File): StorageProvider {
-    // Size-based routing
-    if (file.size > 5 * 1024 * 1024) {
-      return 'cloudflare-r2';  // Large files
-    }
-    
-    // Type-based routing
-    if (file.type.startsWith('image/') && file.size < 1024 * 1024) {
-      return 'supabase';  // Small images for fast access
-    }
-    
-    return 'supabase';  // Default for small files
+    // All files go to R2 for consistency
+    return 'cloudflare-r2';  // All files up to 5GB
   }
 }
 

@@ -8,75 +8,88 @@ export default component$(() => {
   const navItems = [
     { 
       path: '/dashboard', 
-      label: '📊 Overview', 
-      description: 'Statistics and analytics'
-    },
-    { 
-      path: '/dashboard/pages', 
-      label: '📄 Pages', 
-      description: 'Visual page editor (Builder.io)'
-    },
-    { 
-      path: '/dashboard/posts', 
-      label: '📝 Posts', 
-      description: 'Blog posts and articles'
-    },
-    { 
-      path: '/dashboard/components', 
-      label: '🧩 Components', 
-      description: 'Design system components'
-    },
-    { 
-      path: '/dashboard/media', 
-      label: '📁 Media', 
-      description: 'Files and assets'
-    },
-    { 
-      path: '/dashboard/templates', 
-      label: '📋 Templates', 
-      description: 'Page templates and layouts'
-    },
-    { 
-      path: '/dashboard/workflows', 
-      label: '🔄 Workflows', 
-      description: 'Automated processes'
+      label: '🏠 Dashboard', 
+      description: 'System overview and real-time stats',
+      status: 'live'
     },
     { 
       path: '/dashboard/analytics', 
       label: '📈 Analytics', 
-      description: 'Performance and usage'
+      description: 'Real database metrics and performance',
+      status: 'live'
     },
     { 
-      path: '/dashboard/settings', 
-      label: '⚙️ Settings', 
-      description: 'Configuration and preferences'
+      path: '/dashboard/media', 
+      label: '📁 Media', 
+      description: 'Cloudflare R2 file storage',
+      status: 'live'
+    },
+    { 
+      path: '/dashboard/components', 
+      label: '🧩 Components', 
+      description: 'LIT Web Components with Spectrum tokens',
+      status: 'live'
+    },
+    { 
+      path: '/dashboard/posts', 
+      label: '📝 Posts', 
+      description: 'Content management with Supabase',
+      status: 'live'
+    },
+    { 
+      path: '/dashboard/pages', 
+      label: '📄 Pages', 
+      description: 'Content pages (basic implementation)',
+      status: 'basic'
     }
   ];
 
   return (
     <div class="min-h-screen bg-gray-50">
-      {/* Unified Navigation */}
+      {/* Production Navigation */}
       <nav class="bg-white shadow-sm border-b">
         <div class="container">
-          <div class="flex space-x-8 py-4">
-            <div class="flex items-center">
-              <h1 class="text-xl font-semibold text-gray-900">Content Management</h1>
+          <div class="flex items-center justify-between py-4">
+            <div class="flex items-center space-x-4">
+              <Link href="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700">
+                🚀 Production Platform
+              </Link>
+              <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                ✅ LIVE
+              </span>
             </div>
-            <div class="flex space-x-6">
-              {navItems.map((item) => (
-                <Link 
-                  key={item.path}
-                  href={item.path}
-                  class={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    currentPath === item.path 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <span>{item.label}</span>
-                </Link>
-              ))}
+            
+            <div class="flex items-center space-x-4">
+              <span class="text-sm text-gray-500">
+                Real-time system status
+              </span>
+              <a href="/api/health" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                Health Check →
+              </a>
             </div>
+          </div>
+          
+          <div class="flex space-x-1 pb-4">
+            {navItems.map((item) => (
+              <Link 
+                key={item.path}
+                href={item.path}
+                class={`relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  currentPath === item.path 
+                    ? 'bg-blue-100 text-blue-700 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+                title={item.description}
+              >
+                <span>{item.label}</span>
+                {item.status === 'live' && (
+                  <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                )}
+                {item.status === 'basic' && (
+                  <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                )}
+              </Link>
+            ))}
           </div>
         </div>
       </nav>

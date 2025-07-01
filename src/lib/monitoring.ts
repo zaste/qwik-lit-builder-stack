@@ -26,7 +26,7 @@ class PerformanceMonitor {
   endTimer(name: string, tags?: Record<string, string>): number {
     const startTime = this.timers.get(name);
     if (!startTime) {
-      // console.warn(`Timer ${name} was not started`);
+      // 
       return 0;
     }
 

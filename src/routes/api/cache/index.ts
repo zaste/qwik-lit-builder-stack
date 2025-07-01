@@ -19,7 +19,7 @@ export const onGet: RequestHandler = async ({ json, platform, error, query }) =>
   try {
     const value = await services.kv.get(key);
     json(200, { key, value, found: value !== null });
-  } catch (err) {
+  } catch (_error) {
     throw error(500, 'Failed to get cache value');
   }
 };
@@ -41,7 +41,7 @@ export const onPost: RequestHandler = async ({ json, platform, error, request })
 
     await services.kv.set(key, value, ttl);
     json(200, { success: true, key });
-  } catch (err) {
+  } catch (_error) {
     throw error(500, 'Failed to set cache value');
   }
 };
@@ -61,7 +61,7 @@ export const onDelete: RequestHandler = async ({ json, platform, error, query })
   try {
     await services.kv.delete(key);
     json(200, { success: true, key });
-  } catch (err) {
+  } catch (_error) {
     throw error(500, 'Failed to delete cache value');
   }
 };

@@ -353,8 +353,8 @@ export class RBACManager {
       
       return { success: true, permissionId };
 
-    } catch (error) {
-      logger.error('Permission creation failed', permissionData, error as Error);
+    } catch (_error) {
+      logger.error('Permission creation failed', permissionData, _error as Error);
       return { success: false, error: 'Failed to create permission' };
     }
   }
@@ -409,8 +409,8 @@ export class RBACManager {
       
       return { success: true, roleId };
 
-    } catch (error) {
-      logger.error('Role creation failed', roleData, error as Error);
+    } catch (_error) {
+      logger.error('Role creation failed', roleData, _error as Error);
       return { success: false, error: 'Failed to create role' };
     }
   }
@@ -455,8 +455,8 @@ export class RBACManager {
       
       return { success: true };
 
-    } catch (error) {
-      logger.error('Role update failed', { roleId, updates }, error as Error);
+    } catch (_error) {
+      logger.error('Role update failed', { roleId, updates }, _error as Error);
       return { success: false, error: 'Failed to update role' };
     }
   }
@@ -527,12 +527,12 @@ export class RBACManager {
       
       return { success: true };
 
-    } catch (error) {
+    } catch (_error) {
       logger.error('User role assignment failed', { 
         userId, 
         roleIds, 
         directPermissions 
-      }, error as Error);
+      }, _error as Error);
       return { success: false, error: 'Failed to assign roles' };
     }
   }
@@ -610,8 +610,8 @@ export class RBACManager {
 
       return result;
 
-    } catch (error) {
-      logger.error('Authorization check failed', context, error as Error);
+    } catch (_error) {
+      logger.error('Authorization check failed', context, _error as Error);
       return {
         allowed: false,
         reason: 'Authorization check failed'

@@ -3,6 +3,7 @@ import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { getCurrentUser } from '~/lib/auth';
 import { getSupabaseClient } from '~/lib/supabase';
+import { logger } from '~/lib/logger';
 
 export const useDashboardData = routeLoader$(async ({ cookie }) => {
   const user = await getCurrentUser(cookie);
@@ -31,15 +32,38 @@ export const useDashboardData = routeLoader$(async ({ cookie }) => {
     .eq('user_id', user.id)
     .single();
 
+  // Get pages count from Builder.io content
+  const { count: pagesCount } = await supabase
+    .from('builder_pages')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  // Get components count from design system registry
+  const { count: componentsCount } = await supabase
+    .from('design_system_components')
+    .select('*', { count: 'exact', head: true })
+    .eq('created_by', user.id);
+
+  // Get active sessions count
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const { count: activeSessionsCount } = await supabase
+    .from('user_sessions')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('last_activity', fiveMinutesAgo)
+    .eq('active', true);
+
   return {
     user,
     stats: {
       postsCount: postsCount || 0,
+      pagesCount: pagesCount || 0,
+      componentsCount: componentsCount || 0,
       // Real file statistics
       totalFiles: fileStats?.total_files || 0,
       totalSize: fileStats?.total_size || 0,
       storageUsed: formatFileSize(fileStats?.total_size || 0),
-      activeSessions: 1 // TODO: Implement real session tracking
+      activeSessions: activeSessionsCount || 0
     },
     recentPosts: recentPosts || [],
   };
@@ -60,12 +84,12 @@ export default component$(() => {
   const realtimeStats = useSignal<any>(null);
 
   // Fetch realtime stats from API
-  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(async () => {
     try {
       const response = await fetch('/api/dashboard/stats', {
         headers: {
-          'Authorization': `Bearer ${data.value?.user.accessToken || ''}`
+          // Use cookie-based auth instead of Bearer token
+          'Cookie': document.cookie
         }
       });
       
@@ -74,8 +98,7 @@ export default component$(() => {
         realtimeStats.value = stats;
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch realtime stats:', error);
+      logger.error('Failed to fetch realtime stats', { error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -108,7 +131,7 @@ export default component$(() => {
             <div class="text-2xl mr-3">📄</div>
             <div>
               <h3 class="text-sm font-medium text-gray-500">Pages</h3>
-              <p class="text-3xl font-bold text-gray-900">12</p>
+              <p class="text-3xl font-bold text-gray-900">{stats.pagesCount}</p>
             </div>
           </div>
         </div>
@@ -118,7 +141,7 @@ export default component$(() => {
             <div class="text-2xl mr-3">🧩</div>
             <div>
               <h3 class="text-sm font-medium text-gray-500">Components</h3>
-              <p class="text-3xl font-bold text-gray-900">4</p>
+              <p class="text-3xl font-bold text-gray-900">{stats.componentsCount}</p>
             </div>
           </div>
         </div>

@@ -5,18 +5,8 @@ import { getCurrentUser } from '~/lib/auth';
 import { getSupabaseClient } from '~/lib/supabase';
 import { DSFileUpload } from '~/design-system/components/qwik-wrappers';
 
-// Media file interface
-interface MediaFile {
-  id: string;
-  filename: string;
-  original_name: string;
-  file_size: number;
-  file_type: string;
-  storage_backend: 'supabase' | 'r2';
-  storage_path: string;
-  public_url?: string;
-  created_at: string;
-}
+// Import correct MediaFile interface
+import type { MediaFile } from '~/routes/api/files/list/index';
 
 export const useMediaData = routeLoader$(async ({ cookie }) => {
   const user = await getCurrentUser(cookie);
@@ -109,16 +99,31 @@ export default component$(() => {
     try {
       const response = await fetch('/api/files/list?limit=50', {
         headers: {
-          'Authorization': `Bearer ${mediaData.value.user.accessToken || ''}`
+          // Use cookie-based auth instead of Bearer token
+          'Cookie': document.cookie
         }
       });
       
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { files: any[] };
         realtimeFiles.value = data.files;
       }
-    } catch (error) {
-      console.error('Failed to refresh file list:', error);
+    } catch (fetchError) {
+      // Properly handle and expose file list refresh errors
+      const errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown error';
+      
+      console.error('Failed to refresh file list', {
+        error: errorMessage,
+        endpoint: '/api/files/list',
+        userId: mediaData.value.user?.id
+      });
+      
+      // Set error state to inform user
+      uploadStatus.value = `❌ Failed to refresh file list: ${errorMessage}`;
+      
+      // Clear files on error to avoid showing stale data
+      realtimeFiles.value = [];
+      
     } finally {
       isLoading.value = false;
     }
@@ -245,21 +250,17 @@ export default component$(() => {
                 <div key={file.id} class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div class="flex items-center justify-between mb-3">
                     <div class="text-sm font-medium text-gray-900 truncate">
-                      {file.original_name}
+                      {file.name}
                     </div>
-                    <span class={`px-2 py-1 text-xs rounded-full ${
-                      file.storage_backend === 'r2' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      {file.storage_backend.toUpperCase()}
+                    <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                      R2
                     </span>
                   </div>
                   
                   <div class="text-sm text-gray-600 space-y-1">
-                    <div>Size: {(file.file_size / 1024 / 1024).toFixed(2)} MB</div>
-                    <div>Type: {file.file_type}</div>
-                    <div>Uploaded: {new Date(file.created_at).toLocaleDateString()}</div>
+                    <div>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                    <div>Type: {file.type}</div>
+                    <div>Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}</div>
                   </div>
                   
                   <div class="mt-4 flex space-x-2">

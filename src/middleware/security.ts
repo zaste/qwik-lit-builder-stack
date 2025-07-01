@@ -27,6 +27,9 @@ const defaultSecurityConfig: SecurityConfig = {
 
 // Content Security Policy configuration
 function generateCSP(isDev: boolean = false): string {
+  // Check if running in GitHub Codespaces
+  const isCodespaces = typeof process !== 'undefined' && process.env.CODESPACES === 'true';
+  
   const baseCSP = {
     'default-src': ["'self'"],
     'script-src': [
@@ -34,7 +37,6 @@ function generateCSP(isDev: boolean = false): string {
       "'unsafe-inline'", // Required for Qwik inline scripts
       'https://cdn.jsdelivr.net',
       'https://unpkg.com',
-      'https://*.builder.io',
       'https://*.supabase.co',
       ...(isDev ? ["'unsafe-eval'"] : [])
     ],
@@ -51,7 +53,6 @@ function generateCSP(isDev: boolean = false): string {
       'https:',
       'https://*.supabase.co',
       'https://*.cloudflare.com',
-      'https://*.builder.io',
       'https://*.githubusercontent.com'
     ],
     'font-src': [
@@ -63,21 +64,22 @@ function generateCSP(isDev: boolean = false): string {
       "'self'",
       'https://*.supabase.co',
       'https://*.cloudflare.com',
-      'https://*.builder.io',
       'https://*.sentry.io',
       'wss://*.supabase.co',
       'https://api.github.com',
       ...(isDev ? ['ws://localhost:*', 'http://localhost:*'] : [])
     ],
     'frame-src': [
-      "'self'",
-      'https://*.builder.io'
+      "'self'"
     ],
     'worker-src': [
       "'self'",
       'blob:'
     ],
-    'manifest-src': ["'self'"],
+    'manifest-src': [
+      "'self'",
+      ...(isCodespaces ? ['https://github.dev', 'https://*.github.dev'] : [])
+    ],
     'media-src': [
       "'self'",
       'https://*.supabase.co',
@@ -96,48 +98,84 @@ function generateCSP(isDev: boolean = false): string {
   return isDev ? cspString : `${cspString}; upgrade-insecure-requests`;
 }
 
-// Rate limiting store (in-memory for demo, use Redis/KV in production)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+// Real distributed rate limiting using Cloudflare KV
+async function getRateLimitData(env: any, key: string): Promise<{ count: number; resetTime: number } | null> {
+  try {
+    if (!env.KV_CACHE) {
+      console.warn('KV_CACHE not available, rate limiting disabled');
+      return null;
+    }
+    
+    const data = await env.KV_CACHE.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Failed to get rate limit data from KV', { key, error: error instanceof Error ? error.message : String(error) });
+    return null;
+  }
+}
+
+async function setRateLimitData(env: any, key: string, data: { count: number; resetTime: number }): Promise<void> {
+  try {
+    if (!env.KV_CACHE) {
+      return; // Gracefully degrade if KV not available
+    }
+    
+    const ttl = Math.max(1, Math.ceil((data.resetTime - Date.now()) / 1000));
+    await env.KV_CACHE.put(key, JSON.stringify(data), { expirationTtl: ttl });
+  } catch (error) {
+    console.error('Failed to set rate limit data in KV', { key, error: error instanceof Error ? error.message : String(error) });
+  }
+}
 
 function getRateLimitKey(request: Request): string {
   const ip = request.headers.get('cf-connecting-ip') ||
              request.headers.get('x-forwarded-for') ||
+             request.headers.get('x-real-ip') ||
              'unknown';
   return `rate_limit:${ip}`;
 }
 
-function checkRateLimit(request: Request, config: SecurityConfig): boolean {
+async function checkRateLimit(request: Request, config: SecurityConfig, env: any): Promise<boolean> {
   const key = getRateLimitKey(request);
   const now = Date.now();
   const windowStart = now - config.rateLimitWindowMs;
   
-  const current = rateLimitStore.get(key);
+  const current = await getRateLimitData(env, key);
   
   if (!current || current.resetTime < windowStart) {
-    rateLimitStore.set(key, { count: 1, resetTime: now });
+    // Create new rate limit window
+    const newData = { count: 1, resetTime: now + config.rateLimitWindowMs };
+    await setRateLimitData(env, key, newData);
     return true;
   }
   
   if (current.count >= config.rateLimitMaxRequests) {
+    console.warn('Rate limit exceeded', {
+      ip: key,
+      currentCount: current.count,
+      maxRequests: config.rateLimitMaxRequests,
+      windowMs: config.rateLimitWindowMs
+    });
     return false;
   }
   
+  // Increment counter
   current.count++;
-  rateLimitStore.set(key, current);
+  await setRateLimitData(env, key, current);
   return true;
 }
 
 /**
  * Enhanced Security headers middleware
  */
-export const securityHeaders: RequestHandler = async ({ headers, request, next, json }) => {
+export const securityHeaders: RequestHandler = async ({ headers, request, next, json, env }) => {
   const config = defaultSecurityConfig;
   const isDev = process.env.NODE_ENV === 'development';
   const startTime = Date.now();
 
   try {
-    // Rate limiting check (skip for development)
-    if (!isDev && !checkRateLimit(request, config)) {
+    // Real distributed rate limiting check (skip for development)
+    if (!isDev && !(await checkRateLimit(request, config, env))) {
       logger.security('Rate limit exceeded', 'medium', {
         ip: getRateLimitKey(request),
         userAgent: request.headers.get('user-agent'),

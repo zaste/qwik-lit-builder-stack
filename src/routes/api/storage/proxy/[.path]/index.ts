@@ -37,8 +37,8 @@ export const onGet: RequestHandler = async ({ params, platform, error, cacheCont
         'Cache-Control': 'public, max-age=2592000, immutable',
       },
     }));
-  } catch (err) {
-    if (err instanceof NotFoundError) {
+  } catch (_error) {
+    if (_error instanceof NotFoundError) {
       throw error(404, 'File not found');
     }
     throw error(500, 'Failed to retrieve file');

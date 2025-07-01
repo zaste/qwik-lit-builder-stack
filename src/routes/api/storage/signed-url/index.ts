@@ -30,7 +30,7 @@ export const onGet: RequestHandler = async ({ query, json, platform, error }) =>
       url: proxyUrl.toString(),
       expires: new Date(Date.now() + expires * 1000).toISOString(),
     });
-  } catch (err) {
+  } catch (_error) {
     throw error(500, 'Failed to generate signed URL');
   }
 };

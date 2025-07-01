@@ -16,8 +16,8 @@ export const authMiddleware: RequestHandler = async ({ cookie, redirect, next })
   try {
     // Valid session, continue
     await next();
-  } catch (error) {
-    // console.error('Auth middleware error:', error);
+  } catch (_error) {
+    // 
     clearSession(cookie);
     throw redirect(302, '/login');
   }

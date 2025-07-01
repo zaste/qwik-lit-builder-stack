@@ -159,8 +159,8 @@ class StructuredLogger {
           body: JSON.stringify({ logs })
         });
       }
-    } catch (error) {
-      // console.error('Failed to send logs to remote endpoint:', error);
+    } catch (_error) {
+      // 
       // Re-queue failed logs (with limit to prevent infinite growth)
       if (this.logQueue.length < this.maxQueueSize) {
         this.logQueue.unshift(...logs.slice(0, this.maxQueueSize - this.logQueue.length));

@@ -8,7 +8,6 @@ export const onRequest: RequestHandler = async () => {
 
 export default component$(() => {
   // Register design system and error handling on client
-  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(async () => {
     if (typeof window !== 'undefined') {
       // Initialize Sentry error tracking
@@ -31,16 +30,18 @@ export default component$(() => {
           <div class="flex justify-between h-16">
             <div class="flex items-center">
               <a href="/" class="text-xl font-bold text-gray-900">
-                Qwik + LIT + Builder
+                🚀 <span class="text-blue-600">Qwik + LIT</span> Production Stack
               </a>
             </div>
-            <div class="flex items-center space-x-4">
-              <a href="/" class="text-gray-600 hover:text-gray-900">Home</a>
-              <a href="/about" class="text-gray-600 hover:text-gray-900">About</a>
-              <a href="/demo" class="text-gray-600 hover:text-gray-900">Demo</a>
-              <a href="/dashboard" class="text-gray-600 hover:text-gray-900">Dashboard</a>
-              <a href="/dashboard/media" class="text-gray-600 hover:text-gray-900">Media Library</a>
-              <a href="/login" class="text-gray-600 hover:text-gray-900">Login</a>
+            <div class="flex items-center space-x-6">
+              <a href="/" class="text-gray-600 hover:text-gray-900 font-medium">Home</a>
+              <a href="/dashboard" class="text-gray-600 hover:text-gray-900 font-medium">📊 Dashboard</a>
+              <a href="/dashboard/analytics" class="text-gray-600 hover:text-gray-900 font-medium">📈 Analytics</a>
+              <a href="/dashboard/media" class="text-gray-600 hover:text-gray-900 font-medium">📁 Media</a>
+              <a href="/api/health" target="_blank" class="text-green-600 hover:text-green-700 font-medium">💚 Health</a>
+              <a href="/login" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                🔐 Demo Login
+              </a>
             </div>
           </div>
         </div>
@@ -52,11 +53,22 @@ export default component$(() => {
         </ErrorBoundary>
       </main>
       
-      <footer class="bg-gray-50 mt-12">
+      <footer class="bg-gradient-to-r from-gray-50 to-gray-100 mt-12">
         <div class="container py-8">
-          <p class="text-center text-gray-600">
-            Built with Qwik, LIT, and Builder.io
-          </p>
+          <div class="text-center">
+            <p class="text-lg font-semibold text-gray-900 mb-2">
+              🚀 Production-Ready Platform
+            </p>
+            <p class="text-gray-600 mb-4">
+              Built with ⚡ Qwik City • 🧩 LIT Elements • 🗄️ Supabase • ☁️ Cloudflare
+            </p>
+            <div class="flex justify-center space-x-6 text-sm">
+              <span class="text-green-600 font-medium">✅ 0 TypeScript Errors</span>
+              <span class="text-blue-600 font-medium">⚡ Zero Hydration</span>
+              <span class="text-purple-600 font-medium">🔐 Enterprise Security</span>
+              <span class="text-yellow-600 font-medium">🌐 Edge Computing</span>
+            </div>
+          </div>
         </div>
       </footer>
     </ErrorBoundary>

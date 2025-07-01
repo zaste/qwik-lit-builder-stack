@@ -1,27 +1,17 @@
 name = "qwik-lit-builder-app"
-main = "dist/_worker.js"
 compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
 
-# KV Namespaces for caching
+# KV Namespaces for Pages
 [[kv_namespaces]]
 binding = "KV"
 id = "d7a33d626dfb43059f52828345a24efe"
 preview_id = "dcf348d303684946ad6bb224348c2311"
 
-# R2 Storage Buckets
+# R2 Storage Buckets for Pages
 [[r2_buckets]]
 binding = "R2"
 bucket_name = "qwik-production-files"
-
-# Durable Objects for WebSocket
-[[durable_objects.bindings]]
-name = "WEBSOCKET_DO"
-class_name = "WebSocketDurableObject"
-script_name = "qwik-lit-builder-app"
-
-[[migrations]]
-tag = "v1"
-new_classes = ["WebSocketDurableObject"]
 
 # Environment Variables
 [vars]
@@ -31,29 +21,9 @@ DEPLOY_TARGET = "cloudflare"
 [env.development]
 vars = { ENVIRONMENT = "development" }
 
-# Production
+# Production  
 [env.production]
 vars = { ENVIRONMENT = "production" }
 
-# Routes
-routes = [
-  { include = "/*", exclude = ["/*.xml", "/*.txt", "/favicon.ico", "/robots.txt", "/sitemap.xml"] }
-]
-
-# Build configuration
-[build]
-command = "pnpm build:cloudflare"
-
-[site]
-bucket = "./dist"
-
-# Compatibility flags
+# Compatibility flags for Pages
 compatibility_flags = ["nodejs_compat"]
-
-# Workers configuration
-[placement]
-mode = "smart"
-
-# Performance hints
-[limits]
-cpu_ms = 50

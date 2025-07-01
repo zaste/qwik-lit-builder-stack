@@ -66,8 +66,8 @@ export class ValidationController implements ReactiveController {
     try {
       const rules = JSON.parse(rulesString) as ValidationRule[];
       this.setRules(rules);
-    } catch (error) {
-      // console.warn('Invalid validation rules JSON:', rulesString);
+    } catch (_error) {
+      // 
     }
   }
 

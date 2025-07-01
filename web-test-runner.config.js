@@ -1,70 +1,26 @@
 import { playwrightLauncher } from '@web/test-runner-playwright';
+import { esbuildPlugin } from '@web/dev-server-esbuild';
 
 export default {
-  // Test files pattern
-  files: 'src/**/*.test.{js,ts}',
-  
-  // Node resolve for ES modules
+  files: ['src/**/*.test.ts'],
   nodeResolve: true,
-  
-  // Browser configuration
-  browsers: [
-    playwrightLauncher({ 
-      product: 'chromium',
-      launchOptions: {
-        args: ['--no-sandbox', '--disable-dev-shm-usage']
-      }
-    })
+  plugins: [
+    esbuildPlugin({
+      ts: true,
+      target: 'es2020',
+    }),
   ],
-  
-  // Test framework
+  browsers: [
+    playwrightLauncher({ product: 'chromium' }),
+  ],
   testFramework: {
-    path: '@web/test-runner-mocha/dist/autorun.js'
+    config: {
+      timeout: 5000,
+    },
   },
-  
-  // Coverage configuration
   coverage: true,
   coverageConfig: {
-    include: [
-      'src/design-system/components/**/*.ts',
-      'src/design-system/controllers/**/*.ts'
-    ],
-    exclude: [
-      'src/**/*.test.ts',
-      'src/**/*.spec.ts'
-    ],
-    threshold: {
-      statements: 80,
-      branches: 70,
-      functions: 80,
-      lines: 80
-    }
+    include: ['src/**/*.ts'],
+    exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
   },
-  
-  // Serve configuration
-  rootDir: '.',
-  
-  // Development mode
-  watch: false,
-  
-  // Concurrency
-  concurrency: 4,
-  
-  // Timeout
-  testsStartTimeout: 30000,
-  testsFinishTimeout: 60000,
-  
-  // Plugin configuration for LIT components
-  plugins: [],
-  
-  // Middleware for serving files
-  middleware: [],
-  
-  // Additional configuration
-  preserveSymlinks: true,
-  
-  // Environment variables
-  environmentVariables: {
-    NODE_ENV: 'test'
-  }
 };

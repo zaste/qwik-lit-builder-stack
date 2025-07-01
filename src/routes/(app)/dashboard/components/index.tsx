@@ -1,4 +1,4 @@
-import { component$, useSignal } from '@builder.io/qwik';
+import { component$, useSignal, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 export default component$(() => {
@@ -139,7 +139,7 @@ export default component$(() => {
               )}
               {selectedComponent.value === 'ds-card' && (
                 <ds-card variant={currentProps.variant}>
-                  <div innerHTML={currentProps.content}></div>
+                  <div dangerouslySetInnerHTML={currentProps.content}></div>
                 </ds-card>
               )}
               {selectedComponent.value === 'ds-input' && (
@@ -177,9 +177,9 @@ export default component$(() => {
                       value={currentProps[prop.name]}
                       onChange$={(e) => updateProp(prop.name, (e.target as HTMLSelectElement).value)}
                     >
-                      {prop.options?.map((option) => (
+                      {'options' in prop && prop.options ? prop.options.map((option: string) => (
                         <option key={option} value={option}>{option}</option>
-                      ))}
+                      )) : null}
                     </select>
                   ) : prop.type === 'boolean' ? (
                     <input

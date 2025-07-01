@@ -152,7 +152,7 @@ export class CacheManager {
       }
       
       return data;
-    } catch (error) {
+    } catch (_error) {
       const errorTime = Date.now() - startTime;
       
       // Record cache error
@@ -165,7 +165,7 @@ export class CacheManager {
         strategy: options.strategy || 'API'
       });
       
-      throw error;
+      throw _error;
     }
   }
   
@@ -199,8 +199,8 @@ export class CacheManager {
           if (taggedKeys) {
             taggedKeys.forEach(key => keysToInvalidate.add(key));
           }
-        } catch (error) {
-          errors.push(`Failed to get keys for tag ${tag}: ${error}`);
+        } catch (_error) {
+          errors.push(`Failed to get keys for tag ${tag}: ${_error instanceof Error ? _error.message : String(_error)}`);
         }
       }
       
@@ -217,13 +217,13 @@ export class CacheManager {
               try {
                 await services.kv!.delete(key);
                 invalidatedCount++;
-              } catch (error) {
-                errors.push(`Failed to delete key ${key}: ${error}`);
+              } catch (_error) {
+                errors.push(`Failed to delete key ${key}: ${_error instanceof Error ? _error.message : String(_error)}`);
               }
             })
           );
-        } catch (error) {
-          errors.push(`Batch invalidation failed: ${error}`);
+        } catch (_error) {
+          errors.push(`Batch invalidation failed: ${_error instanceof Error ? _error.message : String(_error)}`);
         }
       }
       
@@ -231,15 +231,15 @@ export class CacheManager {
       for (const tag of tags) {
         try {
           await services.kv.delete(`tag:${tag}`);
-        } catch (error) {
-          errors.push(`Failed to clean up tag ${tag}: ${error}`);
+        } catch (_error) {
+          errors.push(`Failed to clean up tag ${tag}: ${_error instanceof Error ? _error.message : String(_error)}`);
         }
       }
       
-      // console.log(`🚀 Cache invalidation completed: ${invalidatedCount} keys invalidated for tags: ${tags.join(', ')}`);
+      // 
       
-    } catch (error) {
-      errors.push(`Global invalidation error: ${error}`);
+    } catch (_error) {
+      errors.push(`Global invalidation error: ${_error instanceof Error ? _error.message : String(_error)}`);
     }
     
     return { invalidated: invalidatedCount, errors };
@@ -258,13 +258,13 @@ export class CacheManager {
     try {
       // Note: KV doesn't support pattern matching directly
       // This is a simulation - in production, you'd need to maintain an index
-      // console.log(`🔍 Pattern invalidation requested: ${pattern}`);
+      // 
       
       // For now, we'll log this request and suggest using tags instead
-      // console.log('💡 For pattern-based invalidation, consider using cache tags for better performance');
+      // 
       
-    } catch (error) {
-      errors.push(`Pattern invalidation error: ${error}`);
+    } catch (_error) {
+      errors.push(`Pattern invalidation error: ${_error instanceof Error ? _error.message : String(_error)}`);
     }
     
     return { invalidated: invalidatedCount, errors };
@@ -280,17 +280,17 @@ export class CacheManager {
     const relatedTags = relationshipMap[primaryKey] || [];
     
     if (relatedTags.length > 0) {
-      // console.log(`🔗 Invalidating related content for ${primaryKey}: ${relatedTags.join(', ')}`);
+      // 
       const _result = await this.invalidateByTags(relatedTags);
-      // console.log(`✅ Related content invalidation: ${result.invalidated} keys, ${result.errors.length} errors`);
+      // 
     }
     
     // Also invalidate the primary key directly
     try {
       await services.kv.delete(primaryKey);
-      // console.log(`🎯 Primary key ${primaryKey} invalidated`);
-    } catch (error) {
-      // console.error(`❌ Failed to invalidate primary key ${primaryKey}:`, error);
+      // 
+    } catch (_error) {
+      // 
     }
   }
   

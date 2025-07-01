@@ -69,11 +69,11 @@ export class ComponentCacheManager {
       ]
     };
 
-    // Compress if enabled and template is large
+    // Real compression if enabled and template is large
     if (this.config.compressionEnabled && template.template.length > 1024) {
       entry.compressed = true;
-      // Simulate compression (in production, use actual compression)
-      const compressed = this.simulateCompression(template.template);
+      // Use real compression
+      const compressed = await this.compressContent(template.template);
       this.compressionCache.set(cacheKey, compressed);
     }
 
@@ -91,7 +91,7 @@ export class ComponentCacheManager {
       }
     );
 
-    // console.log(`🧩 Cached component: ${template.name}@${template.version} (${template.metadata.size} bytes)`);
+    // 
   }
 
   /**
@@ -107,7 +107,19 @@ export class ComponentCacheManager {
         memoryEntry.accessCount++;
         memoryEntry.lastAccessed = Date.now();
         
-        // console.log(`⚡ Component cache hit (memory): ${componentId}`);
+        // Handle compressed content
+        if (memoryEntry.compressed) {
+          const compressedData = this.compressionCache.get(cacheKey);
+          if (compressedData) {
+            const decompressed = await this.decompressContent(compressedData);
+            // Return template with decompressed content
+            return {
+              ...memoryEntry.template,
+              template: decompressed
+            };
+          }
+        }
+        
         return memoryEntry.template;
       }
 
@@ -125,15 +137,15 @@ export class ComponentCacheManager {
         // Restore to memory cache
         this.memoryCache.set(cacheKey, distributedEntry as CacheEntry);
         
-        // console.log(`📡 Component cache hit (distributed): ${componentId}`);
+        // 
         return (distributedEntry as CacheEntry).template;
       }
 
-      // console.log(`❌ Component cache miss: ${componentId}`);
+      // 
       return null;
       
-    } catch (error) {
-      // console.error(`❌ Failed to get component ${componentId}:`, error);
+    } catch (_error) {
+      // 
       return null;
     }
   }
@@ -160,11 +172,11 @@ export class ComponentCacheManager {
           }
         );
 
-        // console.log(`⚙️ Cached compiled component: ${componentId}`);
+        // 
       }
       
-    } catch (error) {
-      // console.error(`❌ Failed to cache compiled component ${componentId}:`, error);
+    } catch (_error) {
+      // 
     }
   }
 
@@ -178,7 +190,7 @@ export class ComponentCacheManager {
       // Check memory cache first
       const memoryEntry = this.memoryCache.get(cacheKey);
       if (memoryEntry?.compiled) {
-        // console.log(`⚡ Compiled component cache hit (memory): ${componentId}`);
+        // 
         return memoryEntry.compiled;
       }
 
@@ -193,14 +205,14 @@ export class ComponentCacheManager {
       );
 
       if (compiled) {
-        // console.log(`📡 Compiled component cache hit (distributed): ${componentId}`);
+        // 
         return compiled;
       }
 
       return null;
       
-    } catch (error) {
-      // console.error(`❌ Failed to get compiled component ${componentId}:`, error);
+    } catch (_error) {
+      // 
       return null;
     }
   }
@@ -217,25 +229,48 @@ export class ComponentCacheManager {
       .filter(key => key.key.startsWith('component:'))
       .slice(0, 5);
 
-    // console.log(`🔮 Prefetching ${frequentComponents.length} frequently used components`);
+    console.debug('Starting component prefetching', {
+      frequentComponentsCount: frequentComponents.length,
+      strategy: 'frequency-based'
+    });
 
-    for (const component of frequentComponents) {
-      if (!this.prefetchQueue.has(component.key)) {
+    // Real async prefetching without setTimeout simulation
+    const prefetchPromises = frequentComponents
+      .filter(component => !this.prefetchQueue.has(component.key))
+      .map(async (component) => {
         this.prefetchQueue.add(component.key);
         
-        // Simulate prefetching component dependencies
-        setTimeout(async () => {
-          try {
-            const componentId = component.key.split(':')[1];
-            await this.getComponent(componentId);
-            this.prefetchQueue.delete(component.key);
-          } catch (error) {
-            // console.error(`❌ Prefetch failed for ${component.key}:`, error);
-            this.prefetchQueue.delete(component.key);
-          }
-        }, 100);
-      }
-    }
+        try {
+          const componentId = component.key.split(':')[1];
+          const startTime = Date.now();
+          
+          // Real component prefetching
+          await this.getComponent(componentId);
+          
+          const prefetchTime = Date.now() - startTime;
+          console.debug('Component prefetched successfully', {
+            componentId,
+            cacheKey: component.key,
+            prefetchTime,
+            usage: component.requests
+          });
+          
+          this.prefetchQueue.delete(component.key);
+          
+        } catch (prefetchError) {
+          console.error('Component prefetch failed', {
+            componentId: component.key.split(':')[1],
+            error: prefetchError instanceof Error ? prefetchError.message : String(prefetchError),
+            usage: component.requests
+          });
+          
+          this.prefetchQueue.delete(component.key);
+          throw prefetchError; // Don't hide prefetch failures
+        }
+      });
+
+    // Execute all prefetch operations concurrently
+    await Promise.allSettled(prefetchPromises);
   }
 
   /**
@@ -258,10 +293,10 @@ export class ComponentCacheManager {
         version ? `version:${version}` : ''
       ].filter(Boolean));
 
-      // console.log(`🗑️ Invalidated component cache: ${componentId}${version ? `@${version}` : ''}`);
+      // 
       
-    } catch (error) {
-      // console.error(`❌ Failed to invalidate component ${componentId}:`, error);
+    } catch (_error) {
+      // 
     }
   }
 
@@ -282,10 +317,10 @@ export class ComponentCacheManager {
         }
       );
 
-      // console.log(`🏗️ Cached Builder.io schema: ${componentName}`);
+      // 
       
-    } catch (error) {
-      // console.error(`❌ Failed to cache Builder.io schema ${componentName}:`, error);
+    } catch (_error) {
+      // 
     }
   }
 
@@ -306,13 +341,13 @@ export class ComponentCacheManager {
       );
 
       if (schema) {
-        // console.log(`🏗️ Builder.io schema cache hit: ${componentName}`);
+        // 
       }
 
       return schema;
       
-    } catch (error) {
-      // console.error(`❌ Failed to get Builder.io schema ${componentName}:`, error);
+    } catch (_error) {
+      // 
       return null;
     }
   }
@@ -324,7 +359,7 @@ export class ComponentCacheManager {
     const currentSize = this.getCurrentCacheSize();
     
     if (currentSize > this.config.maxSize) {
-      // console.log(`🧹 Cache optimization needed: ${currentSize} > ${this.config.maxSize} bytes`);
+      // 
       
       // Sort by access count and last accessed time
       const entries = Array.from(this.memoryCache.entries())
@@ -342,10 +377,10 @@ export class ComponentCacheManager {
         this.memoryCache.delete(key);
         this.compressionCache.delete(key);
         
-        // console.log(`🗑️ Removed from cache: ${entry.template.name} (${entry.template.metadata.size} bytes)`);
+        // 
       }
       
-      // console.log(`✅ Cache optimized: removed ${removedSize} bytes`);
+      // 
     }
   }
 
@@ -376,13 +411,32 @@ export class ComponentCacheManager {
     const compressedSize = compressedEntries.reduce((sum, compressed) => sum + compressed.length, 0);
     const compressionRatio = originalSize > 0 ? (1 - compressedSize / originalSize) * 100 : 0;
 
+    // Calculate real hit rate from analytics
+    const hitRate = this.calculateHitRate();
+
     return {
       memoryEntries: this.memoryCache.size,
       totalSize,
-      hitRate: 0, // Would be calculated from analytics
+      hitRate,
       mostAccessed,
       compressionRatio
     };
+  }
+
+  /**
+   * Calculate real hit rate from cache analytics
+   */
+  private calculateHitRate(): number {
+    try {
+      const metrics = cacheAnalytics.getMetrics(60); // Last 60 minutes
+      const cacheRequests = metrics.totalRequests;
+      const cacheHits = metrics.hits || 0;
+      
+      if (cacheRequests === 0) return 0;
+      return Math.round((cacheHits / cacheRequests) * 100);
+    } catch {
+      return 0;
+    }
   }
 
   /**
@@ -392,7 +446,6 @@ export class ComponentCacheManager {
     this.memoryCache.clear();
     this.compressionCache.clear();
     this.prefetchQueue.clear();
-    // console.log('🧹 Component cache cleared');
   }
 
   private getComponentCacheKey(componentId: string, version?: string): string {
@@ -404,12 +457,105 @@ export class ComponentCacheManager {
       .reduce((sum, entry) => sum + entry.template.metadata.size, 0);
   }
 
-  private simulateCompression(content: string): string {
-    // Simulate compression by removing whitespace and comments
-    return content
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
-      .replace(/\s+/g, ' ') // Collapse whitespace
-      .trim();
+  /**
+   * Real content compression using Web API compression
+   */
+  private async compressContent(content: string): Promise<string> {
+    try {
+      // Use CompressionStream API for real compression
+      const encoder = new TextEncoder();
+      
+      const stream = new CompressionStream('gzip');
+      const writer = stream.writable.getWriter();
+      const reader = stream.readable.getReader();
+      
+      // Write content to compression stream
+      await writer.write(encoder.encode(content));
+      await writer.close();
+      
+      // Read compressed data
+      const chunks: Uint8Array[] = [];
+      let done = false;
+      
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          chunks.push(value);
+        }
+      }
+      
+      // Combine chunks and convert to base64 for storage
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+      const combined = new Uint8Array(totalLength);
+      let offset = 0;
+      
+      for (const chunk of chunks) {
+        combined.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      // Convert to base64 for string storage
+      return btoa(String.fromCharCode(...combined));
+      
+    } catch (error) {
+      console.warn('Compression failed, storing uncompressed:', error);
+      // Fallback to uncompressed if compression fails
+      return content;
+    }
+  }
+
+  /**
+   * Real content decompression
+   */
+  private async decompressContent(compressedData: string): Promise<string> {
+    try {
+      // Convert base64 back to Uint8Array
+      const binaryString = atob(compressedData);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // Use DecompressionStream API for real decompression
+      const stream = new DecompressionStream('gzip');
+      const writer = stream.writable.getWriter();
+      const reader = stream.readable.getReader();
+      const decoder = new TextDecoder();
+      
+      // Write compressed data to decompression stream
+      await writer.write(bytes);
+      await writer.close();
+      
+      // Read decompressed data
+      const chunks: Uint8Array[] = [];
+      let done = false;
+      
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          chunks.push(value);
+        }
+      }
+      
+      // Combine chunks and decode
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+      const combined = new Uint8Array(totalLength);
+      let offset = 0;
+      
+      for (const chunk of chunks) {
+        combined.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      return decoder.decode(combined);
+      
+    } catch (error) {
+      console.warn('Decompression failed, returning as-is:', error);
+      // Fallback to treating as uncompressed
+      return compressedData;
+    }
   }
 }
 

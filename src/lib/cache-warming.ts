@@ -133,12 +133,9 @@ export class CacheWarmingManager {
       try {
         const startTime = Date.now();
         
-        // Create a simple fetcher for demonstration
-        // In production, this would fetch actual content
+        // Real content fetcher based on key type
         const fetcher = async () => {
-          // Simulate content fetching
-          await new Promise(resolve => setTimeout(resolve, 100));
-          return { content: `warmed-${candidate.key}`, timestamp: Date.now() };
+          return await this.fetchRealContent(candidate.key);
         };
 
         await this.cacheManager.getOrSet(
@@ -166,19 +163,19 @@ export class CacheWarmingManager {
           });
         });
         
-      } catch (error) {
+      } catch (warmingError) {
         results.push({
           success: false,
           key: candidate.key,
           responseTime: 0,
-          error: String(error)
+          error: String(warmingError)
         });
         
         import('./logger').then(({ logger }) => {
           logger.error('Content warming failed', {
             component: 'CacheWarmingManager',
             key: candidate.key,
-            error: error instanceof Error ? error.message : String(error)
+            error: warmingError instanceof Error ? warmingError.message : String(warmingError)
           });
         });
       }
@@ -212,13 +209,8 @@ export class CacheWarmingManager {
         const startTime = Date.now();
         
         const fetcher = async () => {
-          // Simulate page/API response
-          return { 
-            path: page.path, 
-            warmed: true, 
-            timestamp: Date.now(),
-            content: `Critical page content for ${page.path}`
-          };
+          // Real page fetching
+          return await this.fetchRealPage(page.path);
         };
 
         await this.cacheManager.getOrSet(
@@ -238,17 +230,17 @@ export class CacheWarmingManager {
           responseTime
         });
 
-        // console.log(`✅ Warmed critical page: ${page.key} (${responseTime}ms)`);
+        // 
         
-      } catch (error) {
+      } catch (_error) {
         results.push({
           success: false,
           key: page.key,
           responseTime: 0,
-          error: String(error)
+          error: String(_error)
         });
         
-        // console.error(`❌ Failed to warm critical page ${page.key}:`, error);
+        // 
       }
     }
 
@@ -270,22 +262,56 @@ export class CacheWarmingManager {
 
     const results: WarmingResult[] = [];
 
-    // console.log(`🔥 Warming ${builderTargets.length} Builder.io templates/components`);
+    console.info('Starting Builder.io templates warming', {
+      targetsCount: builderTargets.length,
+      strategy: 'builder-templates'
+    });
 
     for (const target of builderTargets) {
       try {
         const startTime = Date.now();
         
         const fetcher = async () => {
-          // Simulate Builder.io content fetching
-          return {
-            type: target.type,
-            name: target.key.split(':').pop(),
-            schema: { /* component schema */ },
-            template: { /* template data */ },
-            warmed: true,
-            timestamp: Date.now()
-          };
+          // Real Builder.io content fetching
+          const componentName = target.key.split(':').pop();
+          
+          if (target.type === 'component') {
+            // Fetch real component metadata from Builder.io API
+            const response = await fetch(`/api/builder/components?name=${componentName}`);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch component ${componentName}: ${response.statusText}`);
+            }
+            const componentData = await response.json() as { schema?: any; metadata?: any };
+            
+            return {
+              type: target.type,
+              name: componentName,
+              schema: componentData?.schema || {},
+              metadata: componentData?.metadata || {},
+              warmed: true,
+              timestamp: Date.now(),
+              source: 'builder-api'
+            };
+          } else if (target.type === 'template') {
+            // Fetch real template data from Builder.io
+            const response = await fetch(`/api/builder/pages?template=${componentName}`);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch template ${componentName}: ${response.statusText}`);
+            }
+            const templateData = await response.json() as { template?: any; content?: any };
+            
+            return {
+              type: target.type,
+              name: componentName,
+              template: templateData?.template || {},
+              content: templateData?.content || {},
+              warmed: true,
+              timestamp: Date.now(),
+              source: 'builder-api'
+            };
+          }
+          
+          throw new Error(`Unknown target type: ${target.type}`);
         };
 
         await this.cacheManager.getOrSet(
@@ -305,17 +331,29 @@ export class CacheWarmingManager {
           responseTime
         });
 
-        // console.log(`✅ Warmed Builder.io ${target.type}: ${target.key} (${responseTime}ms)`);
+        console.debug('Builder template warmed successfully', {
+          key: target.key,
+          type: target.type,
+          responseTime,
+          strategy: 'builder-templates'
+        });
         
-      } catch (error) {
+      } catch (warmingError) {
+        const errorMessage = warmingError instanceof Error ? warmingError.message : String(warmingError);
+        
         results.push({
           success: false,
           key: target.key,
           responseTime: 0,
-          error: String(error)
+          error: errorMessage
         });
         
-        // console.error(`❌ Failed to warm Builder.io ${target.type} ${target.key}:`, error);
+        // Log warming failures for monitoring
+        console.error('Cache warming failed for target', {
+          key: target.key,
+          type: target.type,
+          error: errorMessage
+        });
       }
     }
 
@@ -328,11 +366,11 @@ export class CacheWarmingManager {
   async executeStrategy(strategyName: string): Promise<WarmingResult[]> {
     const strategy = this.strategies.get(strategyName);
     if (!strategy || !strategy.enabled) {
-      // console.warn(`🚫 Strategy "${strategyName}" not found or disabled`);
+      // 
       return [];
     }
 
-    // console.log(`🚀 Executing warming strategy: ${strategyName}`);
+    // 
 
     switch (strategyName) {
       case 'popular-content':
@@ -350,7 +388,7 @@ export class CacheWarmingManager {
         ]);
         return allResults.flat();
       default:
-        // console.warn(`🚫 Unknown strategy: ${strategyName}`);
+        // 
         return [];
     }
   }
@@ -372,17 +410,17 @@ export class CacheWarmingManager {
         // Schedule by interval
         const intervalMs = strategy.schedule.interval * 60 * 1000;
         const timer = setInterval(() => {
-          this.executeStrategy(name).catch(_error => {
-            // console.error(`❌ Scheduled warming failed for ${name}:`, error);
+          this.executeStrategy(name).catch((_error) => {
+            // 
           });
         }, intervalMs);
         
         this.scheduledWarmings.set(name, timer);
-        // console.log(`⏰ Scheduled warming "${name}" every ${strategy.schedule.interval} minutes`);
+        // 
         
       } else if (strategy.schedule.at) {
         // Schedule at specific time (simplified - just log for now)
-        // console.log(`⏰ Would schedule warming "${name}" at ${strategy.schedule.at} daily`);
+        // 
       }
     });
   }
@@ -392,7 +430,7 @@ export class CacheWarmingManager {
    */
   async executeManualWarming(): Promise<{ totalTargets: number; results: WarmingResult[] }> {
     if (this.isWarming) {
-      // console.warn('🚫 Warming already in progress');
+      // 
       return { totalTargets: 0, results: [] };
     }
 
@@ -400,7 +438,7 @@ export class CacheWarmingManager {
     const results: WarmingResult[] = [];
     
     try {
-      // console.log(`🔥 Starting manual warming of ${this.warmingQueue.length} targets`);
+      // 
       
       // Process warming queue
       while (this.warmingQueue.length > 0) {
@@ -427,17 +465,17 @@ export class CacheWarmingManager {
             size: target.estimatedSize
           });
 
-          // console.log(`✅ Manually warmed: ${target.key} (${responseTime}ms)`);
+          // 
           
-        } catch (error) {
+        } catch (_error) {
           results.push({
             success: false,
             key: target.key,
             responseTime: 0,
-            error: String(error)
+            error: String(_error)
           });
           
-          // console.error(`❌ Manual warming failed for ${target.key}:`, error);
+          // 
         }
       }
       
@@ -446,7 +484,7 @@ export class CacheWarmingManager {
     }
 
     const _successCount = results.filter(r => r.success).length;
-    // console.log(`🎯 Manual warming completed: ${successCount}/${results.length} successful`);
+    // 
 
     return { totalTargets: results.length, results };
   }
@@ -475,16 +513,67 @@ export class CacheWarmingManager {
    */
   clearQueue(): void {
     this.warmingQueue = [];
-    // console.log('🧹 Warming queue cleared');
+    // 
+  }
+
+  /**
+   * Fetch real content based on cache key type
+   */
+  private async fetchRealContent(key: string): Promise<any> {
+    try {
+      if (key.startsWith('builder:content:')) {
+        const [, , contentId, modelName] = key.split(':');
+        const response = await fetch(`/api/builder/content/${contentId}?model=${modelName}`);
+        return await response.json();
+      } else if (key.startsWith('component:')) {
+        const [, componentId] = key.split(':');
+        const response = await fetch(`/api/builder/components?id=${componentId}`);
+        return await response.json();
+      } else if (key.startsWith('api:')) {
+        const apiPath = key.replace('api:', '/api/').replace(':', '/');
+        const response = await fetch(apiPath);
+        return await response.json();
+      }
+      
+      // Default fallback
+      return { key, warmed: true, timestamp: Date.now() };
+    } catch (error) {
+      throw new Error(`Failed to fetch content for key: ${key}`);
+    }
+  }
+
+  /**
+   * Fetch real page content
+   */
+  private async fetchRealPage(path: string): Promise<any> {
+    try {
+      const response = await fetch(path, {
+        headers: { 'Accept': 'text/html,application/json' }
+      });
+      
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        return await response.json();
+      } else {
+        const html = await response.text();
+        return { 
+          path, 
+          html: html.substring(0, 1000), // Store partial HTML for cache
+          timestamp: Date.now(),
+          size: html.length
+        };
+      }
+    } catch (error) {
+      throw new Error(`Failed to fetch page: ${path}`);
+    }
   }
 
   /**
    * Stop all scheduled warmings
    */
   stopScheduledWarmings(): void {
-    this.scheduledWarmings.forEach((timer, _name) => {
+    this.scheduledWarmings.forEach((timer, name) => {
       clearInterval(timer);
-      // console.log(`⏹️ Stopped scheduled warming: ${name}`);
+      console.log(`Stopped warming schedule: ${name}`);
     });
     this.scheduledWarmings.clear();
   }

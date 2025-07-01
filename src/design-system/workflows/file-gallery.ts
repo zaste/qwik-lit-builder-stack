@@ -512,30 +512,73 @@ export class DSFileGallery extends LitElement {
     return html`<div class="file-icon">${icon}</div>`;
   }
 
-  private _handleUploadComplete(e: CustomEvent) {
+  private async _handleUploadComplete(e: CustomEvent) {
     const uploadedFiles = e.detail.files;
-    const newFiles = uploadedFiles.map((file: File, index: number) => ({
-      id: `file-${Date.now()}-${index}`,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: URL.createObjectURL(file), // In real app, this would be from server
-      uploadedAt: new Date()
-    }));
+    const uploadResults: GalleryFile[] = [];
+    const uploadErrors: { file: string; error: string }[] = [];
 
-    this._files = [...this._files, ...newFiles];
-    this._updateFilteredFiles();
+    // Process each file and handle errors appropriately
+    for (let index = 0; index < uploadedFiles.length; index++) {
+      const file = uploadedFiles[index];
+      try {
+        const permanentUrl = await this._uploadToStorage(file);
+        
+        uploadResults.push({
+          id: `file-${Date.now()}-${index}`,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: permanentUrl, // Real storage URL only
+          uploadedAt: new Date()
+        });
+        
+        console.info('File uploaded successfully', {
+          fileName: file.name,
+          fileSize: file.size,
+          storageUrl: permanentUrl
+        });
+        
+      } catch (uploadError) {
+        uploadErrors.push({
+          file: file.name,
+          error: uploadError instanceof Error ? uploadError.message : String(uploadError)
+        });
+        
+        console.error('File upload failed', {
+          fileName: file.name,
+          error: uploadError instanceof Error ? uploadError.message : String(uploadError)
+        });
+      }
+    }
 
-    // Dispatch event
-    this.dispatchEvent(new CustomEvent('ds-gallery-upload', {
-      detail: { files: newFiles },
-      bubbles: true
-    }));
+    // Only add successfully uploaded files
+    if (uploadResults.length > 0) {
+      this._files = [...this._files, ...uploadResults];
+      this._updateFilteredFiles();
+    }
+
+    // Dispatch events for both successes and failures
+    if (uploadResults.length > 0) {
+      this.dispatchEvent(new CustomEvent('ds-gallery-upload', {
+        detail: { files: uploadResults },
+        bubbles: true
+      }));
+    }
+
+    if (uploadErrors.length > 0) {
+      this.dispatchEvent(new CustomEvent('ds-gallery-upload-error', {
+        detail: { 
+          errors: uploadErrors,
+          message: `${uploadErrors.length} file(s) failed to upload to permanent storage`
+        },
+        bubbles: true
+      }));
+    }
   }
 
   private _handleUploadProgress(_e: CustomEvent) {
     // Handle upload progress if needed
-    // console.log('Upload progress:', e.detail);
+    // 
   }
 
   private _handleFileClick(file: GalleryFile) {
@@ -708,6 +751,40 @@ export class DSFileGallery extends LitElement {
   clearSelection() {
     this._selectedFiles.clear();
     this.requestUpdate();
+  }
+
+  /**
+   * Upload file to real storage service and return permanent URL
+   */
+  private async _uploadToStorage(file: File): Promise<string> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+      
+      const result = await response.json() as { url: string };
+      return result.url; // Real storage URL from R2/S3
+    } catch (error) {
+      // Log upload failure with context
+      console.error('File upload to storage failed', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      
+      // CRITICAL: Do not use temporary URLs in production
+      // Throw error to expose the real issue instead of masking it
+      throw new Error(`Upload failed: ${error instanceof Error ? error.message : String(error)}. File not uploaded to permanent storage.`);
+    }
   }
 }
 

@@ -16,7 +16,7 @@ export class KVCache {
     
     try {
       return JSON.parse(value);
-    } catch {
+    } catch (_error) {
       return value as T;
     }
   }

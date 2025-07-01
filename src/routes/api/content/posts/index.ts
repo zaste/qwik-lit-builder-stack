@@ -30,11 +30,11 @@ export const onGet: RequestHandler = async ({ json, query }) => {
         pages: Math.ceil((count || 0) / limit)
       }
     });
-  } catch (error) {
-    console.error('Failed to fetch posts:', error);
+  } catch (_error) {
+    
     json(500, { 
       error: 'Failed to fetch posts',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: _error instanceof Error ? _error.message : 'Unknown error'
     });
   }
 };
@@ -42,16 +42,22 @@ export const onGet: RequestHandler = async ({ json, query }) => {
 export const onPost: RequestHandler = async ({ json, request }) => {
   try {
     const supabase = getSupabaseClient();
-    const postData = await request.json();
+    const postData = await request.json() as {
+      title?: string;
+      content?: string;
+      slug?: string;
+      published?: boolean;
+      author_id?: string;
+    };
 
     const { data: post, error } = await supabase
       .from('posts')
       .insert([{
-        title: postData.title,
-        content: postData.content,
-        slug: postData.slug || postData.title?.toLowerCase().replace(/\s+/g, '-'),
+        title: postData.title || 'Untitled',
+        content: postData.content || '',
+        slug: postData.slug || postData.title?.toLowerCase().replace(/\s+/g, '-') || 'untitled',
         published: postData.published || false,
-        author_id: postData.author_id
+        author_id: postData.author_id || ''
       }])
       .select()
       .single();
@@ -59,11 +65,11 @@ export const onPost: RequestHandler = async ({ json, request }) => {
     if (error) throw error;
 
     json(201, { post });
-  } catch (error) {
-    console.error('Failed to create post:', error);
+  } catch (_error) {
+    
     json(500, { 
       error: 'Failed to create post',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: _error instanceof Error ? _error.message : 'Unknown error'
     });
   }
 };

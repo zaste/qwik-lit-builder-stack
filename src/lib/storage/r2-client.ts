@@ -3,7 +3,7 @@
  * Real implementation for file storage in R2 buckets
  */
 
-import { R2Bucket } from '@cloudflare/workers-types';
+import type { R2Bucket } from '@cloudflare/workers-types';
 
 export interface R2UploadResult {
   success: boolean;
@@ -76,11 +76,11 @@ export class CloudflareR2Client implements R2Client {
         path,
         size: file.size
       };
-    } catch (error) {
-      console.error('R2 upload error:', error);
+    } catch (_error) {
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown R2 upload error'
+        error: _error instanceof Error ? _error.message : 'Unknown R2 upload error'
       };
     }
   }
@@ -95,11 +95,11 @@ export class CloudflareR2Client implements R2Client {
       return {
         success: true
       };
-    } catch (error) {
-      console.error('R2 delete error:', error);
+    } catch (_error) {
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown R2 delete error'
+        error: _error instanceof Error ? _error.message : 'Unknown R2 delete error'
       };
     }
   }
@@ -123,8 +123,8 @@ export class CloudflareR2Client implements R2Client {
       });
 
       return result.objects.map(obj => obj.key);
-    } catch (error) {
-      console.error('R2 list error:', error);
+    } catch (_error) {
+      
       return [];
     }
   }

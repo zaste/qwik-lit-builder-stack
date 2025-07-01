@@ -23,8 +23,8 @@ export default component$(() => {
       if (authError) throw authError;
 
       await navigate('/dashboard');
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Login failed';
+    } catch (_error) {
+      error.value = _error instanceof Error ? _error.message : 'Login failed';
     } finally {
       isLoading.value = false;
     }
@@ -37,8 +37,8 @@ export default component$(() => {
     try {
       const { error: authError } = await supabaseAuth.signInWithOAuth(provider);
       if (authError) throw authError;
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : 'OAuth login failed';
+    } catch (_error) {
+      error.value = _error instanceof Error ? _error.message : 'OAuth login failed';
       isLoading.value = false;
     }
   });
@@ -57,8 +57,8 @@ export default component$(() => {
       if (authError) throw authError;
       
       error.value = 'Check your email for the login link!';
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Failed to send magic link';
+    } catch (_error) {
+      error.value = _error instanceof Error ? _error.message : 'Failed to send magic link';
     } finally {
       isLoading.value = false;
     }

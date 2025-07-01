@@ -33,21 +33,21 @@ export function initializeMonitoring() {
 
   // Log unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
-    // console.error('Unhandled promise rejection:', event.reason);
+    // 
     Sentry.captureException(event.reason);
   });
 
   // Enhanced error logging
   window.addEventListener('error', (event) => {
     if (event.error) {
-      // console.error('Global error:', event.error);
+      // 
       
       // Log to Sentry
       Sentry.captureException(event.error);
     }
   });
 
-  // console.log('🔍 Monitoring services initialized');
+  // 
 }
 
 // Export monitoring utilities
