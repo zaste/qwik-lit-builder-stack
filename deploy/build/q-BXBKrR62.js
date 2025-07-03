@@ -1,0 +1,1 @@
+import{_ as t}from"./q-Ccds0Gka.js";import{c as e,q as s}from"./q-rRPm90by.js";const o=e(s(()=>t(()=>import("./q-D3Zxh9yP.js").then(t=>t.i),[]),"s_r0j4X6otVtI")),n={title:"Components - Design System",meta:[{name:"description",content:"Manage and preview your design system components"}]};export{o as default,n as head};

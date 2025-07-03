@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
 import type { ErrorResponse, HealthCheckResponse } from '../../../types/api';
-import { getSupabaseClient } from '~/lib/supabase';
+// getSupabaseClient import removed - using direct client creation for Cloudflare Workers compatibility
 import { logger } from '../../../lib/logger';
 
 interface HealthCheck {
@@ -57,15 +57,16 @@ function addResponseTime(time: number) {
 }
 
 // Database health check (Supabase)
-async function checkDatabase(): Promise<HealthCheckResult> {
+async function checkDatabase(platform?: any): Promise<HealthCheckResult> {
   const startTime = Date.now();
   
   try {
-    // Check if we're in development with placeholder credentials
-    const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-    const isPlaceholder = supabaseUrl.includes('placeholder') || supabaseUrl.includes('wprgiqjcabmhhmwmurcp');
+    // Get Supabase configuration from platform environment variables
+    const supabaseUrl = platform?.env?.VITE_SUPABASE_URL || '';
+    const supabaseAnonKey = platform?.env?.VITE_SUPABASE_ANON_KEY || '';
+    const isPlaceholder = supabaseUrl.includes('placeholder') || supabaseUrl.includes('your-project-id');
     
-    if (isPlaceholder || !supabaseUrl) {
+    if (isPlaceholder || !supabaseUrl || !supabaseAnonKey) {
       return {
         status: 'warn',
         responseTime: Date.now() - startTime,
@@ -75,7 +76,9 @@ async function checkDatabase(): Promise<HealthCheckResult> {
       };
     }
     
-    const supabase = getSupabaseClient();
+    // Create Supabase client with platform environment variables
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const { error } = await supabase.from('profiles').select('count').limit(1);
     
     const responseTime = Date.now() - startTime;
@@ -200,8 +203,8 @@ async function checkExternalServices(): Promise<HealthCheckResult> {
   const startTime = Date.now();
   
   try {
-    // Check external dependencies with timeout
-    const timeoutMs = 5000;
+    // Check external dependencies with reduced timeout for production
+    const timeoutMs = 1000; // Reduced from 5000ms to 1000ms
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     
@@ -335,13 +338,13 @@ function checkPlatform(platform: any): HealthCheckResult {
 }
 
 // Calculate overall health status
-function calculateOverallStatus(checks: HealthCheck['checks']): 'healthy' | 'unhealthy' | 'degraded' {
+function calculateOverallStatus(checks: HealthCheck['checks'], platform?: any): 'healthy' | 'unhealthy' | 'degraded' {
   const checkResults = Object.values(checks);
   const failedChecks = checkResults.filter(check => check.status === 'fail').length;
   const warnChecks = checkResults.filter(check => check.status === 'warn').length;
   
   // In development mode, treat warnings as healthy if the core platform is working
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = platform?.env?.NODE_ENV === 'development' || process.env.NODE_ENV === 'development';
   
   if (failedChecks > 0) {
     return 'unhealthy';
@@ -360,25 +363,42 @@ export const onGet: RequestHandler = async ({ json, platform }) => {
   incrementRequestCount();
   
   try {
-    // Perform all health checks in parallel
-    const [database, storage, cache, external, memory, platformCheck] = await Promise.all([
-      checkDatabase(),
+    // In production, skip external services check for faster response
+    const isProduction = platform?.env?.DEPLOY_TARGET === 'cloudflare';
+    
+    // Perform health checks in parallel, conditionally including external services
+    const healthPromises = [
+      checkDatabase(platform),
       checkStorage(platform),
       checkCache(platform),
-      checkExternalServices(),
       Promise.resolve(checkMemory()),
       Promise.resolve(checkPlatform(platform))
-    ]);
+    ];
+    
+    // Only add external services check in development for faster production health checks
+    if (!isProduction) {
+      healthPromises.push(checkExternalServices());
+    }
+    
+    const results = await Promise.all(healthPromises);
+    
+    // Map results back to named structure
+    const [database, storage, cache, memory, platformCheck, external] = results;
+    const externalResult = external || {
+      status: 'pass' as const,
+      message: 'External services check skipped in production',
+      responseTime: 0
+    };
     
     const checks = { 
       database, 
       storage, 
       cache, 
-      external, 
+      external: externalResult, 
       memory, 
       platform: platformCheck 
     };
-    const overallStatus = calculateOverallStatus(checks);
+    const overallStatus = calculateOverallStatus(checks, platform);
     
     // Calculate metrics
     const now = Date.now();
@@ -398,8 +418,8 @@ export const onGet: RequestHandler = async ({ json, platform }) => {
       status: overallStatus,
       timestamp: new Date().toISOString(),
       uptime: Math.floor(uptimeMs / 1000), // uptime in seconds
-      version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.NODE_ENV || 'development',
+      version: platform?.env?.npm_package_version || '1.0.0',
+      environment: platform?.env?.NODE_ENV || 'development',
       checks,
       metrics: {
         responseTime: healthCheckResponseTime,

@@ -307,7 +307,7 @@ export const sentryService = new SentryService();
 // Helper functions for easy integration
 export function initializeSentry(): void {
   // Wait for DOM to be ready before initializing Sentry
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         sentryService.initialize();

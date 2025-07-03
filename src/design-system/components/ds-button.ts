@@ -1,5 +1,7 @@
 import { LitElement, html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
+@customElement('ds-button')
 export class DSButton extends LitElement {
   static styles = css`
     :host {
@@ -99,31 +101,17 @@ export class DSButton extends LitElement {
     }
   `;
 
-  static properties = {
-    variant: { type: String },
-    size: { type: String },
-    disabled: { type: Boolean },
-    text: { type: String },
-    icon: { type: String },
-    iconPosition: { type: String },
-    loading: { type: Boolean },
-    primaryColor: { type: String },
-    hoverColor: { type: String },
-    borderRadius: { type: Number },
-    fullWidth: { type: Boolean }
-  };
-
-  variant: 'primary' | 'secondary' = 'primary';
-  size: 'medium' | 'large' = 'medium';
-  disabled = false;
-  text = 'Button';
-  icon = '';
-  iconPosition: 'left' | 'right' = 'left';
-  loading = false;
-  primaryColor = '#007acc';
-  hoverColor = '#005999';
-  borderRadius = 6;
-  fullWidth = false;
+  @property({ type: String }) variant: 'primary' | 'secondary' = 'primary';
+  @property({ type: String }) size: 'medium' | 'large' = 'medium';
+  @property({ type: Boolean }) disabled = false;
+  @property({ type: String }) text = 'Button';
+  @property({ type: String }) icon = '';
+  @property({ type: String }) iconPosition: 'left' | 'right' = 'left';
+  @property({ type: Boolean }) loading = false;
+  @property({ type: String }) primaryColor = '#007acc';
+  @property({ type: String }) hoverColor = '#005999';
+  @property({ type: Number }) borderRadius = 6;
+  @property({ type: Boolean }) fullWidth = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -218,9 +206,6 @@ export class DSButton extends LitElement {
     );
   }
 }
-
-// Register the custom element
-customElements.define('ds-button', DSButton);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -5,7 +5,7 @@
  */
 
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { cacheAnalytics } from '~/lib/cache-analytics';
+import { cacheAnalytics } from '../../../../lib/cache-analytics';
 
 export const onGet: RequestHandler = async ({ json, url, cacheControl }) => {
   try {

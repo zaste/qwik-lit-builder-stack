@@ -133,7 +133,7 @@ export class DSFileUpload extends LitElement {
     .file-item {
       display: flex;
       align-items: center;
-      justify-content: between;
+      justify-content: space-between;
       padding: var(--ds-space-sm);
       background: var(--ds-color-background-hover);
       border-radius: var(--ds-radius-lg);

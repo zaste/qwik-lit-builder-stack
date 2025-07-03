@@ -1,13 +1,10 @@
-// Design System Entry Point
-import './components/ds-button';
-import './components/ds-file-upload';
-import './components/ds-input';
-import './components/ds-card';
-
 // Register all components
-export function registerDesignSystem() {
-  // Components are auto-registered via custom elements
-  // 
+export async function registerDesignSystem() {
+  // Dynamic imports to avoid SSR issues with LIT decorators
+  await import('./components/ds-button');
+  await import('./components/ds-input');
+  await import('./components/ds-card');
+  await import('./components/ds-file-upload');
 }
 
 // Design system registration complete - no external integrations needed

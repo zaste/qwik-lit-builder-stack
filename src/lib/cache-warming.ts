@@ -231,17 +231,25 @@ export class CacheWarmingManager {
           responseTime
         });
 
-        // 
+        logger.info('Critical page warmed successfully', {
+          key: page.key,
+          path: page.path,
+          responseTime
+        });
         
-      } catch (_error) {
+      } catch (error) {
         results.push({
           success: false,
           key: page.key,
           responseTime: 0,
-          error: String(_error)
+          error: String(error)
         });
         
-        // 
+        logger.error('Critical page warming failed', {
+          key: page.key,
+          path: page.path,
+          error: error instanceof Error ? error.message : String(error)
+        });
       }
     }
 
@@ -389,7 +397,7 @@ export class CacheWarmingManager {
         ]);
         return allResults.flat();
       default:
-        // 
+        logger.warn('Unknown warming strategy requested', { strategyName });
         return [];
     }
   }
@@ -411,17 +419,26 @@ export class CacheWarmingManager {
         // Schedule by interval
         const intervalMs = strategy.schedule.interval * 60 * 1000;
         const timer = setInterval(() => {
-          this.executeStrategy(name).catch((_error) => {
-            // 
+          this.executeStrategy(name).catch((error) => {
+            logger.error('Scheduled warming strategy failed', {
+              strategyName: name,
+              error: error instanceof Error ? error.message : String(error)
+            });
           });
         }, intervalMs);
         
         this.scheduledWarmings.set(name, timer);
-        // 
+        logger.info('Scheduled warming strategy', {
+          strategyName: name,
+          intervalMinutes: strategy.schedule.interval
+        });
         
       } else if (strategy.schedule.at) {
-        // Schedule at specific time (simplified - just log for now)
-        // 
+        // Schedule at specific time - would need cron-like scheduling
+        logger.info('Time-based warming scheduled', {
+          strategyName: name,
+          scheduledAt: strategy.schedule.at
+        });
       }
     });
   }
@@ -431,7 +448,7 @@ export class CacheWarmingManager {
    */
   async executeManualWarming(): Promise<{ totalTargets: number; results: WarmingResult[] }> {
     if (this.isWarming) {
-      // 
+      logger.warn('Manual warming already in progress');
       return { totalTargets: 0, results: [] };
     }
 
@@ -439,7 +456,9 @@ export class CacheWarmingManager {
     const results: WarmingResult[] = [];
     
     try {
-      // 
+      logger.info('Starting manual cache warming', {
+        queueSize: this.warmingQueue.length
+      });
       
       // Process warming queue
       while (this.warmingQueue.length > 0) {
@@ -466,17 +485,24 @@ export class CacheWarmingManager {
             size: target.estimatedSize
           });
 
-          // 
+          logger.debug('Cache target warmed successfully', {
+            key: target.key,
+            responseTime,
+            size: target.estimatedSize
+          });
           
-        } catch (_error) {
+        } catch (error) {
           results.push({
             success: false,
             key: target.key,
             responseTime: 0,
-            error: String(_error)
+            error: String(error)
           });
           
-          // 
+          logger.error('Cache target warming failed', {
+            key: target.key,
+            error: error instanceof Error ? error.message : String(error)
+          });
         }
       }
       
@@ -484,8 +510,12 @@ export class CacheWarmingManager {
       this.isWarming = false;
     }
 
-    const _successCount = results.filter(r => r.success).length;
-    // 
+    const successCount = results.filter(r => r.success).length;
+    logger.info('Manual cache warming completed', {
+      totalTargets: results.length,
+      successCount,
+      failureCount: results.length - successCount
+    });
 
     return { totalTargets: results.length, results };
   }
@@ -514,7 +544,7 @@ export class CacheWarmingManager {
    */
   clearQueue(): void {
     this.warmingQueue = [];
-    // 
+    logger.info('Cache warming queue cleared');
   }
 
   /**

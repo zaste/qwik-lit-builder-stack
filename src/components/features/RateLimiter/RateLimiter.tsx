@@ -1,5 +1,5 @@
 import { component$, useStore, useTask$ } from '@builder.io/qwik';
-import { RateLimitError } from '~/lib/errors';
+import { RateLimitError } from '../../../lib/errors';
 
 interface RateLimiterState {
   requests: number[];

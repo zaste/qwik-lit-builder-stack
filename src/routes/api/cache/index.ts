@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { getCloudflareServices } from '~/lib/cloudflare';
+import { getCloudflareServices } from '../../../lib/cloudflare';
 
 /**
  * Cache management API using Cloudflare KV

@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { pagesService, generateSlug, validatePageTitle, validateSlug, CMSError } from '~/lib/cms';
-import { logger } from '~/lib/logger';
+import { pagesService, generateSlug, validatePageTitle, validateSlug, CMSError } from '../../../../lib/cms';
+import { logger } from '../../../../lib/logger';
 
 /**
  * GET /api/content/pages
@@ -15,18 +15,29 @@ export const onGet: RequestHandler = async ({ json, query, cookie }) => {
     const published = query.get('published') ? query.get('published') === 'true' : undefined;
     const author_only = query.get('author_only') === 'true';
 
-    // Get user from session (simplified - in real app would use proper auth)
+    // Get user from authenticated session
     let author_id: string | undefined;
     if (author_only) {
-      // For demo purposes, we'll use a placeholder author_id
-      // In real implementation, get from authenticated session
       const sessionCookie = cookie.get('sb-access-token');
       if (!sessionCookie) {
         json(401, { error: 'Authentication required for author-only requests' });
         return;
       }
-      // author_id would be extracted from session
-      author_id = undefined; // Will show all pages for now
+      
+      // Extract author ID from validated Supabase session
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser(sessionCookie.value);
+        if (error || !user) {
+          logger.warn('Invalid session token for author filter', { error: error?.message });
+          json(401, { error: 'Invalid session token' });
+          return;
+        }
+        author_id = user.id;
+      } catch (error) {
+        logger.warn('Failed to validate session token for author filter', { error: error instanceof Error ? error.message : String(error) });
+        json(401, { error: 'Invalid session token' });
+        return;
+      }
     }
 
     const result = await pagesService.getPages({
@@ -102,17 +113,28 @@ export const onPost: RequestHandler = async ({ json, parseBody, cookie }) => {
       return;
     }
 
-    // Get author from session (simplified for demo)
-    // In real implementation, extract from authenticated session
+    // Get author from authenticated session
     const sessionCookie = cookie.get('sb-access-token');
     if (!sessionCookie) {
       json(401, { error: 'Authentication required' });
       return;
     }
 
-    // For demo purposes, use a hardcoded author ID
-    // In real implementation: const { user } = await getUser(sessionCookie);
-    const authorId = '00000000-0000-0000-0000-000000000000'; // Placeholder
+    // Extract author ID from validated Supabase session
+    let authorId = null;
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser(sessionCookie.value);
+      if (error || !user) {
+        logger.warn('Invalid session token', { error: error?.message });
+        json(401, { error: 'Invalid session token' });
+        return;
+      }
+      authorId = user.id;
+    } catch (error) {
+      logger.warn('Failed to validate session token', { error: error instanceof Error ? error.message : String(error) });
+      json(401, { error: 'Invalid session token' });
+      return;
+    }
 
     // Prepare page data
     const pageData = {

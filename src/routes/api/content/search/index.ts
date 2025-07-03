@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { getSupabaseClient } from '~/lib/supabase';
+import { getSupabaseClient } from '../../../../lib/supabase';
 
 /**
  * Unified Search API - Search across all content types
@@ -34,7 +34,7 @@ export const onGet: RequestHandler = async ({ json, query }) => {
         .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
         .limit(10);
 
-      results.results.posts = posts?.map(post => ({
+      results.results.posts = posts?.map((post: any) => ({
         id: post.id,
         title: post.title,
         type: 'post',
@@ -44,26 +44,30 @@ export const onGet: RequestHandler = async ({ json, query }) => {
       })) || [];
     }
 
-    // Search Pages (Mock Data)
+    // Search Pages (Real Supabase Data)
     if (!contentType || contentType === 'pages') {
-      // Use mock data for pages search
+      const supabase = getSupabaseClient();
       try {
-        const response = await fetch(
-          `https://jsonplaceholder.typicode.com/posts?q=${encodeURIComponent(searchQuery)}`
-        );
-        if (response.ok) {
-          const data = await response.json() as { results?: any[] };
-          results.results.pages = data.results?.map((page: any) => ({
-            id: page.id,
-            title: page.name,
-            type: 'page',
-            url: page.data?.url || '/',
-            excerpt: page.data?.description || '',
-            created_at: page.createdDate
-          })) || [];
-        }
-      } catch (_error) {
-        // Silently handle API errors
+        const { data: pages } = await supabase
+          .from('pages')
+          .select('id, title, description, slug, created_at')
+          .or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+          .eq('published', true)
+          .limit(10);
+
+        results.results.pages = pages?.map((page: any) => ({
+          id: page.id,
+          title: page.title,
+          type: 'page',
+          url: `/${page.slug}`,
+          excerpt: page.description || '',
+          created_at: page.created_at
+        })) || [];
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Pages search error:', error);
+        // Return empty results on error, don't break the search
+        results.results.pages = [];
       }
     }
 
@@ -76,7 +80,7 @@ export const onGet: RequestHandler = async ({ json, query }) => {
         .ilike('original_name', `%${searchQuery}%`)
         .limit(10);
 
-      results.results.media = media?.map(file => ({
+      results.results.media = media?.map((file: any) => ({
         id: file.id,
         title: file.original_name,
         type: 'media',

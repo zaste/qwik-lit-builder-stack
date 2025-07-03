@@ -7,6 +7,10 @@ import { getSupabaseClient } from './supabase';
 export async function getCurrentUser(cookie: Cookie) {
   const supabase = getSupabaseClient();
   
+  if (!supabase) {
+    throw new Error('Supabase client not available - check configuration');
+  }
+  
   // Use real Supabase authentication only
   
   const sessionCookie = cookie.get('sb-auth-token');
@@ -25,9 +29,13 @@ export async function getCurrentUser(cookie: Cookie) {
  * Establish user session by setting auth cookie
  */
 export function establishSession(cookie: Cookie, sessionToken: string) {
+  // Environment-aware cookie security settings
+  const isDevelopment = typeof process !== 'undefined' && process.env.NODE_ENV === 'development';
+  const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+  
   cookie.set('sb-auth-token', sessionToken, {
     httpOnly: true,
-    secure: true,
+    secure: !isDevelopment && !isLocalhost, // Secure in production, flexible in development
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/'

@@ -8,12 +8,13 @@ import { visualizer } from 'rollup-plugin-visualizer';
 export default defineConfig(async ({ command, mode }) => {
   const isProd = mode === 'production';
   
-  // Simplified adapter configuration for testing
+  // Cloudflare Pages adapter with static generation for homepage
   const adapter = cloudflarePagesAdapter({
     ssg: {
-      include: ['/*'],
-      exclude: ['/api/*', '/admin/*', '/(app)/*'],
+      include: ['/'],
+      exclude: ['/api/*', '/auth/*', '/(app)/*', '/dashboard/*'],
     },
+    staticGenerate: true,
   });
   
   

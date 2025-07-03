@@ -1,7 +1,7 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { useNavigate } from '@builder.io/qwik-city';
-import { supabaseAuth } from '~/lib/supabase';
+import { supabaseAuth } from '../../lib/supabase';
 
 export default component$(() => {
   const navigate = useNavigate();

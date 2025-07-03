@@ -2,6 +2,8 @@
  * Centralized error handling
  */
 
+import { logger } from './logger';
+
 export class AppError extends Error {
   constructor(
     message: string,
@@ -65,9 +67,7 @@ export class ExternalServiceError extends AppError {
 
 // Error handler for API routes
 export function handleApiError(error: unknown) {
-  import('./logger').then(({ logger }) => {
-    logger.error('API Error occurred', { error: error instanceof Error ? error.message : String(error) });
-  });
+  logger.error('API Error occurred', { error: error instanceof Error ? error.message : String(error) });
   
   if (error instanceof AppError) {
     return {

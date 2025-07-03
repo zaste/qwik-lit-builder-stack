@@ -5,8 +5,9 @@
 
 import { component$, Resource } from '@builder.io/qwik';
 import { type DocumentHead, routeLoader$, type StaticGenerateHandler } from '@builder.io/qwik-city';
-import { pagesService } from '~/lib/cms';
-import { logger } from '~/lib/logger';
+import { pagesService } from '../../lib/cms';
+import { logger } from '../../lib/logger';
+import { sanitizeRichHTML } from '../../lib/security/html-sanitizer';
 
 // Route loader to fetch page data
 export const usePageData = routeLoader$(async ({ params, status }) => {
@@ -85,7 +86,7 @@ const ContentBlockRenderer = component$<{ block: any }>(({ block }) => {
             <p class="text-gray-600 mb-4">{blockProps.subtitle}</p>
           )}
           {blockProps.content && (
-            <div dangerouslySetInnerHTML={blockProps.content} />
+            <div dangerouslySetInnerHTML={sanitizeRichHTML(blockProps.content)} />
           )}
           {block.children && block.children.length > 0 && (
             <div>
@@ -171,7 +172,7 @@ const ContentBlockRenderer = component$<{ block: any }>(({ block }) => {
       return (
         <div 
           class={blockProps.className || ''}
-          dangerouslySetInnerHTML={blockProps.html || ''}
+          dangerouslySetInnerHTML={sanitizeRichHTML(blockProps.html || '')}
         />
       );
 

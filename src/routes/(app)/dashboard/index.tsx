@@ -1,9 +1,9 @@
 import { component$, useSignal, useTask$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import { getCurrentUser } from '~/lib/auth';
-import { getSupabaseClient } from '~/lib/supabase';
-import { logger } from '~/lib/logger';
+import { getCurrentUser } from '../../../lib/auth';
+import { getSupabaseClient } from '../../../lib/supabase';
+import { logger } from '../../../lib/logger';
 
 export const useDashboardData = routeLoader$(async ({ cookie }) => {
   const user = await getCurrentUser(cookie);
@@ -252,7 +252,7 @@ export default component$(() => {
           {recentPosts.length === 0 ? (
             <div class="px-6 py-4 text-gray-500">No posts yet</div>
           ) : (
-            recentPosts.map((post) => (
+            recentPosts.map((post: any) => (
               <div key={post.id} class="px-6 py-4 hover:bg-gray-50">
                 <div class="flex items-center justify-between">
                   <div>

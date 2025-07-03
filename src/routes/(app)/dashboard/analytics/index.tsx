@@ -1,6 +1,6 @@
 import { component$, useSignal, useTask$, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import { logger } from '~/lib/logger';
+import { logger } from '../../../../lib/logger';
 
 interface AnalyticsData {
   pageViews: { value: number; change: string };

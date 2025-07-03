@@ -4,10 +4,10 @@
  */
 
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { handleApiError } from '~/lib/errors';
+import { handleApiError } from '../../../../lib/errors';
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '~/types/database.types';
-import { logger } from '~/lib/logger';
+import type { Database } from '../../../../types/database.types';
+import { logger } from '../../../../lib/logger';
 
 /**
  * Get active session count for user from database

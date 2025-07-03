@@ -1,5 +1,5 @@
 name = "qwik-lit-builder-app"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-28"
 pages_build_output_dir = "dist"
 
 # KV Namespaces for Pages
@@ -16,14 +16,41 @@ bucket_name = "qwik-production-files"
 # Environment Variables
 [vars]
 DEPLOY_TARGET = "cloudflare"
+NODE_ENV = "production"
+# Note: Sensitive environment variables are now configured in Cloudflare Pages dashboard:
+# - VITE_SUPABASE_URL
+# - VITE_SUPABASE_ANON_KEY  
+# - VITE_SENTRY_DSN
 
-# Development
-[env.development]
-vars = { ENVIRONMENT = "development" }
+# Preview (replaces development for Pages)
+[env.preview.vars]
+ENVIRONMENT = "preview"
+NODE_ENV = "preview"
+DEPLOY_TARGET = "cloudflare"
+# Note: Sensitive environment variables are configured in Cloudflare Pages dashboard
+
+[env.preview]
+kv_namespaces = [
+  { binding = "KV", id = "dcf348d303684946ad6bb224348c2311" }
+]
+r2_buckets = [
+  { binding = "R2", bucket_name = "qwik-production-files" }
+]
 
 # Production  
+[env.production.vars]
+ENVIRONMENT = "production"
+NODE_ENV = "production"
+DEPLOY_TARGET = "cloudflare"
+# Note: Sensitive environment variables are configured in Cloudflare Pages dashboard
+
 [env.production]
-vars = { ENVIRONMENT = "production" }
+kv_namespaces = [
+  { binding = "KV", id = "d7a33d626dfb43059f52828345a24efe" }
+]
+r2_buckets = [
+  { binding = "R2", bucket_name = "qwik-production-files" }
+]
 
 # Compatibility flags for Pages
 compatibility_flags = ["nodejs_compat"]

@@ -577,9 +577,13 @@ export class DSFileGallery extends LitElement {
     }
   }
 
-  private _handleUploadProgress(_e: CustomEvent) {
-    // Handle upload progress if needed
-    // 
+  private _handleUploadProgress(e: CustomEvent) {
+    // Handle upload progress updates
+    const progress = e.detail.progress;
+    logger.debug('File upload progress', {
+      fileName: e.detail.fileName,
+      progress: progress?.percentage || 0
+    });
   }
 
   private _handleFileClick(file: GalleryFile) {

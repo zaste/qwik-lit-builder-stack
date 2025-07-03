@@ -257,6 +257,7 @@ class DesignSystemThemeManager {
 
   // Apply theme to document root
   private applyTheme(theme: DesignSystemTheme) {
+    if (typeof document === 'undefined') return;
     const root = document.documentElement;
 
     // Apply color variables
@@ -437,6 +438,7 @@ export function initializeDesignSystemStyles() {
   themeManager.setTheme('Default');
   
   // Add base design system styles
+  if (typeof document === 'undefined') return;
   const styleElement = document.createElement('style');
   styleElement.id = 'design-system-base';
   styleElement.textContent = `
@@ -490,7 +492,7 @@ export type { DesignSystemTheme };
 export { DesignSystemThemeManager };
 
 // Auto-initialize when imported in browser
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   // Wait for DOM to be ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeDesignSystemStyles);

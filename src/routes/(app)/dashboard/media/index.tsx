@@ -1,13 +1,13 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import { getCurrentUser } from '~/lib/auth';
-import { getSupabaseClient } from '~/lib/supabase';
-import { DSFileUpload } from '~/design-system/components/qwik-wrappers';
-import { logger } from '~/lib/logger';
+import { getCurrentUser } from '../../../../lib/auth';
+import { getSupabaseClient } from '../../../../lib/supabase';
+import { DSFileUpload } from '../../../../design-system/components/qwik-wrappers';
+import { logger } from '../../../../lib/logger';
 
 // Import correct MediaFile interface
-import type { MediaFile } from '~/routes/api/files/list/index';
+import type { MediaFile } from '../../../api/files/list/index';
 
 export const useMediaData = routeLoader$(async ({ cookie }) => {
   const user = await getCurrentUser(cookie);
@@ -49,7 +49,7 @@ export const useMediaData = routeLoader$(async ({ cookie }) => {
   };
 
   // Transform database records to MediaFile format
-  const mediaFiles: MediaFile[] = (files || []).map(file => ({
+  const mediaFiles: MediaFile[] = (files || []).map((file: any) => ({
     id: file.id,
     name: file.file_name,
     size: file.file_size,

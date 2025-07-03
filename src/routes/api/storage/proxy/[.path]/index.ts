@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { getCloudflareServices } from '~/lib/cloudflare';
-import { NotFoundError } from '~/lib/errors';
+import { getCloudflareServices } from '../../../../../lib/cloudflare';
+import { NotFoundError } from '../../../../../lib/errors';
 
 /**
  * Proxy endpoint for R2 storage files

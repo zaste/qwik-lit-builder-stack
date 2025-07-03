@@ -8,7 +8,7 @@ declare module '@builder.io/qwik-city/middleware/cloudflare-pages' {
       SUPABASE_URL: string;
       SUPABASE_ANON_KEY: string;
       SUPABASE_SERVICE_KEY?: string;
-      BUILDER_PUBLIC_KEY: string;
+      // BUILDER_PUBLIC_KEY: string; // Removed - Builder.io CMS not currently integrated
       ENVIRONMENT?: string;
     };
   }
@@ -20,7 +20,7 @@ declare module '@builder.io/qwik-city/middleware/vercel-edge' {
       SUPABASE_URL: string;
       SUPABASE_ANON_KEY: string;
       SUPABASE_SERVICE_KEY?: string;
-      BUILDER_PUBLIC_KEY: string;
+      // BUILDER_PUBLIC_KEY: string; // Removed - Builder.io CMS not currently integrated
       ENVIRONMENT?: string;
     };
   }

@@ -1,17 +1,17 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
+import { onGet as filesListGet } from '../../files/list/index';
+import { onPost as uploadPost } from '../../upload/index';
 
 /**
  * Media Content API - Unified routing for R2 + Supabase media
  */
 
-export const onGet: RequestHandler = async ({ json, env, query, request }) => {
+export const onGet: RequestHandler = async (context) => {
   // Forward to existing files/list API
-  const { onGet: filesListGet } = await import('../../files/list/index');
-  return filesListGet({ json, env, query, request } as any);
+  return filesListGet(context);
 };
 
-export const onPost: RequestHandler = async ({ json, env, request }) => {
+export const onPost: RequestHandler = async (context) => {
   // Forward to existing upload API
-  const { onPost: uploadPost } = await import('../../upload/index');
-  return uploadPost({ json, env, request } as any);
+  return uploadPost(context);
 };

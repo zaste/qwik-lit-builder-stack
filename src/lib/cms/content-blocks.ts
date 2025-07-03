@@ -395,7 +395,7 @@ export class ContentBlocksService {
       }
 
       // Update order indexes (shift everything down by 1)
-      const updates = blocksToReorder.map(block => 
+      const updates = blocksToReorder.map((block: any) => 
         this.supabase
           .from('content_blocks')
           .update({ 

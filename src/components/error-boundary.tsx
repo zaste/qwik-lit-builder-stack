@@ -4,6 +4,7 @@
  */
 
 import { component$, useSignal, useTask$, Slot, $ } from '@builder.io/qwik';
+import { logger } from '../lib/logger';
 
 interface ErrorBoundaryProps {
   fallback?: any;
@@ -30,9 +31,7 @@ export const ErrorBoundary = component$<ErrorBoundaryProps>((props) => {
         }
       });
     }).catch((_error) => {
-      import('../lib/logger').then(({ logger }) => {
-        logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
-      });
+      logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
     });
   });
 
@@ -179,9 +178,7 @@ export const APIErrorBoundary = component$<{ children?: any }>(() => {
         metadata: { context: 'API_REQUEST' }
       });
     }).catch((_error) => {
-      import('../lib/logger').then(({ logger }) => {
-        logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
-      });
+      logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
     });
   });
 
@@ -217,9 +214,7 @@ export const ComponentErrorBoundary = component$<{ componentName: string; childr
         }
       });
     }).catch((_error) => {
-      import('../lib/logger').then(({ logger }) => {
-        logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
-      });
+      logger.error('Failed to load error handler', { error: _error instanceof Error ? _error.message : String(_error) });
     });
   });
 

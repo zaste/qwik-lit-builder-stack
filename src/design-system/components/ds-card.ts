@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
-import { property } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
+@customElement('ds-card')
 export class DSCard extends LitElement {
   static styles = css`
     :host {
@@ -387,9 +388,6 @@ export class DSCard extends LitElement {
     );
   }
 }
-
-// Register the custom element
-customElements.define('ds-card', DSCard);
 
 declare global {
   interface HTMLElementTagNameMap {

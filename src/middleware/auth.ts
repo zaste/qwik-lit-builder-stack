@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { getCurrentUser, clearSession } from '~/lib/auth';
+import { getCurrentUser, clearSession } from '../lib/auth';
 
 /**
  * Auth middleware for protected routes

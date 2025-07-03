@@ -48,5 +48,14 @@ export default defineConfig({
   // Add esbuild configuration for better module handling
   esbuild: {
     target: 'es2020',
+    // Enable decorator support for LIT components
+    experimentalDecorators: true,
+    useDefineForClassFields: false,
+    // Keep class names for better debugging
+    keepNames: true,
+  },
+  // Add better handling for LIT decorators
+  optimizeDeps: {
+    include: ['lit', 'lit/decorators.js', 'lit/directives/class-map.js'],
   },
 });

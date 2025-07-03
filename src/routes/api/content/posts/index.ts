@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { getSupabaseClient } from '~/lib/supabase';
+import { getSupabaseClient } from '../../../../lib/supabase';
 
 /**
  * Posts Content API - Unified routing for Supabase posts
@@ -12,10 +12,11 @@ export const onGet: RequestHandler = async ({ json, query }) => {
     const limit = parseInt(query.get('limit') || '10');
     const offset = (page - 1) * limit;
 
-    // Get posts with pagination
+    // Get pages (acting as posts) with pagination
     const { data: posts, error, count } = await supabase
-      .from('posts')
+      .from('pages')
       .select('*', { count: 'exact' })
+      .eq('published', true)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -51,13 +52,13 @@ export const onPost: RequestHandler = async ({ json, request }) => {
     };
 
     const { data: post, error } = await supabase
-      .from('posts')
+      .from('pages')
       .insert([{
         title: postData.title || 'Untitled',
-        content: postData.content || '',
+        content: postData.content || null,
         slug: postData.slug || postData.title?.toLowerCase().replace(/\s+/g, '-') || 'untitled',
         published: postData.published || false,
-        author_id: postData.author_id || ''
+        description: postData.content || ''
       }])
       .select()
       .single();

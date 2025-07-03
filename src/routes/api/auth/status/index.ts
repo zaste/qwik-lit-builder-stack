@@ -6,7 +6,7 @@
 
 import type { RequestHandler } from '@builder.io/qwik-city';
 import { createClient } from '@supabase/supabase-js';
-import { logger } from '~/lib/logger';
+import { logger } from '../../../../lib/logger';
 
 export const onGet: RequestHandler = async ({ json, cookie, env, request }) => {
   try {
@@ -50,8 +50,8 @@ export const onGet: RequestHandler = async ({ json, cookie, env, request }) => {
         hasToken: true,
         tokenPresent: true,
         valid: false,
-        reason: authError?.message || 'Invalid token',
-        error: authError?.message
+        reason: 'Authentication token is invalid or expired',
+        error: 'Invalid token'
       });
       return;
     }
@@ -76,7 +76,7 @@ export const onGet: RequestHandler = async ({ json, cookie, env, request }) => {
     
     json(500, {
       authenticated: false,
-      error: 'Failed to check authentication status'
+      error: 'Internal server error'
     });
   }
 };

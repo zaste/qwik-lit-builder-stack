@@ -44,8 +44,9 @@ export const onPost: RequestHandler = async ({ json, request, platform }) => {
           'unknown'
     };
 
-    // Log to console (will be captured by logging infrastructure)
-    // 
+    // Log to console (captured by logging infrastructure)
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(logEntry));
 
     // Store critical errors in KV for immediate attention
     if (errorReport.severity === 'critical' && platform?.env?.ERROR_LOGS) {
@@ -64,7 +65,8 @@ export const onPost: RequestHandler = async ({ json, request, platform }) => {
     } as ApiResponse);
 
   } catch (_error) {
-    // 
+    // eslint-disable-next-line no-console
+    console.error('Error processing error report:', _error);
     
     json(500, { 
       error: 'Failed to process error report' 

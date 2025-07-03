@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/browser';
-import { performanceMonitor } from '~/lib/monitoring';
+import { performanceMonitor } from '../../lib/monitoring';
 
 /**
  * Initialize all monitoring services
@@ -14,10 +14,10 @@ export function initializeMonitoring() {
       dsn: sentryDsn,
       environment: import.meta.env.MODE,
       integrations: [
-        new Sentry.BrowserTracing({
+        Sentry.browserTracingIntegration({
           tracingOrigins: ['localhost', /^\//],
         }),
-        new Sentry.Replay({
+        Sentry.replayIntegration({
           maskAllText: false,
           blockAllMedia: false,
         }),
@@ -51,5 +51,5 @@ export function initializeMonitoring() {
 }
 
 // Export monitoring utilities
-export { performanceMonitor } from '~/lib/monitoring';
+export { performanceMonitor } from '../../lib/monitoring';
 export { Sentry };

@@ -20,7 +20,7 @@ const defaultSecurityConfig: SecurityConfig = {
   enableContentTypeNoSniff: true,
   enableReferrerPolicy: true,
   enablePermissionsPolicy: true,
-  corsOrigins: ['http://localhost:5173', 'https://*.pages.dev'],
+  corsOrigins: ['http://localhost:5176', 'https://*.pages.dev'],
   rateLimitWindowMs: 15 * 60 * 1000, // 15 minutes
   rateLimitMaxRequests: 100
 };
@@ -101,12 +101,12 @@ function generateCSP(isDev: boolean = false): string {
 // Real distributed rate limiting using Cloudflare KV
 async function getRateLimitData(env: any, key: string): Promise<{ count: number; resetTime: number } | null> {
   try {
-    if (!env.KV_CACHE) {
-      logger.warn('KV_CACHE not available, rate limiting disabled');
+    if (!env.KV) {
+      logger.warn('KV not available, rate limiting disabled');
       return null;
     }
     
-    const data = await env.KV_CACHE.get(key);
+    const data = await env.KV.get(key);
     return data ? JSON.parse(data) : null;
   } catch (error) {
     logger.error('Failed to get rate limit data from KV', { key, error: error instanceof Error ? error.message : String(error) });
@@ -116,12 +116,12 @@ async function getRateLimitData(env: any, key: string): Promise<{ count: number;
 
 async function setRateLimitData(env: any, key: string, data: { count: number; resetTime: number }): Promise<void> {
   try {
-    if (!env.KV_CACHE) {
+    if (!env.KV) {
       return; // Gracefully degrade if KV not available
     }
     
     const ttl = Math.max(1, Math.ceil((data.resetTime - Date.now()) / 1000));
-    await env.KV_CACHE.put(key, JSON.stringify(data), { expirationTtl: ttl });
+    await env.KV.put(key, JSON.stringify(data), { expirationTtl: ttl });
   } catch (error) {
     logger.error('Failed to set rate limit data in KV', { key, error: error instanceof Error ? error.message : String(error) });
   }
@@ -168,14 +168,15 @@ async function checkRateLimit(request: Request, config: SecurityConfig, env: any
 /**
  * Enhanced Security headers middleware
  */
-export const securityHeaders: RequestHandler = async ({ headers, request, next, json, env }) => {
+export const securityHeaders: RequestHandler = async ({ headers, request, next, json, platform }) => {
+  const env = platform?.env;
   const config = defaultSecurityConfig;
   const isDev = process.env.NODE_ENV === 'development';
   const startTime = Date.now();
 
   try {
     // Real distributed rate limiting check (skip for development)
-    if (!isDev && !(await checkRateLimit(request, config, env))) {
+    if (!isDev && env && !(await checkRateLimit(request, config, env))) {
       logger.security('Rate limit exceeded', 'medium', {
         ip: getRateLimitKey(request),
         userAgent: request.headers.get('user-agent'),
@@ -235,12 +236,23 @@ export const securityHeaders: RequestHandler = async ({ headers, request, next, 
     }
 
   } catch (error) {
-    logger.security('Security middleware error', 'high', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+    const errorDetails = {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
       method: request.method,
       path: new URL(request.url).pathname,
-      ip: getRateLimitKey(request)
-    });
+      ip: getRateLimitKey(request),
+      timestamp: new Date().toISOString(),
+      env: {
+        hasKV: !!env?.KV,
+        nodeEnv: process.env.NODE_ENV,
+        kvType: typeof env?.KV
+      }
+    };
+    
+    logger.security('Security middleware error - DETAILED', 'high', errorDetails);
+    // eslint-disable-next-line no-console
+    console.error('SECURITY MIDDLEWARE ERROR DETAILS:', JSON.stringify(errorDetails, null, 2));
     throw error;
   }
 };

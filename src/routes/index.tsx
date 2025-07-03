@@ -19,6 +19,8 @@ export default component$(() => {
 
   // Load real system status
   useTask$(async () => {
+    if (typeof window === 'undefined') return; // Skip on server-side
+    
     try {
       const response = await fetch('/api/health');
       if (response.ok) {

@@ -71,6 +71,45 @@ export class StorageRouter {
   }
 
   /**
+   * Upload buffer to R2 storage (for processed images)
+   */
+  async uploadFileBuffer(
+    buffer: Buffer,
+    filename: string,
+    contentType: string,
+    userId?: string,
+    customPath?: string
+  ): Promise<StorageUploadResult> {
+    try {
+      // Validate buffer
+      if (!buffer || buffer.length === 0) {
+        return {
+          success: false,
+          provider: 'r2',
+          error: 'Buffer is empty'
+        };
+      }
+
+      // Generate path for processed image
+      const path = this.generateFilePathFromBuffer(filename, userId, customPath);
+      
+      const result = await this.r2Client.uploadBuffer(buffer, path, contentType);
+      
+      return {
+        ...result,
+        provider: 'r2'
+      };
+    } catch (error) {
+      logger.error('Storage buffer upload failed', { error: error instanceof Error ? error.message : String(error) });
+      return {
+        success: false,
+        provider: 'r2',
+        error: error instanceof Error ? error.message : 'Unknown upload error'
+      };
+    }
+  }
+
+  /**
    * Delete file from R2 storage
    */
   async deleteFile(path: string): Promise<StorageDeleteResult> {
@@ -164,6 +203,16 @@ export class StorageRouter {
     
     const userPrefix = userId ? `users/${userId}/` : 'uploads/';
     return `${userPrefix}${category}/${timestamp}-${randomId}-${baseName}.${extension}`;
+  }
+
+  /**
+   * Generate file path for buffer uploads (processed images)
+   */
+  private generateFilePathFromBuffer(filename: string, userId?: string, customPath?: string): string {
+    const userPrefix = userId ? `users/${userId}/` : 'uploads/';
+    const pathPrefix = customPath || '';
+    
+    return `${userPrefix}${pathPrefix}${pathPrefix ? '/' : ''}${filename}`;
   }
 
   /**

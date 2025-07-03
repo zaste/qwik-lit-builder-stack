@@ -4,9 +4,9 @@
  */
 
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { handleApiError } from '~/lib/errors';
+import { handleApiError } from '../../../../lib/errors';
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '~/types/database.types';
+import type { Database } from '../../../../types/database.types';
 
 export interface MediaFile {
   id: string;

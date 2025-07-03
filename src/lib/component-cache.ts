@@ -92,7 +92,13 @@ export class ComponentCacheManager {
       }
     );
 
-    // 
+    logger.debug('Component cached successfully', {
+      componentId: template.id,
+      name: template.name,
+      version: template.version,
+      compressed: entry.compressed,
+      size: template.metadata.size
+    });
   }
 
   /**
@@ -138,15 +144,22 @@ export class ComponentCacheManager {
         // Restore to memory cache
         this.memoryCache.set(cacheKey, distributedEntry as CacheEntry);
         
-        // 
+        logger.debug('Component restored from distributed cache', {
+          componentId,
+          cacheKey
+        });
         return (distributedEntry as CacheEntry).template;
       }
 
-      // 
+      logger.debug('Component not found in cache', { componentId, cacheKey });
       return null;
       
-    } catch (_error) {
-      // 
+    } catch (error) {
+      logger.warn('Component cache retrieval failed', {
+        componentId,
+        cacheKey,
+        error: error instanceof Error ? error.message : String(error)
+      });
       return null;
     }
   }
@@ -173,11 +186,17 @@ export class ComponentCacheManager {
           }
         );
 
-        // 
+        logger.debug('Compiled component cached successfully', {
+          componentId,
+          cacheKey
+        });
       }
       
-    } catch (_error) {
-      // 
+    } catch (error) {
+      logger.warn('Failed to cache compiled component', {
+        componentId,
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -191,7 +210,7 @@ export class ComponentCacheManager {
       // Check memory cache first
       const memoryEntry = this.memoryCache.get(cacheKey);
       if (memoryEntry?.compiled) {
-        // 
+        logger.debug('Compiled component found in memory cache', { componentId });
         return memoryEntry.compiled;
       }
 
@@ -206,14 +225,17 @@ export class ComponentCacheManager {
       );
 
       if (compiled) {
-        // 
+        logger.debug('Compiled component found in distributed cache', { componentId });
         return compiled;
       }
 
       return null;
       
-    } catch (_error) {
-      // 
+    } catch (error) {
+      logger.warn('Failed to retrieve compiled component', {
+        componentId,
+        error: error instanceof Error ? error.message : String(error)
+      });
       return null;
     }
   }
@@ -235,7 +257,7 @@ export class ComponentCacheManager {
       strategy: 'frequency-based'
     });
 
-    // Real async prefetching without setTimeout simulation
+    // Real async prefetching with proper KV operations
     const prefetchPromises = frequentComponents
       .filter(component => !this.prefetchQueue.has(component.key))
       .map(async (component) => {
@@ -294,10 +316,17 @@ export class ComponentCacheManager {
         version ? `version:${version}` : ''
       ].filter(Boolean));
 
-      // 
+      logger.info('Component cache invalidated', {
+        componentId,
+        version: version || 'latest'
+      });
       
-    } catch (_error) {
-      // 
+    } catch (error) {
+      logger.error('Failed to invalidate component cache', {
+        componentId,
+        version,
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -318,10 +347,16 @@ export class ComponentCacheManager {
         }
       );
 
-      // 
+      logger.debug('Builder schema cached successfully', {
+        componentName,
+        cacheKey
+      });
       
-    } catch (_error) {
-      // 
+    } catch (error) {
+      logger.error('Failed to cache Builder schema', {
+        componentName,
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -342,13 +377,16 @@ export class ComponentCacheManager {
       );
 
       if (schema) {
-        // 
+        logger.debug('Builder schema found in cache', { componentName });
       }
 
       return schema;
       
-    } catch (_error) {
-      // 
+    } catch (error) {
+      logger.warn('Failed to retrieve Builder schema', {
+        componentName,
+        error: error instanceof Error ? error.message : String(error)
+      });
       return null;
     }
   }
@@ -360,7 +398,11 @@ export class ComponentCacheManager {
     const currentSize = this.getCurrentCacheSize();
     
     if (currentSize > this.config.maxSize) {
-      // 
+      logger.info('Cache optimization needed', {
+        currentSize,
+        maxSize: this.config.maxSize,
+        entries: this.memoryCache.size
+      });
       
       // Sort by access count and last accessed time
       const entries = Array.from(this.memoryCache.entries())
@@ -378,10 +420,18 @@ export class ComponentCacheManager {
         this.memoryCache.delete(key);
         this.compressionCache.delete(key);
         
-        // 
+        logger.debug('Removed cache entry during optimization', {
+          componentName: entry.template.name,
+          size: entry.template.metadata.size,
+          accessCount: entry.accessCount
+        });
       }
       
-      // 
+      logger.info('Cache optimization completed', {
+        removedEntries: entries.length,
+        removedSize,
+        newSize: this.getCurrentCacheSize()
+      });
     }
   }
 
