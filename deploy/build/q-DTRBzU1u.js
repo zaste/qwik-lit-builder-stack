@@ -1,1 +1,0 @@
-import{_}from"./q-Ccds0Gka.js";async function t(){await _(()=>import("./q-R-pYA-GP.js"),[]),await _(()=>import("./q-C-pp5bYl.js"),[]),await _(()=>import("./q-CluS6p4c.js"),[]),await _(()=>import("./q-DpgkXmpv.js"),[])}export{t as registerDesignSystem};
