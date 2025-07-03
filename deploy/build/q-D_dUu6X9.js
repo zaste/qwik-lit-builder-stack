@@ -1,1 +1,0 @@
-import{_ as a}from"./q-Ccds0Gka.js";import{c as e,q as t}from"./q-rRPm90by.js";const n=e(t(()=>a(()=>import("./q-C7NR6O9o.js"),[]),"s_Z1neaZRFYyU")),s={title:"Pages - Content Management",meta:[{name:"description",content:"Manage your visual pages and landing pages"}]};export{n as default,s as head};

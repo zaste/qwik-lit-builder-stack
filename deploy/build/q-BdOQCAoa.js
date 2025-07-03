@@ -1,0 +1,1 @@
+import{_ as o}from"./q-Ccds0Gka.js";import{c as t,q as e}from"./q-DFVw1sOS.js";const s=t(e(()=>o(()=>import("./q-C3mjJQvV.js"),[]),"s_dUKnuUOG7r8")),a={title:"404 - Page Not Found",meta:[{name:"description",content:"The page you are looking for does not exist"}]};export{s as default,a as head};

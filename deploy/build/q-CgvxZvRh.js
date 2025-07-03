@@ -1,0 +1,1 @@
+import{b as s,_ as i,S as a,d as l}from"./q-DFVw1sOS.js";import"./q-Ccds0Gka.js";const o=o=>s("ds-button",{onClick$:o.onClick$},{variant:l(s=>s.variant||"primary",[o]),size:l(s=>s.size||"medium",[o]),disabled:l(s=>s.disabled,[o]),class:l(s=>s.class,[o])},i(a,null,3,"iB_0"),0,"iB_1");export{o as s_ykRnvgmcjTo};

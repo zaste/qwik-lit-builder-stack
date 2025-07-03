@@ -1,1 +1,0 @@
-import{_ as t}from"./q-Ccds0Gka.js";import{c as e,q as o}from"./q-rRPm90by.js";const r=e(o(()=>t(()=>import("./q-C_CWcZYR.js").then(t=>t.i),[]),"s_c7k0xbY1wX8")),s={title:"Analytics - Performance Metrics",meta:[{name:"description",content:"Monitor your content performance and system metrics"}]};export{r as default,s as head};
