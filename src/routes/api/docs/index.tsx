@@ -1,13 +1,79 @@
 import { component$ } from '@builder.io/qwik';
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { API_DOCS } from '~/lib/api-docs';
+
+// Comprehensive API docs structure
+const API_DOCS = {
+  title: "Qwik LIT Builder App API",
+  version: "2.0.0",
+  description: "REST API for file management, dashboard analytics, cache management, and health monitoring",
+  endpoints: {
+    "GET /api/health": {
+      description: "Health check endpoint with service status",
+      params: {},
+      response: { status: "healthy", timestamp: "ISO string", checks: "object" }
+    },
+    "POST /api/upload": {
+      description: "File upload to R2 storage with database metadata",
+      params: { file: "File", bucket: "string", userId: "string?" },
+      response: { success: true, storage: "r2", path: "string", url: "string", size: "number" }
+    },
+    "GET /api/dashboard/stats": {
+      description: "Real-time dashboard statistics from database",
+      params: {},
+      headers: { "Authorization": "Bearer JWT_TOKEN" },
+      response: { 
+        totalFiles: "number", 
+        totalSize: "number", 
+        storageUsed: "string", 
+        imageCount: "number",
+        videoCount: "number",
+        audioCount: "number",
+        documentCount: "number",
+        lastUpload: "string|null",
+        avgFileSize: "number",
+        activeSessions: "number"
+      }
+    },
+    "GET /api/files/list": {
+      description: "List user files with pagination and filtering",
+      params: { page: "number?", limit: "number?", filter: "string?", search: "string?" },
+      headers: { "Authorization": "Bearer JWT_TOKEN" },
+      response: {
+        files: "MediaFile[]",
+        pagination: { page: "number", total: "number", hasMore: "boolean" },
+        stats: { totalFiles: "number", filteredCount: "number" }
+      }
+    },
+    "GET /api/cache": {
+      description: "Get cached value by key",
+      params: { key: "string" },
+      response: { key: "string", value: "any", found: "boolean" }
+    },
+    "POST /api/cache": {
+      description: "Set cache value with optional TTL",
+      body: { key: "string", value: "any", ttl: "number?" },
+      response: { success: true, key: "string" }
+    },
+    "DELETE /api/cache": {
+      description: "Delete cached value by key",
+      params: { key: "string" },
+      response: { success: true, key: "string" }
+    }
+  },
+  errors: {
+    "400": { code: "BAD_REQUEST", message: "Invalid request parameters" },
+    "404": { code: "NOT_FOUND", message: "Resource not found" },
+    "500": { code: "INTERNAL_ERROR", message: "Internal server error" },
+    "503": { code: "SERVICE_UNAVAILABLE", message: "Service temporarily unavailable" }
+  }
+};
 
 /**
  * API documentation endpoint
  */
 export const onGet: RequestHandler = async ({ json, headers }) => {
   headers.set('Content-Type', 'application/json');
-  return json(200, API_DOCS);
+  json(200, API_DOCS);
 };
 
 /**
@@ -46,7 +112,7 @@ export default component$(() => {
               
               <p class="text-gray-600 mb-4">{config.description}</p>
               
-              {config.params && (
+              {'params' in config && config.params && Object.keys(config.params).length > 0 && (
                 <div class="mb-4">
                   <h4 class="font-semibold mb-2">Parameters:</h4>
                   <pre class="bg-gray-100 p-3 rounded text-sm overflow-x-auto">
@@ -54,7 +120,7 @@ export default component$(() => {
                 </div>
               )}
               
-              {config.body && (
+              {'body' in config && config.body && (
                 <div class="mb-4">
                   <h4 class="font-semibold mb-2">Request Body:</h4>
                   <pre class="bg-gray-100 p-3 rounded text-sm overflow-x-auto">

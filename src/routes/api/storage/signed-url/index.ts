@@ -1,5 +1,4 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { getCloudflareServices } from '~/lib/cloudflare';
 
 /**
  * Generate signed URLs for R2 storage
@@ -27,11 +26,11 @@ export const onGet: RequestHandler = async ({ query, json, platform, error }) =>
     // For now, return a proxied URL through your API
     const proxyUrl = new URL(`/api/storage/proxy/${key}`, platform.request.url);
     
-    return json(200, {
+    json(200, {
       url: proxyUrl.toString(),
       expires: new Date(Date.now() + expires * 1000).toISOString(),
     });
-  } catch (err) {
+  } catch (_error) {
     throw error(500, 'Failed to generate signed URL');
   }
 };

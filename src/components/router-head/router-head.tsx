@@ -24,13 +24,19 @@ export const RouterHead = component$(() => {
         <link key={l.key} {...l} />
       ))}
 
-      {head.styles.map((s) => (
-        <style key={s.key} {...s.props} dangerouslySetInnerHTML={s.style} />
-      ))}
+      {head.styles.map((s) => {
+        const { style, ...styleProps } = s;
+        return (
+          <style key={s.key} {...styleProps} dangerouslySetInnerHTML={style} />
+        );
+      })}
 
-      {head.scripts.map((s) => (
-        <script key={s.key} {...s.props} dangerouslySetInnerHTML={s.script} />
-      ))}
+      {head.scripts.map((s) => {
+        const { script, ...scriptProps } = s;
+        return (
+          <script key={s.key} {...scriptProps} dangerouslySetInnerHTML={script} />
+        );
+      })}
     </>
   );
 });

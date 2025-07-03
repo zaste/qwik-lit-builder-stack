@@ -1,6 +1,6 @@
 import { component$, Slot } from '@builder.io/qwik';
 import type { RequestHandler } from '@builder.io/qwik-city';
-import { authMiddleware } from '~/middleware/auth';
+import { authMiddleware } from '../../middleware/auth';
 
 // Use auth middleware for all routes in this group
 export const onRequest: RequestHandler = authMiddleware;

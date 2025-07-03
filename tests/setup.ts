@@ -1,76 +1,75 @@
-import { beforeAll, vi } from 'vitest';
-import '@testing-library/jest-dom';
+import { beforeAll, afterEach } from 'vitest';
 
-// Mock window.matchMedia
+// Global test setup
 beforeAll(() => {
+  // Setup global test environment
+  global.fetch = fetch;
+  
+  // Mock browser APIs that might not be available in happy-dom
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: vi.fn().mockImplementation(query => ({
+    value: (query: string) => ({
       matches: false,
       media: query,
       onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => {},
+    }),
   });
 
   // Mock ResizeObserver
-  global.ResizeObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }));
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
 
   // Mock IntersectionObserver
-  global.IntersectionObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }));
-  
-  // Mock Cloudflare KV
-  global.KV = {
-    get: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-    list: vi.fn(),
+  global.IntersectionObserver = class MockIntersectionObserver {
+    root = null;
+    rootMargin = '0px';
+    thresholds = [];
+    
+    constructor() {}
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() { return []; }
   } as any;
 
-  // Mock Cloudflare R2
-  global.R2 = {
-    get: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-    list: vi.fn(),
-    head: vi.fn(),
-  } as any;
-  
-  // Mock Supabase client
-  vi.mock('~/lib/supabase', () => ({
-    getSupabaseClient: vi.fn(() => ({
-      auth: {
-        signIn: vi.fn(),
-        signOut: vi.fn(),
-        getSession: vi.fn(),
-        getUser: vi.fn(),
-      },
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-        })),
-        insert: vi.fn(),
-        update: vi.fn(),
-        delete: vi.fn(),
-      })),
-    })),
-    supabaseAuth: {
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signInWithOAuth: vi.fn(),
-    },
-  }));
+  // Enable custom elements for LIT components
+  if (!customElements.get('ds-button')) {
+    // Mock custom elements registry if needed
+    const originalDefine = customElements.define;
+    customElements.define = function(name: string, constructor: any, options?: any) {
+      try {
+        return originalDefine.call(this, name, constructor, options);
+      } catch (e) {
+        // Ignore already defined elements
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        if (!errorMessage.includes('already defined')) {
+          throw e;
+        }
+      }
+    };
+  }
+
+  // Mock CSS custom properties support
+  if (!CSS.supports('color', 'var(--test)')) {
+    Object.defineProperty(CSS, 'supports', {
+      writable: true,
+      value: () => true,
+    });
+  }
+});
+
+// Cleanup after each test
+afterEach(() => {
+  // Clean up any registered custom elements for isolated tests
+  if (typeof document !== 'undefined') {
+    document.body.innerHTML = '';
+  }
 });

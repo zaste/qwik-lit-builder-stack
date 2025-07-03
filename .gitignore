@@ -72,3 +72,5 @@ Thumbs.db
 # Misc
 .vercel/
 .netlify/
+# Generated secrets
+.secrets-generated.env

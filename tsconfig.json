@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "target": "ES2022",
-    "module": "ES2022",
+    "target": "ES2021",
+    "module": "ES2022", 
     "lib": ["ES2022", "DOM", "WebWorker", "DOM.Iterable"],
     "jsx": "react-jsx",
     "jsxImportSource": "@builder.io/qwik",
@@ -28,6 +28,6 @@
       "@qwik-city-plan": ["./src/routes"]
     }
   },
-  "include": ["src", "tests", ".eslintrc.cjs"],
-  "exclude": ["node_modules", "dist", "server", "tmp", "build"]
+  "include": ["src", "tests", ".eslintrc.cjs", "scripts"],
+  "exclude": ["node_modules", "dist", "server", "tmp", "build", "**/*.test.ts", "**/*.spec.ts", "tests/e2e", "src/design-system/foundation/tokens/dist/**"]
 }

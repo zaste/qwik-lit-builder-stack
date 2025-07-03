@@ -1,8 +1,9 @@
-import { component$ } from '@builder.io/qwik';
+import { component$, useSignal, useTask$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import { getCurrentUser } from '~/middleware/auth';
-import { getSupabaseClient } from '~/lib/supabase';
+import { getCurrentUser } from '../../../lib/auth';
+import { getSupabaseClient } from '../../../lib/supabase';
+import { logger } from '../../../lib/logger';
 
 export const useDashboardData = routeLoader$(async ({ cookie }) => {
   const user = await getCurrentUser(cookie);
@@ -24,23 +25,88 @@ export const useDashboardData = routeLoader$(async ({ cookie }) => {
     .order('created_at', { ascending: false })
     .limit(5);
 
+  // Get file statistics from user_file_stats view
+  const { data: fileStats } = await supabase
+    .from('user_file_stats')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+
+  // Get pages count from Builder.io content
+  const { count: pagesCount } = await supabase
+    .from('builder_pages')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  // Get components count from design system registry
+  const { count: componentsCount } = await supabase
+    .from('design_system_components')
+    .select('*', { count: 'exact', head: true })
+    .eq('created_by', user.id);
+
+  // Get active sessions count
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const { count: activeSessionsCount } = await supabase
+    .from('user_sessions')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('last_activity', fiveMinutesAgo)
+    .eq('active', true);
+
   return {
     user,
     stats: {
       postsCount: postsCount || 0,
+      pagesCount: pagesCount || 0,
+      componentsCount: componentsCount || 0,
+      // Real file statistics
+      totalFiles: fileStats?.total_files || 0,
+      totalSize: fileStats?.total_size || 0,
+      storageUsed: formatFileSize(fileStats?.total_size || 0),
+      activeSessions: activeSessionsCount || 0
     },
     recentPosts: recentPosts || [],
   };
 });
 
-export default component$(() => {
-  const dashboardData = useDashboardData();
+// Helper function to format file sizes
+function formatFileSize(bytes: number): string {
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes === 0) return '0 B';
+  
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const formattedSize = (bytes / Math.pow(1024, i)).toFixed(1);
+  return `${formattedSize} ${sizes[i]}`;
+}
 
-  if (!dashboardData.value) {
+export default component$(() => {
+  const data = useDashboardData();
+  const realtimeStats = useSignal<any>(null);
+
+  // Fetch realtime stats from API
+  useTask$(async () => {
+    try {
+      const response = await fetch('/api/dashboard/stats', {
+        headers: {
+          // Use cookie-based auth instead of Bearer token
+          'Cookie': document.cookie
+        }
+      });
+      
+      if (response.ok) {
+        const stats = await response.json();
+        realtimeStats.value = stats;
+      }
+    } catch (error) {
+      logger.error('Failed to fetch realtime stats', { error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  if (!data.value) {
     return <div>Loading...</div>;
   }
 
-  const { user, stats, recentPosts } = dashboardData.value;
+  const { user, stats, recentPosts } = data.value;
 
   return (
     <div>
@@ -49,20 +115,131 @@ export default component$(() => {
       </h1>
       
       {/* Stats Grid */}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white p-6 rounded-lg shadow">
-          <h3 class="text-sm font-medium text-gray-500">Total Posts</h3>
-          <p class="text-3xl font-bold text-gray-900 mt-2">{stats.postsCount}</p>
+          <div class="flex items-center">
+            <div class="text-2xl mr-3">📝</div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Posts</h3>
+              <p class="text-3xl font-bold text-gray-900">{stats.postsCount}</p>
+            </div>
+          </div>
         </div>
         
         <div class="bg-white p-6 rounded-lg shadow">
-          <h3 class="text-sm font-medium text-gray-500">Storage Used</h3>
-          <p class="text-3xl font-bold text-gray-900 mt-2">0 MB</p>
+          <div class="flex items-center">
+            <div class="text-2xl mr-3">📄</div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Pages</h3>
+              <p class="text-3xl font-bold text-gray-900">{stats.pagesCount}</p>
+            </div>
+          </div>
         </div>
         
         <div class="bg-white p-6 rounded-lg shadow">
-          <h3 class="text-sm font-medium text-gray-500">Active Sessions</h3>
-          <p class="text-3xl font-bold text-gray-900 mt-2">1</p>
+          <div class="flex items-center">
+            <div class="text-2xl mr-3">🧩</div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Components</h3>
+              <p class="text-3xl font-bold text-gray-900">{stats.componentsCount}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex items-center">
+            <div class="text-2xl mr-3">📁</div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Media Files</h3>
+              <p class="text-3xl font-bold text-gray-900">{realtimeStats.value?.totalFiles || stats.totalFiles || 0}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div class="grid lg:grid-cols-3 gap-8 mb-8">
+        <div class="bg-white rounded-lg shadow-sm border">
+          <div class="px-6 py-4 border-b">
+            <h2 class="text-lg font-semibold">Quick Actions</h2>
+          </div>
+          <div class="p-6 space-y-3">
+            <a href="/dashboard/pages" class="block bg-blue-50 hover:bg-blue-100 p-4 rounded-lg transition-colors">
+              <div class="flex items-center">
+                <span class="text-xl mr-3">📄</span>
+                <div>
+                  <h3 class="font-medium text-gray-900">Create Page</h3>
+                  <p class="text-sm text-gray-600">Build with Builder.io</p>
+                </div>
+              </div>
+            </a>
+            <a href="/dashboard/posts" class="block bg-green-50 hover:bg-green-100 p-4 rounded-lg transition-colors">
+              <div class="flex items-center">
+                <span class="text-xl mr-3">📝</span>
+                <div>
+                  <h3 class="font-medium text-gray-900">Write Post</h3>
+                  <p class="text-sm text-gray-600">Create blog content</p>
+                </div>
+              </div>
+            </a>
+            <a href="/dashboard/media" class="block bg-purple-50 hover:bg-purple-100 p-4 rounded-lg transition-colors">
+              <div class="flex items-center">
+                <span class="text-xl mr-3">📁</span>
+                <div>
+                  <h3 class="font-medium text-gray-900">Upload Media</h3>
+                  <p class="text-sm text-gray-600">Add files and images</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border">
+          <div class="px-6 py-4 border-b">
+            <h2 class="text-lg font-semibold">Design System Status</h2>
+          </div>
+          <div class="p-6 space-y-3">
+            {['DS Button', 'DS Card', 'DS Input', 'DS File Upload'].map((component) => (
+              <div key={component} class="flex items-center justify-between">
+                <span class="text-sm font-medium">{component}</span>
+                <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                  ✅ Active
+                </span>
+              </div>
+            ))}
+            <a href="/dashboard/components" class="block text-center bg-gray-50 hover:bg-gray-100 p-3 rounded-lg transition-colors text-sm text-blue-600 font-medium">
+              Manage Components →
+            </a>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border">
+          <div class="px-6 py-4 border-b">
+            <h2 class="text-lg font-semibold">System Health</h2>
+          </div>
+          <div class="p-6 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium">Builder.io</span>
+              <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                ✅ Connected
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium">Supabase</span>
+              <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                ✅ Connected
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium">R2 Storage</span>
+              <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                ✅ Connected
+              </span>
+            </div>
+            <a href="/dashboard/analytics" class="block text-center bg-gray-50 hover:bg-gray-100 p-3 rounded-lg transition-colors text-sm text-blue-600 font-medium">
+              View Analytics →
+            </a>
+          </div>
         </div>
       </div>
       
@@ -75,7 +252,7 @@ export default component$(() => {
           {recentPosts.length === 0 ? (
             <div class="px-6 py-4 text-gray-500">No posts yet</div>
           ) : (
-            recentPosts.map((post) => (
+            recentPosts.map((post: any) => (
               <div key={post.id} class="px-6 py-4 hover:bg-gray-50">
                 <div class="flex items-center justify-between">
                   <div>

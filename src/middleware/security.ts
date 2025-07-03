@@ -1,35 +1,260 @@
 import type { RequestHandler } from '@builder.io/qwik-city';
+import { logger } from '../lib/logger';
+
+export interface SecurityConfig {
+  enableCSP: boolean;
+  enableHSTS: boolean;
+  enableFrameGuard: boolean;
+  enableContentTypeNoSniff: boolean;
+  enableReferrerPolicy: boolean;
+  enablePermissionsPolicy: boolean;
+  corsOrigins: string[];
+  rateLimitWindowMs: number;
+  rateLimitMaxRequests: number;
+}
+
+const defaultSecurityConfig: SecurityConfig = {
+  enableCSP: true,
+  enableHSTS: true,
+  enableFrameGuard: true,
+  enableContentTypeNoSniff: true,
+  enableReferrerPolicy: true,
+  enablePermissionsPolicy: true,
+  corsOrigins: ['http://localhost:5176', 'https://*.pages.dev'],
+  rateLimitWindowMs: 15 * 60 * 1000, // 15 minutes
+  rateLimitMaxRequests: 100
+};
+
+// Content Security Policy configuration
+function generateCSP(isDev: boolean = false): string {
+  // Check if running in GitHub Codespaces
+  const isCodespaces = typeof process !== 'undefined' && process.env.CODESPACES === 'true';
+  
+  const baseCSP = {
+    'default-src': ["'self'"],
+    'script-src': [
+      "'self'",
+      "'unsafe-inline'", // Required for Qwik inline scripts
+      'https://cdn.jsdelivr.net',
+      'https://unpkg.com',
+      'https://*.supabase.co',
+      ...(isDev ? ["'unsafe-eval'"] : [])
+    ],
+    'style-src': [
+      "'self'",
+      "'unsafe-inline'", // Required for CSS-in-JS
+      'https://fonts.googleapis.com',
+      'https://cdn.jsdelivr.net'
+    ],
+    'img-src': [
+      "'self'",
+      'data:',
+      'blob:',
+      'https:',
+      'https://*.supabase.co',
+      'https://*.cloudflare.com',
+      'https://*.githubusercontent.com'
+    ],
+    'font-src': [
+      "'self'",
+      'https://fonts.gstatic.com',
+      'https://cdn.jsdelivr.net'
+    ],
+    'connect-src': [
+      "'self'",
+      'https://*.supabase.co',
+      'https://*.cloudflare.com',
+      'https://*.sentry.io',
+      'wss://*.supabase.co',
+      'https://api.github.com',
+      ...(isDev ? ['ws://localhost:*', 'http://localhost:*'] : [])
+    ],
+    'frame-src': [
+      "'self'"
+    ],
+    'worker-src': [
+      "'self'",
+      'blob:'
+    ],
+    'manifest-src': [
+      "'self'",
+      ...(isCodespaces ? ['https://github.dev', 'https://*.github.dev'] : [])
+    ],
+    'media-src': [
+      "'self'",
+      'https://*.supabase.co',
+      'https://*.cloudflare.com'
+    ],
+    'object-src': ["'none'"],
+    'base-uri': ["'self'"],
+    'form-action': ["'self'"],
+    'frame-ancestors': ["'none'"]
+  };
+
+  const cspString = Object.entries(baseCSP)
+    .map(([directive, sources]) => `${directive} ${sources.join(' ')}`)
+    .join('; ');
+
+  return isDev ? cspString : `${cspString}; upgrade-insecure-requests`;
+}
+
+// Real distributed rate limiting using Cloudflare KV
+async function getRateLimitData(env: any, key: string): Promise<{ count: number; resetTime: number } | null> {
+  try {
+    if (!env.KV) {
+      logger.warn('KV not available, rate limiting disabled');
+      return null;
+    }
+    
+    const data = await env.KV.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    logger.error('Failed to get rate limit data from KV', { key, error: error instanceof Error ? error.message : String(error) });
+    return null;
+  }
+}
+
+async function setRateLimitData(env: any, key: string, data: { count: number; resetTime: number }): Promise<void> {
+  try {
+    if (!env.KV) {
+      return; // Gracefully degrade if KV not available
+    }
+    
+    const ttl = Math.max(1, Math.ceil((data.resetTime - Date.now()) / 1000));
+    await env.KV.put(key, JSON.stringify(data), { expirationTtl: ttl });
+  } catch (error) {
+    logger.error('Failed to set rate limit data in KV', { key, error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
+function getRateLimitKey(request: Request): string {
+  const ip = request.headers.get('cf-connecting-ip') ||
+             request.headers.get('x-forwarded-for') ||
+             request.headers.get('x-real-ip') ||
+             'unknown';
+  return `rate_limit:${ip}`;
+}
+
+async function checkRateLimit(request: Request, config: SecurityConfig, env: any): Promise<boolean> {
+  const key = getRateLimitKey(request);
+  const now = Date.now();
+  const windowStart = now - config.rateLimitWindowMs;
+  
+  const current = await getRateLimitData(env, key);
+  
+  if (!current || current.resetTime < windowStart) {
+    // Create new rate limit window
+    const newData = { count: 1, resetTime: now + config.rateLimitWindowMs };
+    await setRateLimitData(env, key, newData);
+    return true;
+  }
+  
+  if (current.count >= config.rateLimitMaxRequests) {
+    logger.security('Rate limit exceeded', 'medium', {
+      ip: key,
+      currentCount: current.count,
+      maxRequests: config.rateLimitMaxRequests,
+      windowMs: config.rateLimitWindowMs
+    });
+    return false;
+  }
+  
+  // Increment counter
+  current.count++;
+  await setRateLimitData(env, key, current);
+  return true;
+}
 
 /**
- * Security headers middleware
+ * Enhanced Security headers middleware
  */
-export const securityHeaders: RequestHandler = async ({ headers, next }) => {
-  // Security headers
-  headers.set('X-Frame-Options', 'DENY');
-  headers.set('X-Content-Type-Options', 'nosniff');
-  headers.set('X-XSS-Protection', '1; mode=block');
-  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
-  // Content Security Policy
-  const csp = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.builder.io https://*.supabase.co",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: blob: https://*.supabase.co https://cdn.builder.io https://*.githubusercontent.com",
-    "connect-src 'self' https://*.supabase.co https://cdn.builder.io wss://*.supabase.co https://api.github.com",
-    "frame-src 'self' https://builder.io",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
-  ].join('; ');
-  
-  headers.set('Content-Security-Policy', csp);
-  
-  await next();
+export const securityHeaders: RequestHandler = async ({ headers, request, next, json, platform }) => {
+  const env = platform?.env;
+  const config = defaultSecurityConfig;
+  const isDev = process.env.NODE_ENV === 'development';
+  const startTime = Date.now();
+
+  try {
+    // Real distributed rate limiting check (skip for development)
+    if (!isDev && env && !(await checkRateLimit(request, config, env))) {
+      logger.security('Rate limit exceeded', 'medium', {
+        ip: getRateLimitKey(request),
+        userAgent: request.headers.get('user-agent'),
+        path: new URL(request.url).pathname
+      });
+
+      throw json(429, {
+        error: 'Rate limit exceeded',
+        retryAfter: Math.ceil(config.rateLimitWindowMs / 1000)
+      });
+    }
+
+    // Enhanced security headers
+    if (config.enableFrameGuard) {
+      headers.set('X-Frame-Options', 'DENY');
+    }
+
+    if (config.enableContentTypeNoSniff) {
+      headers.set('X-Content-Type-Options', 'nosniff');
+    }
+
+    if (config.enableReferrerPolicy) {
+      headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    }
+
+    if (config.enablePermissionsPolicy) {
+      headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+    }
+
+    if (config.enableHSTS && !isDev) {
+      headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
+
+    if (config.enableCSP) {
+      headers.set('Content-Security-Policy', generateCSP(isDev));
+    }
+
+    // Additional security headers
+    headers.set('X-DNS-Prefetch-Control', 'off');
+    headers.set('X-Download-Options', 'noopen');
+    headers.set('X-Permitted-Cross-Domain-Policies', 'none');
+    headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+    headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+    headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+
+    await next();
+
+    // Log security metrics
+    const duration = Date.now() - startTime;
+    if (duration > 1000) { // Log slow requests
+      logger.security('Slow request detected', 'low', {
+        method: request.method,
+        path: new URL(request.url).pathname,
+        duration,
+        ip: getRateLimitKey(request)
+      });
+    }
+
+  } catch (error) {
+    const errorDetails = {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      method: request.method,
+      path: new URL(request.url).pathname,
+      ip: getRateLimitKey(request),
+      timestamp: new Date().toISOString(),
+      env: {
+        hasKV: !!env?.KV,
+        nodeEnv: process.env.NODE_ENV,
+        kvType: typeof env?.KV
+      }
+    };
+    
+    logger.security('Security middleware error - DETAILED', 'high', errorDetails);
+    // eslint-disable-next-line no-console
+    console.error('SECURITY MIDDLEWARE ERROR DETAILS:', JSON.stringify(errorDetails, null, 2));
+    throw error;
+  }
 };
 
 /**
@@ -54,7 +279,10 @@ export const corsHeaders: RequestHandler = async ({ request, headers, next }) =>
     if (typeof allowed === 'string') {
       return allowed === origin;
     }
-    return allowed.test(origin);
+    if (allowed && typeof allowed.test === 'function') {
+      return allowed.test(origin);
+    }
+    return false;
   });
   
   if (isAllowed) {
@@ -67,7 +295,8 @@ export const corsHeaders: RequestHandler = async ({ request, headers, next }) =>
     headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     headers.set('Access-Control-Max-Age', '86400');
-    return new Response(null, { status: 204, headers });
+    // For OPTIONS requests, don't call next() to end the chain
+    return;
   }
   
   await next();

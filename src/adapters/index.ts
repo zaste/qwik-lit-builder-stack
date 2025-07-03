@@ -1,17 +1,10 @@
-import type { QwikCityVitePluginOptions } from '@builder.io/qwik-city/vite';
+// Removed unused QwikCityVitePluginOptions import
 
 /**
  * Import adapters dynamically to avoid build errors
  */
 async function importAdapters() {
-  const [
-    cfModule,
-    vercelModule,
-    nodeModule,
-    staticModule
-  ] = await Promise.all([
-    import('@builder.io/qwik-city/adapters/cloudflare-pages/vite')
-  ]);
+  const cfModule = await import('@builder.io/qwik-city/adapters/cloudflare-pages/vite');
 
   return { 
     cloudflareAdapter: cfModule.cloudflarePagesAdapter
@@ -20,7 +13,7 @@ async function importAdapters() {
 
 export type DeployTarget = 'cloudflare';
 
-export async function getAdapter(target?: string): Promise<QwikCityVitePluginOptions['adapter']> {
+export async function getAdapter(target?: string): Promise<any> {
   const deployTarget = (target || process.env.DEPLOY_TARGET || 'cloudflare') as DeployTarget;
   
   const adapters = await importAdapters();
@@ -35,7 +28,12 @@ export async function getAdapter(target?: string): Promise<QwikCityVitePluginOpt
       });
       
     default:
-      console.warn(`Unknown deploy target: ${deployTarget}, falling back to cloudflare`);
+      import('../lib/logger').then(({ logger }) => {
+        logger.warn(`Unknown deploy target: ${deployTarget}, falling back to cloudflare`, {
+          component: 'AdapterSelector',
+          deployTarget
+        });
+      });
       return adapters.cloudflareAdapter();
   }
 }

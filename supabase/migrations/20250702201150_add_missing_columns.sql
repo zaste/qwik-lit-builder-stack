@@ -1,0 +1,8 @@
+-- Add missing columns to pages table first
+ALTER TABLE public.pages 
+ADD COLUMN IF NOT EXISTS published_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS seo_title TEXT,
+ADD COLUMN IF NOT EXISTS seo_description TEXT,
+ADD COLUMN IF NOT EXISTS featured_image TEXT,
+ADD COLUMN IF NOT EXISTS social_image TEXT,
+ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE;

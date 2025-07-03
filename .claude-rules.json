@@ -1,0 +1,140 @@
+{
+  "operationalRules": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-07-03T20:00:00Z",
+    "environment": "production-ready-system",
+    "
+    "criticalRules": {
+      "NEVER_BREAK_PRODUCTION": {
+        "description": "Never break a system that is currently functioning in production",
+        "severity": "CRITICAL",
+        "actions": [
+          "Always check production status before making changes",
+          "Verify current functionality is preserved",
+          "Have rollback plan ready"
+        ],
+        "violations": "IMMEDIATE_STOP"
+      },
+      "NEVER_DESTRUCTIVE_CHANGES": {
+        "description": "Never make destructive changes without backup and validation",
+        "severity": "CRITICAL",
+        "actions": [
+          "Create backup/branch before changes",
+          "Test in isolated environment first",
+          "Validate each change incrementally"
+        ],
+        "violations": "IMMEDIATE_ROLLBACK"
+      },
+      "NEVER_MASS_CHANGES": {
+        "description": "Never make multiple large changes simultaneously",
+        "severity": "CRITICAL",
+        "actions": [
+          "One change at a time",
+          "Test each change before next",
+          "Validate system stability after each change"
+        ],
+        "violations": "STOP_AND_ASSESS"
+      }
+    },
+    
+    "safetyChecks": {
+      "PRE_CHANGE_VALIDATION": {
+        "description": "Mandatory checks before any system modification",
+        "required": true,
+        "checks": [
+          "Verify current system is functional",
+          "Check production URL accessibility",
+          "Confirm API endpoints are responding",
+          "Validate database connectivity",
+          "Check build process is working"
+        ]
+      },
+      "POST_CHANGE_VALIDATION": {
+        "description": "Mandatory checks after any system modification",
+        "required": true,
+        "checks": [
+          "Run build process",
+          "Test API endpoints",
+          "Verify production deployment",
+          "Check for new errors or warnings",
+          "Validate core functionality"
+        ]
+      }
+    },
+    
+    "changeManagement": {
+      "INCREMENTAL_APPROACH": {
+        "description": "All changes must be incremental and reversible",
+        "methodology": "step-by-step",
+        "rules": [
+          "Create new implementations alongside existing ones",
+          "Use feature flags to switch between implementations",
+          "Maintain dual systems during transition",
+          "Only remove old code after new code is fully validated"
+        ]
+      },
+      "ROLLBACK_STRATEGY": {
+        "description": "Always have a rollback plan",
+        "requirements": [
+          "Document current working state",
+          "Keep backup of functional code",
+          "Know how to revert each change",
+          "Test rollback process"
+        ]
+      }
+    },
+    
+    "productionUrls": {
+      "primary": "https://1cea5765.qwik-lit-builder-app-7b1.pages.dev/",
+      "apiHealth": "https://1cea5765.qwik-lit-builder-app-7b1.pages.dev/api/health",
+      "apiAuth": "https://1cea5765.qwik-lit-builder-app-7b1.pages.dev/api/auth/status"
+    },
+    
+    "conversionStrategy": {
+      "SIMULATION_TO_REAL": {
+        "description": "Convert simulations to real implementations safely",
+        "approach": "parallel-implementation",
+        "steps": [
+          "Create real implementation alongside simulation",
+          "Add feature flag to switch between implementations",
+          "Test real implementation thoroughly",
+          "Gradually migrate to real implementation",
+          "Remove simulation only after real implementation is stable"
+        ]
+      },
+      "MOCK_TO_REAL": {
+        "description": "Convert mocks to real services safely",
+        "approach": "dual-system",
+        "steps": [
+          "Keep mock system functional",
+          "Implement real system in parallel",
+          "Add environment-based switching",
+          "Test real system extensively",
+          "Remove mock only after real system is production-proven"
+        ]
+      }
+    },
+    
+    "emergencyProcedures": {
+      "SYSTEM_BROKEN": {
+        "description": "If system stops working after changes",
+        "actions": [
+          "STOP all further changes immediately",
+          "Assess what changed in last operation",
+          "Revert last change",
+          "Verify system is functional again",
+          "Document what went wrong"
+        ]
+      },
+      "BUILD_FAILURES": {
+        "description": "If build process fails",
+        "actions": [
+          "Do not proceed with deployment",
+          "Fix build issues before any other changes",
+          "Verify build works before continuing",
+          "Check for new dependencies or conflicts"
+        ]
+      }
+    }
+  }
+}

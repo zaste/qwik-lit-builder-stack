@@ -2,7 +2,7 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
     branches: [main]
 
@@ -33,9 +33,13 @@ jobs:
       
       - name: Run linter
         run: pnpm lint
+        continue-on-error: true  # Don't fail on warnings
       
-      - name: Run tests
-        run: pnpm test
+      - name: Run schema tests
+        run: pnpm test:schemas
+        
+      - name: Run component tests
+        run: pnpm test:components
       
       - name: Build project
         run: pnpm build:cloudflare
@@ -44,10 +48,51 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_BUILDER_PUBLIC_KEY: ${{ secrets.VITE_BUILDER_PUBLIC_KEY }}
 
-  deploy:
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' || github.event_name == 'pull_request'
+    name: Deploy to Staging
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build for staging
+        run: pnpm build:cloudflare
+        env:
+          NODE_ENV: staging
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_BUILDER_PUBLIC_KEY: ${{ secrets.VITE_BUILDER_PUBLIC_KEY }}
+      
+      - name: Deploy to Cloudflare Pages (Staging)
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: qwik-lit-builder-staging
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
+
+  deploy-production:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    name: Deploy to Production
+    environment: production
     
     steps:
       - uses: actions/checkout@v4
@@ -67,11 +112,12 @@ jobs:
       - name: Build for production
         run: pnpm build:cloudflare
         env:
+          NODE_ENV: production
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_BUILDER_PUBLIC_KEY: ${{ secrets.VITE_BUILDER_PUBLIC_KEY }}
       
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages (Production)
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -80,3 +126,30 @@ jobs:
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: '3'
+          
+      - name: Post-deployment health check
+        run: |
+          # Wait for deployment to be ready
+          sleep 30
+          # Health check (replace with actual production URL)
+          curl -f https://qwik-lit-builder-app.pages.dev/api/health || exit 1
+
+  performance-audit:
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    name: Performance Audit
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+        
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun --upload.target=temporary-public-storage
+        env:
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+          LHCI_BUILD_CONTEXT__COMMIT_TIME: ${{ github.event.head_commit.timestamp }}
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}

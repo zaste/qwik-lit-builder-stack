@@ -9,11 +9,11 @@ let supabaseClient: ReturnType<typeof createClient<Database>> | null = null;
  */
 export function getSupabaseClient() {
   if (!supabaseClient) {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Missing Supabase environment variables');
+      throw new Error('Supabase configuration missing: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are required');
     }
 
     supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -39,17 +39,20 @@ export function getSupabaseClient() {
   return supabaseClient;
 }
 
+
 /**
  * Supabase auth helpers
  */
 export const supabaseAuth = {
   async signIn(email: string, password: string) {
     const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: new Error('Supabase not available') };
     return supabase.auth.signInWithPassword({ email, password });
   },
 
   async signUp(email: string, password: string, metadata?: any) {
     const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: new Error('Supabase not available') };
     return supabase.auth.signUp({
       email,
       password,
@@ -61,6 +64,9 @@ export const supabaseAuth = {
 
   async signInWithOAuth(provider: 'google' | 'github' | 'discord') {
     const supabase = getSupabaseClient();
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
     return supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -71,6 +77,7 @@ export const supabaseAuth = {
 
   async signInWithMagicLink(email: string) {
     const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: new Error('Supabase not available') };
     return supabase.auth.signInWithOtp({
       email,
       options: {
@@ -81,57 +88,34 @@ export const supabaseAuth = {
 
   async signOut() {
     const supabase = getSupabaseClient();
+    if (!supabase) return { error: null };
     return supabase.auth.signOut();
   },
 
   async getSession() {
     const supabase = getSupabaseClient();
+    if (!supabase) return { data: { session: null }, error: null };
     return supabase.auth.getSession();
   },
 
   async getUser() {
     const supabase = getSupabaseClient();
+    if (!supabase) return { data: { user: null }, error: null };
     return supabase.auth.getUser();
   },
 
   onAuthStateChange(callback: (event: any, session: any) => void) {
     const supabase = getSupabaseClient();
+    if (!supabase) return { data: { subscription: { unsubscribe: () => {} } } };
     return supabase.auth.onAuthStateChange(callback);
   },
 };
 
 /**
- * Supabase storage helpers
+ * Note: File storage moved to Cloudflare R2
+ * All file operations now handled by src/lib/storage/storage-router.ts
+ * Supabase only handles database and authentication
  */
-export const supabaseStorage = {
-  async uploadFile(bucket: string, path: string, file: File) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).upload(path, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-  },
-
-  async downloadFile(bucket: string, path: string) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).download(path);
-  },
-
-  async deleteFile(bucket: string, paths: string[]) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).remove(paths);
-  },
-
-  getPublicUrl(bucket: string, path: string) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).getPublicUrl(path);
-  },
-
-  async createSignedUrl(bucket: string, path: string, expiresIn: number) {
-    const supabase = getSupabaseClient();
-    return supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
-  },
-};
 
 /**
  * Supabase realtime helpers
@@ -139,11 +123,15 @@ export const supabaseStorage = {
 export const supabaseRealtime = {
   channel(channelName: string) {
     const supabase = getSupabaseClient();
+    if (!supabase) {
+      throw new Error('Supabase client not available for realtime channels');
+    }
     return supabase.channel(channelName);
   },
 
   removeChannel(channel: any) {
     const supabase = getSupabaseClient();
+    if (!supabase) return;
     return supabase.removeChannel(channel);
   },
 
@@ -151,7 +139,7 @@ export const supabaseRealtime = {
   async trackPresence(channelName: string, userState: any) {
     const channel = this.channel(channelName);
     
-    channel.subscribe(async (status) => {
+    channel.subscribe(async (status: string) => {
       if (status === 'SUBSCRIBED') {
         await channel.track(userState);
       }

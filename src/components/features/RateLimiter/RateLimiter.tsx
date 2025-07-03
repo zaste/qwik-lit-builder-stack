@@ -1,5 +1,5 @@
-import { component$, useStore, useVisibleTask$ } from '@builder.io/qwik';
-import { RateLimitError } from '~/lib/errors';
+import { component$, useStore, useTask$ } from '@builder.io/qwik';
+import { RateLimitError } from '../../../lib/errors';
 
 interface RateLimiterState {
   requests: number[];
@@ -13,7 +13,7 @@ export const useRateLimiter = (maxRequests = 10, windowMs = 60000) => {
     blocked: false,
   });
 
-  useVisibleTask$(() => {
+  useTask$(({ cleanup }) => {
     // Clean up old requests periodically
     const interval = setInterval(() => {
       const now = Date.now();
@@ -25,7 +25,7 @@ export const useRateLimiter = (maxRequests = 10, windowMs = 60000) => {
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    cleanup(() => clearInterval(interval));
   });
 
   const checkLimit = () => {
